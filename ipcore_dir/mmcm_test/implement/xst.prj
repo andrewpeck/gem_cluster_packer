@@ -1,0 +1,2 @@
+verilog work ../../mmcm_test.v
+verilog work ../example_design/mmcm_test_exdes.v
