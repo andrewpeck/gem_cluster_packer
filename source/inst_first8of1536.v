@@ -127,7 +127,7 @@ assign vpf = {vfat_sbit[23], vfat_sbit[22], vfat_sbit[21], vfat_sbit[20], vfat_s
               vfat_sbit[7],  vfat_sbit[6],  vfat_sbit[5],  vfat_sbit[4],  vfat_sbit[3],  vfat_sbit[2],  vfat_sbit[1],  vfat_sbit[0]};
 
 always @(posedge clock4x)  begin
-  vpf_ff <= vpf;
+    vpf_ff <= vpf;
 end
 
 wire [10:0] adr [7:0];
