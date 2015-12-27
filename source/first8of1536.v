@@ -104,6 +104,7 @@ module first8of1536 (
       3'd5: cnt[4] <= cnt_enc;
       3'd6: cnt[5] <= cnt_enc;
       3'd7: cnt[6] <= cnt_enc;
+      3'd0: cnt[7] <= cnt_enc;
     endcase
 
     case (phase)
@@ -114,6 +115,7 @@ module first8of1536 (
       3'd5: adr[4] <= adr_enc;
       3'd6: adr[5] <= adr_enc;
       3'd7: adr[6] <= adr_enc;
+      3'd0: adr[7] <= adr_enc;
     endcase
   end
 
@@ -122,7 +124,7 @@ module first8of1536 (
 // ------------------------------------------------------------------------------------------------------------------
 
   always @(posedge clock4x) begin
-    if (phase==3'd0) begin
+    if (phase==3'd1) begin
       adr0 <= adr[0]  ;
       adr1 <= adr[1]  ;
       adr2 <= adr[2]  ;
@@ -130,7 +132,7 @@ module first8of1536 (
       adr4 <= adr[4]  ;
       adr5 <= adr[5]  ;
       adr6 <= adr[6]  ;
-      adr7 <= adr_enc ;
+      adr7 <= adr[7]  ;
 
       cnt0 <= cnt[0]  ;
       cnt1 <= cnt[1]  ;
@@ -139,7 +141,7 @@ module first8of1536 (
       cnt4 <= cnt[4]  ;
       cnt5 <= cnt[5]  ;
       cnt6 <= cnt[6]  ;
-      cnt7 <= cnt_enc ;
+      cnt7 <= cnt[7]  ;
     end
   end
 

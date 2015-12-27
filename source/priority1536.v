@@ -76,7 +76,7 @@ reg  [  95:0] vpf_s3;
 wire [  47:0] vpf_s4;
 wire [  23:0] vpf_s5;
 wire [  11:0] vpf_s6;
-wire [   5:0] vpf_s7;
+reg  [   5:0] vpf_s7;
 wire [   2:0] vpf_s8;
 reg  [   0:0] vpf_s9;
 
@@ -87,7 +87,7 @@ reg  [MXKEYBITS- 8:0] key_s3 [ 95:0];
 wire [MXKEYBITS- 7:0] key_s4 [ 47:0];
 wire [MXKEYBITS- 6:0] key_s5 [ 23:0];
 wire [MXKEYBITS- 5:0] key_s6 [ 11:0];
-wire [MXKEYBITS- 4:0] key_s7 [  5:0];
+reg  [MXKEYBITS- 4:0] key_s7 [  5:0];
 wire [MXKEYBITS- 3:0] key_s8 [  2:0];
 reg  [MXKEYBITS- 1:0] key_s9 [  0:0];
 
@@ -98,7 +98,7 @@ reg  [2:0] cnt_s3 [ 95:0];
 wire [2:0] cnt_s4 [ 47:0];
 wire [2:0] cnt_s5 [ 23:0];
 wire [2:0] cnt_s6 [ 11:0];
-wire [2:0] cnt_s7 [  5:0];
+reg  [2:0] cnt_s7 [  5:0];
 wire [2:0] cnt_s8 [  2:0];
 reg  [2:0] cnt_s9 [  0:0];
 
@@ -148,6 +148,7 @@ for (ihit=0; ihit<48; ihit=ihit+1) begin: s4
   //assign {vpf_s4[ihit], key_s4[ihit]} = vpf_s3[ihit*2+1] ?  {vpf_s3[ihit*2+1], {1'b1,key_s3[ihit*2+1]}}: {vpf_s3[ihit*2  ], {1'b0,key_s3[ihit*2  ]}};
   //assign {vpf_s4[ihit], key_s4[ihit]} = vpf_s3[ihit*2] ?   {vpf_s3[ihit*2  ], {1'b0,key_s3[ihit*2  ]}} : {vpf_s3[ihit*2+1], {1'b1,key_s3[ihit*2+1]}};
   assign   {vpf_s4[ihit], cnt_s4[ihit], key_s4[ihit]} = vpf_s3[ihit*2] ?  {vpf_s3[ihit*2  ], cnt_s3[ihit*2], {1'b0,key_s3[ihit*2  ]}} : {vpf_s3[ihit*2+1], cnt_s3[ihit*2+1], {1'b1,key_s3[ihit*2+1]}} ;
+  //always @(posedge clock) {vpf_s4[ihit], cnt_s4[ihit], key_s4[ihit]} <= vpf_s3[ihit*2] ?  {vpf_s3[ihit*2  ], cnt_s3[ihit*2], {1'b0,key_s3[ihit*2  ]}} : {vpf_s3[ihit*2+1], cnt_s3[ihit*2+1], {1'b1,key_s3[ihit*2+1]}} ;
 end
 endgenerate
 
@@ -175,7 +176,8 @@ generate
 for (ihit=0; ihit<6; ihit=ihit+1) begin: s7
   //assign {vpf_s7[ihit], key_s7[ihit]} = vpf_s6[ihit*2+1]  ?  {vpf_s6[ihit*2+1], {1'b1,key_s6[ihit*2+1]}}: {vpf_s6[ihit*2  ], {1'b0,key_s6[ihit*2  ]}};
   //assign {vpf_s7[ihit], key_s7[ihit]} = vpf_s6[ihit*2]  ?   {vpf_s6[ihit*2  ], {1'b0,key_s6[ihit*2  ]}} : {vpf_s6[ihit*2+1], {1'b1,key_s6[ihit*2+1]}};
-  assign   {vpf_s7[ihit], cnt_s7[ihit], key_s7[ihit]} = vpf_s6[ihit*2] ?  {vpf_s6[ihit*2  ], cnt_s6[ihit*2], {1'b0,key_s6[ihit*2  ]}} : {vpf_s6[ihit*2+1], cnt_s6[ihit*2+1], {1'b1,key_s6[ihit*2+1]}} ;
+  //assign   {vpf_s7[ihit], cnt_s7[ihit], key_s7[ihit]} = vpf_s6[ihit*2] ?  {vpf_s6[ihit*2  ], cnt_s6[ihit*2], {1'b0,key_s6[ihit*2  ]}} : {vpf_s6[ihit*2+1], cnt_s6[ihit*2+1], {1'b1,key_s6[ihit*2+1]}} ;
+  always @(posedge clock) {vpf_s7[ihit], cnt_s7[ihit], key_s7[ihit]} <= vpf_s6[ihit*2] ?  {vpf_s6[ihit*2  ], cnt_s6[ihit*2], {1'b0,key_s6[ihit*2  ]}} : {vpf_s6[ihit*2+1], cnt_s6[ihit*2+1], {1'b1,key_s6[ihit*2+1]}} ;
 end
 endgenerate
 

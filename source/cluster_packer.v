@@ -4,7 +4,7 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-//synthesis attribute ALLCLOCKNETS of cluster_packer is "160MHz"
+//synthesis attribute ALLCLOCKNETS of cluster_packer is "240MHz"
 
 module cluster_packer (
     input  clock4x,
@@ -67,8 +67,8 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   wire [3:0] powerup_dly = 4'd0;
 
   reg powerup_ff  = 0;
-  srl16e_bbl #(1) u_startup (.clock(clock4x), .ce(!powerup), .adr(powerup_dly),  .d(1'b1), .q(powerup));
-  //SRL16E u_startup (.CLK(clock4x),.CE(!powerup),.D(powerup_dly),.A0(powerup_dly[0]),.A1(powerup_dly[1]),.A2(powerup_dly[2]),.A3(powerup_dly[3]),.Q(powerup));
+  //srl16e_bbl #(1) u_startup (.clock(clock4x), .ce(!powerup), .adr(powerup_dly),  .d(1'b1), .q(powerup));
+  SRL16E u_startup (.CLK(clock4x),.CE(!powerup),.D(1'b1),.A0(powerup_dly[0]),.A1(powerup_dly[1]),.A2(powerup_dly[2]),.A3(powerup_dly[3]),.Q(powerup));
   always @(posedge clock4x) begin
     powerup_ff <= powerup;
   end
@@ -78,7 +78,14 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   reg reset_done_ff = 1;
   wire [3:0] reset_dly=4'd0;
 
-  srl16e_bbl #(1) u_reset_dly (.clock(clock4x), .ce(1'b1), .adr(reset_dly),  .d(global_reset), .q(reset_delayed));
+  //srl16e_bbl #(1) u_reset_dly (.clock(clock4x), .ce(1'b1), .adr(reset_dly),  .d(global_reset), .q(reset_delayed));
+  SRL16E u_reset (
+    .CLK (clock4x),
+    .CE  (1'b1),
+    .D   (global_reset),
+    .Q   (reset_delayed),
+    .A0  (reset_dly[0]),.A1 ( reset_dly[1]),.A2 ( reset_dly[2]),.A3 ( reset_dly[3])
+  );
 
   always @(posedge clock4x) begin
     if      (global_reset && reset_done_ff)                    reset_done_ff <= 1'b0;
