@@ -95,7 +95,8 @@ reg [63:0] vfat_sbit [23:0];
 wire [1535:0] vpf;
 reg  [1535:0] vpf_ff;
 
-(* max_fanout = 15 *) reg [2:0] bytecnt; // synthesis attribute keep of bytecnt is true;
+(* max_fanout = 5 *)
+reg [2:0] bytecnt; // synthesis attribute keep of bytecnt is true;
 
 genvar ivfat;
 generate
