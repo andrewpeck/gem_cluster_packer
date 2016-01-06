@@ -55,7 +55,7 @@ end
 //wire [1535:0] vpfs_twos_complement_inv = ~(({1536{1'b1}} ^ vpfs_in) + 1);
 //wire [1535:0] vpfs_twos_complement_inv = ~(-vpfs_in);
 
-parameter MXSEGS  = 16;
+parameter MXSEGS  = 24;
 parameter SEGSIZE = 1536/MXSEGS;
 
 wire [SEGSIZE-1:0] segment           [MXSEGS-1:0];
@@ -63,7 +63,6 @@ wire [SEGSIZE-1:0] segment_copy      [MXSEGS-1:0];
 wire [SEGSIZE-1:0] segment_truncated [MXSEGS-1:0];
 wire [0:0] segment_keep   [MXSEGS-1:0];
 wire [0:0]         segment_active [MXSEGS-1:0];
-// (* max_fanout = 3 *)
 reg [SEGSIZE-1:0] segment_ff [MXSEGS-1:0];
 
 genvar iseg;
@@ -129,6 +128,16 @@ endgenerate
 // assign segment_keep [1]   =  segment_active[0];
 // assign segment_keep [0]   =  0;
 
+assign segment_keep [23]  =  segment_active[22] | segment_active[21] | segment_active[20] | segment_keep[20];
+assign segment_keep [22]  =  segment_active[21] | segment_active[20]                      | segment_keep[20];
+assign segment_keep [21]  =  segment_active[20]                                           | segment_keep[20];
+assign segment_keep [20]  =  segment_active[19]                                           | segment_keep[19];
+
+assign segment_keep [19]  =  segment_active[18] | segment_active[17] | segment_active[16] | segment_keep[16];
+assign segment_keep [18]  =  segment_active[17] | segment_active[16]                      | segment_keep[16];
+assign segment_keep [17]  =  segment_active[16]                                           | segment_keep[16];
+assign segment_keep [16]  =  segment_active[15]                                           | segment_keep[15];
+
 assign segment_keep [15]  =  segment_active[14] | segment_active[13] | segment_active[12] | segment_keep[12];
 assign segment_keep [14]  =  segment_active[13] | segment_active[12]                      | segment_keep[12];
 assign segment_keep [13]  =  segment_active[12]                                           | segment_keep[12];
@@ -153,8 +162,8 @@ assign segment_keep [0]   =  0;
 assign vpfs_out = {
                 //  segment_ff[31], segment_ff[30], segment_ff[29], segment_ff[28],
                 //  segment_ff[27], segment_ff[26], segment_ff[25], segment_ff[24],
-                //  segment_ff[23], segment_ff[22], segment_ff[21], segment_ff[20],
-                //  segment_ff[19], segment_ff[18], segment_ff[17], segment_ff[16],
+                    segment_ff[23], segment_ff[22], segment_ff[21], segment_ff[20],
+                    segment_ff[19], segment_ff[18], segment_ff[17], segment_ff[16],
                     segment_ff[15], segment_ff[14], segment_ff[13], segment_ff[12],
                     segment_ff[11], segment_ff[10], segment_ff[9],  segment_ff[8],
                     segment_ff[7],  segment_ff[6],  segment_ff[5],  segment_ff[4],
