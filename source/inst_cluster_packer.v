@@ -1,32 +1,32 @@
 module inst_cluster_packer (
-  input  lhc_clock,
+  input  clock4x,
 
   input  reset,
 
-  input  [7:0] vfat0,
-  input  [7:0] vfat1,
-  input  [7:0] vfat2,
-  input  [7:0] vfat3,
-  input  [7:0] vfat4,
-  input  [7:0] vfat5,
-  input  [7:0] vfat6,
-  input  [7:0] vfat7,
-  input  [7:0] vfat8,
-  input  [7:0] vfat9,
-  input  [7:0] vfat10,
-  input  [7:0] vfat11,
-  input  [7:0] vfat12,
-  input  [7:0] vfat13,
-  input  [7:0] vfat14,
-  input  [7:0] vfat15,
-  input  [7:0] vfat16,
-  input  [7:0] vfat17,
-  input  [7:0] vfat18,
-  input  [7:0] vfat19,
-  input  [7:0] vfat20,
-  input  [7:0] vfat21,
-  input  [7:0] vfat22,
-  input  [7:0] vfat23,
+  input  [15:0] vfat0,
+  input  [15:0] vfat1,
+  input  [15:0] vfat2,
+  input  [15:0] vfat3,
+  input  [15:0] vfat4,
+  input  [15:0] vfat5,
+  input  [15:0] vfat6,
+  input  [15:0] vfat7,
+  input  [15:0] vfat8,
+  input  [15:0] vfat9,
+  input  [15:0] vfat10,
+  input  [15:0] vfat11,
+  input  [15:0] vfat12,
+  input  [15:0] vfat13,
+  input  [15:0] vfat14,
+  input  [15:0] vfat15,
+  input  [15:0] vfat16,
+  input  [15:0] vfat17,
+  input  [15:0] vfat18,
+  input  [15:0] vfat19,
+  input  [15:0] vfat20,
+  input  [15:0] vfat21,
+  input  [15:0] vfat22,
+  input  [15:0] vfat23,
 
   input truncate_clusters,
 
@@ -40,22 +40,24 @@ module inst_cluster_packer (
   output [13:0] cluster7
 );
 
-mmcm_gen clockgen (
-  // Clock in ports
-  .CLK_IN1(lhc_clock),      // IN
+//synthesis attribute ALLCLOCKNETS of inst_cluster_packer is ""
 
-  // Clock out ports
-  .CLK_OUT1(clock1x),     // OUT
-  .CLK_OUT2(clock2x),     // OUT
-  .CLK_OUT3(clock4x),     // OUT
-  .CLK_OUT4(clock8x),     // OUT
+//  mmcm_gen clockgen (
+//    // Clock in ports
+//    .CLK_IN1(lhc_clock),      // IN
+//
+//    // Clock out ports
+//    .CLK_OUT1(clock1x),     // OUT
+//    .CLK_OUT2(clock2x),     // OUT
+//    .CLK_OUT3(clock4x),     // OUT
+//    .CLK_OUT4(clock8x),     // OUT
+//
+//    // Status and control signals
+//    .RESET(1'b0),// IN
+//    .LOCKED()
+//  );      // OUT
 
-  // Status and control signals
-  .RESET(1'b0),// IN
-  .LOCKED()
-);      // OUT
-
-wire [7 :0] vfat [23:0];
+wire [15:0] vfat [23:0];
 assign vfat[0] = vfat0;
 assign vfat[1] = vfat1;
 assign vfat[2] = vfat2;
@@ -81,45 +83,47 @@ assign vfat[21] = vfat21;
 assign vfat[22] = vfat22;
 assign vfat[23] = vfat23;
 
-reg [7:0] w0 [23:0];
-reg [7:0] w1 [23:0];
-reg [7:0] w2 [23:0];
-reg [7:0] w3 [23:0];
-reg [7:0] w4 [23:0];
-reg [7:0] w5 [23:0];
-reg [7:0] w6 [23:0];
-reg [7:0] w7 [23:0];
+reg [15:0] w0 [23:0];
+reg [15:0] w1 [23:0];
+reg [15:0] w2 [23:0];
+reg [15:0] w3 [23:0];
+reg [15:0] w4 [23:0];
+reg [15:0] w5 [23:0];
+reg [15:0] w6 [23:0];
+reg [15:0] w7 [23:0];
 
 reg [63:0] vfat_sbit [23:0];
 
 wire [1535:0] vpf;
 reg  [1535:0] vpf_ff;
 
-(* max_fanout = 15 *) reg [2:0] bytecnt; // synthesis attribute keep of bytecnt is true;
+(* max_fanout = 15 *) reg [1:0] bytecnt=0; // synthesis attribute keep of bytecnt is true;
 
 genvar ivfat;
 generate
 for (ivfat=0; ivfat<24; ivfat=ivfat+1) begin: fatloop
 
-  always @(posedge clock8x) begin
+  always @(posedge clock4x) begin
     bytecnt <= bytecnt + 1'b1;
   end
 
-  always @(posedge clock8x) begin
+  always @(posedge clock4x) begin
   case (bytecnt)
     3'd0: w0[ivfat]        <= vfat[ivfat];
     3'd1: w1[ivfat]        <= vfat[ivfat];
     3'd2: w2[ivfat]        <= vfat[ivfat];
-    3'd3: w3[ivfat]        <= vfat[ivfat];
-    3'd4: w4[ivfat]        <= vfat[ivfat];
-    3'd5: w5[ivfat]        <= vfat[ivfat];
-    3'd6: w6[ivfat]        <= vfat[ivfat];
-    3'd7: vfat_sbit[ivfat] <= {vfat[ivfat], w6[ivfat], w5[ivfat], w4[ivfat], w3[ivfat], w2[ivfat], w1[ivfat], w0[ivfat]};
+    //3'd3: w3[ivfat]        <= vfat[ivfat];
   endcase
+  end
+
+  always @(posedge clock4x) begin
+    if (bytecnt==3'd3)
+      vfat_sbit[ivfat] <= {vfat[ivfat], w2[ivfat], w1[ivfat], w0[ivfat]};
   end
 
 end
 endgenerate
+
 
 wire [13:0] cluster    [7:0];
 
