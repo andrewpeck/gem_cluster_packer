@@ -27,7 +27,7 @@ always @(posedge clock) reset <= reset_dly;
 // phase
 //----------------------------------------------------------------------------------------------------------------------
 
-(* max_fanout = 10 *)
+(* max_fanout         = 10 *)
 reg latch_en;
 reg [2:0] phase=3'd0;
 always @(posedge clock) begin
@@ -79,8 +79,8 @@ for (iseg=0; iseg<MXSEGS; iseg=iseg+1) begin: segloop
   assign segment_copy[iseg]      =  segment_ff[iseg] & ({SEGSIZE{segment_keep[iseg]}} | ~(~segment_ff[iseg]+1));
 
   always @(posedge clock) begin
-    if   (latch_en) segment_ff[iseg] <= segment_copy[iseg];
-    else            segment_ff[iseg] <= segment     [iseg];
+    if   (latch_en) segment_ff[iseg] <= segment      [iseg];
+    else            segment_ff[iseg] <= segment_copy [iseg];
   end
 
 
