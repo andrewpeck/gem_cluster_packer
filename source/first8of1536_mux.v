@@ -26,10 +26,12 @@ module first8of1536_mux (
 );
 
 
-reg [2:0] phase=3'd1;
+parameter [2:0] offset = 3'd1;
+
+reg [2:0] phase=offset;
 wire cycle = phase[2];
 always @(posedge clock4x) begin
-  phase <= (global_reset) ? 3'd1 : phase+1'b1;
+  phase <= (global_reset) ? offset : phase+1'b1;
 end
 
 wire [10:0] adr0_a, adr1_a, adr2_a, adr3_a, adr4_a, adr5_a, adr6_a, adr7_a;
@@ -51,7 +53,7 @@ first8of1536 u_first8_a (
     .clock4x(clock4x),
     .vpfs (vpfs),
     .cnts (cnts),
-    .delay(4'd7),
+    .delay(4'd0),
 
     .adr0(adr0_a),
     .adr1(adr1_a),

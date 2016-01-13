@@ -62,7 +62,7 @@ module first8of1536 (
 
   (* max_fanout = 50 *) reg [2:0] phase=3'd0;
   always @(posedge clock4x) begin
-    phase <= (reset) ? delay : phase+1'b1;
+    phase <= (reset) ? 0 : phase+1'b1;
   end
 
   //------------------
@@ -97,25 +97,25 @@ module first8of1536 (
 
   always @(posedge clock4x) begin
     case (phase)
-      3'd3: cnt[0] <= cnt_enc;
-      3'd4: cnt[1] <= cnt_enc;
-      3'd5: cnt[2] <= cnt_enc;
-      3'd6: cnt[3] <= cnt_enc;
-      3'd7: cnt[4] <= cnt_enc;
-      3'd0: cnt[5] <= cnt_enc;
-      3'd1: cnt[6] <= cnt_enc;
-      3'd2: cnt[7] <= cnt_enc;
+      3'd4: cnt[0] <= cnt_enc;
+      3'd5: cnt[1] <= cnt_enc;
+      3'd6: cnt[2] <= cnt_enc;
+      3'd7: cnt[3] <= cnt_enc;
+      3'd0: cnt[4] <= cnt_enc;
+      3'd1: cnt[5] <= cnt_enc;
+      3'd2: cnt[6] <= cnt_enc;
+      3'd3: cnt[7] <= cnt_enc;
     endcase
 
     case (phase)
-      3'd3: adr[0] <= adr_enc;
-      3'd4: adr[1] <= adr_enc;
-      3'd5: adr[2] <= adr_enc;
-      3'd6: adr[3] <= adr_enc;
-      3'd7: adr[4] <= adr_enc;
-      3'd0: adr[5] <= adr_enc;
-      3'd1: adr[6] <= adr_enc;
-      3'd2: adr[7] <= adr_enc;
+      3'd4: adr[0] <= adr_enc;
+      3'd5: adr[1] <= adr_enc;
+      3'd6: adr[2] <= adr_enc;
+      3'd7: adr[3] <= adr_enc;
+      3'd0: adr[4] <= adr_enc;
+      3'd1: adr[5] <= adr_enc;
+      3'd2: adr[6] <= adr_enc;
+      3'd3: adr[7] <= adr_enc;
     endcase
   end
 
@@ -124,7 +124,7 @@ module first8of1536 (
 // ------------------------------------------------------------------------------------------------------------------
 
   always @(posedge clock4x) begin
-    if (phase==3'd3) begin
+    if (phase==3'd4) begin
       adr0 <= adr[0]  ;
       adr1 <= adr[1]  ;
       adr2 <= adr[2]  ;
