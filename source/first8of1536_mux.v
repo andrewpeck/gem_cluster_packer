@@ -26,7 +26,7 @@ module first8of1536_mux (
 );
 
 
-parameter [2:0] offset = 3'd1;
+parameter [2:0] offset = 3'd2;
 
 reg [2:0] phase=offset;
 wire cycle = phase[2];
