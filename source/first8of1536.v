@@ -52,7 +52,7 @@ module first8of1536 (
 // reset
 //----------------------------------------------------------------------------------------------------------------------
 
-  SRL16E u00 (.CLK(clock4x),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
+  SRL16E #(.INIT(16'hffff)) u00 (.CLK(clock4x),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
   reg reset=1;
   always @(posedge clock4x) reset <= reset_dly;
 
@@ -86,7 +86,7 @@ module first8of1536 (
     .delay (delay),
     .clock (clock4x ),       // IN  160 MHz clock
     .vpfs  (vpfs_truncated), // IN  1536   bit cluster inputs
-    .cnts  (cnts),        // IN  1536*3 bit cluster counts
+    .cnts  (cnts),           // IN  1536*3 bit cluster counts
     .cnt   (cnt_enc ),       // OUT 11-bit counts    of first found cluster
     .adr   (adr_enc )        // OUT 11-bit addresses of first found cluster
   );
@@ -97,25 +97,25 @@ module first8of1536 (
 
   always @(posedge clock4x) begin
     case (phase)
-      3'd1: cnt[0] <= cnt_enc;
-      3'd2: cnt[1] <= cnt_enc;
-      3'd3: cnt[2] <= cnt_enc;
-      3'd4: cnt[3] <= cnt_enc;
-      3'd5: cnt[4] <= cnt_enc;
-      3'd6: cnt[5] <= cnt_enc;
-      3'd7: cnt[6] <= cnt_enc;
-      3'd0: cnt[7] <= cnt_enc;
+      3'd3: cnt[0] <= cnt_enc;
+      3'd4: cnt[1] <= cnt_enc;
+      3'd5: cnt[2] <= cnt_enc;
+      3'd6: cnt[3] <= cnt_enc;
+      3'd7: cnt[4] <= cnt_enc;
+      3'd0: cnt[5] <= cnt_enc;
+      3'd1: cnt[6] <= cnt_enc;
+      3'd2: cnt[7] <= cnt_enc;
     endcase
 
     case (phase)
-      3'd1: adr[0] <= adr_enc;
-      3'd2: adr[1] <= adr_enc;
-      3'd3: adr[2] <= adr_enc;
-      3'd4: adr[3] <= adr_enc;
-      3'd5: adr[4] <= adr_enc;
-      3'd6: adr[5] <= adr_enc;
-      3'd7: adr[6] <= adr_enc;
-      3'd0: adr[7] <= adr_enc;
+      3'd3: adr[0] <= adr_enc;
+      3'd4: adr[1] <= adr_enc;
+      3'd5: adr[2] <= adr_enc;
+      3'd6: adr[3] <= adr_enc;
+      3'd7: adr[4] <= adr_enc;
+      3'd0: adr[5] <= adr_enc;
+      3'd1: adr[6] <= adr_enc;
+      3'd2: adr[7] <= adr_enc;
     endcase
   end
 
@@ -124,7 +124,7 @@ module first8of1536 (
 // ------------------------------------------------------------------------------------------------------------------
 
   always @(posedge clock4x) begin
-    if (phase==3'd1) begin
+    if (phase==3'd3) begin
       adr0 <= adr[0]  ;
       adr1 <= adr[1]  ;
       adr2 <= adr[2]  ;

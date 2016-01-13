@@ -20,7 +20,7 @@ parameter MXPADS = 1536;
 // reset
 //----------------------------------------------------------------------------------------------------------------------
 
-SRL16E u00 (.CLK(clock),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
+SRL16E #(.INIT(16'hffff)) u00 (.CLK(clock),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
 reg reset=1;
 always @(posedge clock) reset <= reset_dly;
 
@@ -28,15 +28,20 @@ always @(posedge clock) reset <= reset_dly;
 // phase
 //----------------------------------------------------------------------------------------------------------------------
 
-(* max_fanout = 20 *) reg [2:0] phase=3'd0;
+(* max_fanout = 20 *)
+reg [2:0] phase=3'd0;
+(* max_fanout = 20 *)
+reg latch_en;
 always @(posedge clock) begin
-  phase <= (reset) ? 3'd0 : phase+1'b1;
+  phase    <= (reset) ? 3'd0 : phase+1'b1;
+  latch_en <= (phase==3'd0);
 end
 
 
 //----------------------------------------------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------------------------------------------
+
   wire [1535:0] vpfs_in;
   `ifdef debug_priority1536
     reg [1535:0] vpf_ff;
@@ -57,7 +62,7 @@ end
   generate
   for (ipad=0; ipad<MXPADS; ipad=ipad+1) begin:padloop
     always @(posedge clock)
-     if (phase==3'd0) cnts_in [ipad] <= cnts[ipad*3+2:ipad*3];
+      if (latch_en) cnts_in [ipad] <= cnts[ipad*3+2:ipad*3];
   end
   endgenerate
 

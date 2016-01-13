@@ -151,7 +151,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
       always @(posedge clock4x) begin
         if      (ikey==0) vpfs  [(MXKEYS*irow)+ikey] <= partition_padded[irow][ikey];
         else if (ikey <9) vpfs  [(MXKEYS*irow)+ikey] <= partition_padded[irow][ikey:ikey-1]==2'b10;
-        else              vpfs  [(MXKEYS*irow)+ikey] <= partition_padded[irow][ikey:ikey-1]==2'b10;// || (!truncate_clusters && partition_padded[irow][ikey-1:ikey-9]==9'b111111110) ;
+        else              vpfs  [(MXKEYS*irow)+ikey] <= partition_padded[irow][ikey:ikey-1]==2'b10 || (!truncate_clusters && partition_padded[irow][ikey-1:ikey-9]==9'b111111110) ;
       end
 
     end // row loop

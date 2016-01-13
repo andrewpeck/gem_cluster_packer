@@ -19,7 +19,7 @@ reg [1535:0] vpf_ff;
 // reset
 //----------------------------------------------------------------------------------------------------------------------
 
-SRL16E u00 (.CLK(clock),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
+SRL16E #(.INIT(16'hffff)) u00 (.CLK(clock),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
 reg reset=1;
 always @(posedge clock) reset <= reset_dly;
 
@@ -159,33 +159,33 @@ endgenerate
 // assign segment_keep [0]   =  0;
 
 
-assign segment_keep [23] =  segment_active[22]  | segment_active[21]                      | segment_keep[20];
-assign segment_keep [22] =  segment_active[21]                                            | segment_keep[20];
-assign segment_keep [21] =  segment_active[20]                                            | segment_keep[20];
+assign segment_keep [23] =  segment_active[22]  | segment_active[21]   | segment_keep[20];
+assign segment_keep [22] =  segment_active[21]                         | segment_keep[20];
+assign segment_keep [21] =  segment_active[20]                         | segment_keep[20];
 
-assign segment_keep [20] =  segment_active[19]  | segment_active[18]                      | segment_keep[17];
-assign segment_keep [19] =  segment_active[18]                                            | segment_keep[17];
-assign segment_keep [18] =  segment_active[17]                                            | segment_keep[17];
+assign segment_keep [20] =  segment_active[19]  | segment_active[18]   | segment_keep[17];
+assign segment_keep [19] =  segment_active[18]                         | segment_keep[17];
+assign segment_keep [18] =  segment_active[17]                         | segment_keep[17];
 
-assign segment_keep [17] =  segment_active[16]  | segment_active[15]                      | segment_keep[14];
-assign segment_keep [16] =  segment_active[15]                                            | segment_keep[14];
-assign segment_keep [15] =  segment_active[14]                                            | segment_keep[14];
+assign segment_keep [17] =  segment_active[16]  | segment_active[15]   | segment_keep[14];
+assign segment_keep [16] =  segment_active[15]                         | segment_keep[14];
+assign segment_keep [15] =  segment_active[14]                         | segment_keep[14];
 
-assign segment_keep [14] =  segment_active[13]  | segment_active[12]                      | segment_keep[11];
-assign segment_keep [13] =  segment_active[12]                                            | segment_keep[11];
-assign segment_keep [12] =  segment_active[11]                                            | segment_keep[11];
+assign segment_keep [14] =  segment_active[13]  | segment_active[12]   | segment_keep[11];
+assign segment_keep [13] =  segment_active[12]                         | segment_keep[11];
+assign segment_keep [12] =  segment_active[11]                         | segment_keep[11];
 
-assign segment_keep [11] =  segment_active[10]  | segment_active[9]                      | segment_keep[8];
-assign segment_keep [10] =  segment_active[9]                                            | segment_keep[8];
-assign segment_keep [9]  =  segment_active[8]                                            | segment_keep[8];
+assign segment_keep [11] =  segment_active[10]  | segment_active[9]    | segment_keep[8];
+assign segment_keep [10] =  segment_active[9]                          | segment_keep[8];
+assign segment_keep [9]  =  segment_active[8]                          | segment_keep[8];
 
-assign segment_keep [8]  =  segment_active[7]  | segment_active[6]                       | segment_keep[5];
-assign segment_keep [7]  =  segment_active[6]                                            | segment_keep[5];
-assign segment_keep [6]  =  segment_active[5]                                            | segment_keep[5];
+assign segment_keep [8]  =  segment_active[7]  | segment_active[6]     | segment_keep[5];
+assign segment_keep [7]  =  segment_active[6]                          | segment_keep[5];
+assign segment_keep [6]  =  segment_active[5]                          | segment_keep[5];
 
-assign segment_keep [5]  =  segment_active[4]  | segment_active[3]                       | segment_keep[2];
-assign segment_keep [4]  =  segment_active[3]                                            | segment_keep[2];
-assign segment_keep [3]  =  segment_active[2]                                            | segment_keep[2];
+assign segment_keep [5]  =  segment_active[4]  | segment_active[3]     | segment_keep[2];
+assign segment_keep [4]  =  segment_active[3]                          | segment_keep[2];
+assign segment_keep [3]  =  segment_active[2]                          | segment_keep[2];
 
 assign segment_keep [2]  =  segment_active[1]  | segment_active[0];
 assign segment_keep [1]  =  segment_active[0];
