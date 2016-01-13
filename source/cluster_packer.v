@@ -151,7 +151,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
       always @(posedge clock4x) begin
         if      (ikey==0) vpfs  [(MXKEYS*irow)+ikey] <= partition_padded[irow][ikey];
         else if (ikey <9) vpfs  [(MXKEYS*irow)+ikey] <= partition_padded[irow][ikey:ikey-1]==2'b10;
-        else              vpfs  [(MXKEYS*irow)+ikey] <= partition_padded[irow][ikey:ikey-1]==2'b10 || (!truncate_clusters && partition_padded[irow][ikey-1:ikey-9]==9'b111111110) ;
+        else              vpfs  [(MXKEYS*irow)+ikey] <= partition_padded[irow][ikey:ikey-1]==2'b10; // || (!truncate_clusters && partition_padded[irow][ikey-1:ikey-9]==9'b111111110) ;
       end
 
     end // row loop
@@ -228,28 +228,6 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   assign cluster5 = cluster[5];
   assign cluster6 = cluster[6];
   assign cluster7 = cluster[7];
-
-//----------------------------------------------------------------------------------------------------------------------
-// count_seq: procedural function to count the number of consecutive 1 bits in an 8-bit number
-//----------------------------------------------------------------------------------------------------------------------
-
-  function [2:0] count_seq;
-  input [6:0] s;
-  reg [2:0] count;
-  begin
-    casex (s[6:0])
-      7'b1111111: count=3'd7;
-      7'b0111111: count=3'd6;
-      7'bx011111: count=3'd5;
-      7'bxx01111: count=3'd4;
-      7'bxxx0111: count=3'd3;
-      7'bxxxx011: count=3'd2;
-      7'bxxxxx01: count=3'd1;
-      7'bxxxxxx0: count=3'd0;
-    endcase
-    count_seq=count;
-  end
-  endfunction
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule
