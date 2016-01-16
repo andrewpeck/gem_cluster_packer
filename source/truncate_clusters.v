@@ -81,8 +81,9 @@ wire [SEGSIZE-1:0] segment           [MXSEGS-1:0];
 wire [SEGSIZE-1:0] segment_copy      [MXSEGS-1:0];
 wire [SEGSIZE-1:0] segment_truncated [MXSEGS-1:0];
 wire [0:0]         segment_keep      [MXSEGS-1:0];
-wire [0:0]         segment_active    [MXSEGS-1:0];
+reg  [0:0]         segment_active    [MXSEGS-1:0];
 reg  [SEGSIZE-1:0] segment_ff        [MXSEGS-1:0];
+reg  [SEGSIZE-1:0] twos_complement   [MXSEGS-1:0];
 
 genvar iseg;
 generate;
@@ -92,10 +93,14 @@ for (iseg=0; iseg<MXSEGS; iseg=iseg+1) begin: segloop
   assign segment[iseg]        = {vpfs_in [(iseg+1)*SEGSIZE-1:iseg*SEGSIZE]};
 
  // mark segment as active it has any clusters
-  assign segment_active[iseg] = |segment_ff[iseg];
 
   // copy of segment with least significant 1 removed
-  assign segment_copy[iseg]      =  segment_ff[iseg] & ({SEGSIZE{segment_keep[iseg]}} | ~(~segment_ff[iseg]+1));
+  always @(posedge clock) begin
+    twos_complement[iseg] <= ~(~segment_ff[iseg]+1);
+    segment_active[iseg]  <= |segment_ff[iseg];
+  end
+
+  assign segment_copy[iseg] = segment_ff[iseg] & (twos_complement[iseg] | {SEGSIZE{segment_keep[iseg]}});
 
   // with latch_en, our ff latches the incoming clusters, otherwise we latch the copied segments
   always @(posedge clock) begin
