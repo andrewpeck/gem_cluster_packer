@@ -141,7 +141,7 @@ module first8of1536 (
       cnt4 <= cnt[4]  ;
       cnt5 <= cnt[5]  ;
       cnt6 <= cnt[6]  ;
-      cnt7 <= adr_enc ;
+      cnt7 <= cnt_enc ;
     end
   end
 
