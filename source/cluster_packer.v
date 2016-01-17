@@ -88,7 +88,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   );
 
   always @(posedge clock4x) begin
-    if      (global_reset && reset_done_ff)                    reset_done_ff <= 1'b0;
+    if       (global_reset && reset_done_ff)                   reset_done_ff <= 1'b0;
     else if (!global_reset && reset_delayed && !reset_done_ff) reset_done_ff <= 1'b1;
     else                                                       reset_done_ff <= reset_done_ff;
   end
@@ -103,14 +103,25 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   // remap vfats into partitions
   //--------------------------------------------------------------------------------
 
-  wire  [MXKEYS-1:0] partition0 = {vfat16, vfat8,  vfat0};
-  wire  [MXKEYS-1:0] partition1 = {vfat17, vfat9,  vfat1};
-  wire  [MXKEYS-1:0] partition2 = {vfat18, vfat10, vfat2};
-  wire  [MXKEYS-1:0] partition3 = {vfat19, vfat11, vfat3};
-  wire  [MXKEYS-1:0] partition4 = {vfat20, vfat12, vfat4};
-  wire  [MXKEYS-1:0] partition5 = {vfat21, vfat13, vfat5};
-  wire  [MXKEYS-1:0] partition6 = {vfat22, vfat14, vfat6};
-  wire  [MXKEYS-1:0] partition7 = {vfat23, vfat15, vfat7};
+  reg [MXKEYS-1:0] partition0;
+  reg [MXKEYS-1:0] partition1;
+  reg [MXKEYS-1:0] partition2;
+  reg [MXKEYS-1:0] partition3;
+  reg [MXKEYS-1:0] partition4;
+  reg [MXKEYS-1:0] partition5;
+  reg [MXKEYS-1:0] partition6;
+  reg [MXKEYS-1:0] partition7;
+
+  always @(posedge clock4x) begin
+    partition0 <= {vfat16, vfat8,  vfat0};
+    partition1 <= {vfat17, vfat9,  vfat1};
+    partition2 <= {vfat18, vfat10, vfat2};
+    partition3 <= {vfat19, vfat11, vfat3};
+    partition4 <= {vfat20, vfat12, vfat4};
+    partition5 <= {vfat21, vfat13, vfat5};
+    partition6 <= {vfat22, vfat14, vfat6};
+    partition7 <= {vfat23, vfat15, vfat7};
+  end
 
   // pad the partition to handle the edge cases
   //--------------------------------------------------------------------------------
