@@ -65,7 +65,9 @@ always @(posedge clock) reset <= reset_dly;
 // phase
 //----------------------------------------------------------------------------------------------------------------------
 
-(* max_fanout= 10 *)
+//(* KEEP = "TRUE" *)
+//(* equivalent_register_removal = "NO" *)
+//(* max_fanout = 100 *)
 reg latch_en;
 reg [2:0] phase=3'd0;
 always @(posedge clock) begin
@@ -74,7 +76,7 @@ always @(posedge clock) begin
 end
 
 
-parameter MXSEGS  = 24;
+parameter MXSEGS  = 16;
 parameter SEGSIZE = 1536/MXSEGS;
 
 wire [SEGSIZE-1:0] segment           [MXSEGS-1:0];
@@ -123,42 +125,25 @@ endgenerate
 //    experiment effectively you have to go through the pain of doing PAR
 //    and looking at the timing report
 
-assign segment_keep [23] =  segment_active[22] | segment_active[21]    | segment_keep[20];
-assign segment_keep [22] =  segment_active[21]                         | segment_keep[20];
-assign segment_keep [21] =  segment_active[20]                         | segment_keep[20];
+// segments are kept (untruncated) if any preceeding segment has clusters
+assign segment_keep [15]  =  segment_active[14] | segment_active[13] | segment_active[12] | segment_active[11] | segment_active[10] | segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [14]  =  segment_active[13] | segment_active[12] | segment_active[11] | segment_active[10] | segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [13]  =  segment_active[12] | segment_active[11] | segment_active[10] | segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [12]  =  segment_active[11] | segment_active[10] | segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [11]  =  segment_active[10] | segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [10]  =  segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [9]   =  segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [8]   =  segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [7]   =  segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [6]   =  segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [5]   =  segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [4]   =  segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [3]   =  segment_active[2]  | segment_active[1]  | segment_active[0];
+assign segment_keep [2]   =  segment_active[1]  | segment_active[0];
+assign segment_keep [1]   =  segment_active[0];
+assign segment_keep [0]   =  0;
 
-assign segment_keep [20] =  segment_active[19] | segment_active[18]    | segment_keep[17];
-assign segment_keep [19] =  segment_active[18]                         | segment_keep[17];
-assign segment_keep [18] =  segment_active[17]                         | segment_keep[17];
-
-assign segment_keep [17] =  segment_active[16] | segment_active[15]    | segment_keep[14];
-assign segment_keep [16] =  segment_active[15]                         | segment_keep[14];
-assign segment_keep [15] =  segment_active[14]                         | segment_keep[14];
-
-assign segment_keep [14] =  segment_active[13] | segment_active[12]    | segment_keep[11];
-assign segment_keep [13] =  segment_active[12]                         | segment_keep[11];
-assign segment_keep [12] =  segment_active[11]                         | segment_keep[11];
-
-assign segment_keep [11] =  segment_active[10] | segment_active[9]     | segment_keep[8];
-assign segment_keep [10] =  segment_active[9]                          | segment_keep[8];
-assign segment_keep [9]  =  segment_active[8]                          | segment_keep[8];
-
-assign segment_keep [8]  =  segment_active[7]  | segment_active[6]     | segment_keep[5];
-assign segment_keep [7]  =  segment_active[6]                          | segment_keep[5];
-assign segment_keep [6]  =  segment_active[5]                          | segment_keep[5];
-
-assign segment_keep [5]  =  segment_active[4]  | segment_active[3]     | segment_keep[2];
-assign segment_keep [4]  =  segment_active[3]                          | segment_keep[2];
-assign segment_keep [3]  =  segment_active[2]                          | segment_keep[2];
-
-assign segment_keep [2]  =  segment_active[1]  | segment_active[0];
-assign segment_keep [1]  =  segment_active[0];
-assign segment_keep [0]  =  0;
-
-
-assign vpfs_out = { segment_ff[23], segment_ff[22], segment_ff[21], segment_ff[20],
-                    segment_ff[19], segment_ff[18], segment_ff[17], segment_ff[16],
-                    segment_ff[15], segment_ff[14], segment_ff[13], segment_ff[12],
+assign vpfs_out = { segment_ff[15], segment_ff[14], segment_ff[13], segment_ff[12],
                     segment_ff[11], segment_ff[10], segment_ff[9],  segment_ff[8],
                     segment_ff[7],  segment_ff[6],  segment_ff[5],  segment_ff[4],
                     segment_ff[3],  segment_ff[2],  segment_ff[1],  segment_ff[0]};
