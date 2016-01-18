@@ -4,7 +4,8 @@ module first8of1536 (
     input clock4x,
     input global_reset,
 
-    input [3:0] delay,
+    input [3:0] latch_delay,
+    input       latch_in,
 
     input  [1536  -1:0] vpfs,
     input  [1536*3-1:0] cnts,
@@ -41,28 +42,27 @@ module first8of1536 (
   reg [1535:0] vpfs_in;
   always @(posedge clock4x) begin
     if   (global_reset) vpfs_in <= 1536'd0;
-    else  vpfs_in <= vpfs;
+    else                vpfs_in <= vpfs;
   end
 
-  reg [10:0] adr [7:0];
-  reg [2:0]  cnt [7:0];
 
-
-//----------------------------------------------------------------------------------------------------------------------
-// reset
-//----------------------------------------------------------------------------------------------------------------------
-
-  SRL16E #(.INIT(16'hffff)) u00 (.CLK(clock4x),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
-  reg reset=1;
-  always @(posedge clock4x) reset <= reset_dly;
+//   //----------------------------------------------------------------------------------------------------------------------
+//   // reset
+//   //----------------------------------------------------------------------------------------------------------------------
+//
+//     SRL16E #(.INIT(16'hffff)) u_reset (.CLK(clock4x),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
+//     reg reset=1;
+//     always @(posedge clock4x) reset <= reset_dly;
 
 //----------------------------------------------------------------------------------------------------------------------
-// phase counter
+// latch_enable
 //----------------------------------------------------------------------------------------------------------------------
 
-  (* max_fanout = 50 *) reg [2:0] phase=3'd0;
+  (* max_fanout = 100 *) reg latch_en=0;
+  wire [3:0] delay = latch_delay + 4'd4;
+  SRL16E u_latchdly (.CLK(clock4x),.CE(1'b1),.D(latch_in),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(latch_dly));
   always @(posedge clock4x) begin
-    phase <= (reset) ? 0 : phase+1'b1;
+    latch_en <= (latch_dly);
   end
 
   //------------------
@@ -70,9 +70,10 @@ module first8of1536 (
   //------------------
 
   truncate_clusters u_truncate (
-    .global_reset (global_reset),
     .clock        (clock4x),
-    .delay        (delay),
+    .global_reset (global_reset),
+    .latch_delay  (latch_delay+4'd1),
+    .latch_in     (latch_in),
     .vpfs_in      (vpfs_in),
     .vpfs_out     (vpfs_truncated)
   );
@@ -82,68 +83,78 @@ module first8of1536 (
   //--------------------------
 
   priority1536 u_priority (
+    .clock        (clock4x),       // IN  160 MHz clock
     .global_reset (global_reset),
-    .delay (delay),
-    .clock (clock4x ),       // IN  160 MHz clock
-    .vpfs  (vpfs_truncated), // IN  1536   bit cluster inputs
-    .cnts  (cnts),           // IN  1536*3 bit cluster counts
-    .cnt   (cnt_enc ),       // OUT 11-bit counts    of first found cluster
-    .adr   (adr_enc )        // OUT 11-bit addresses of first found cluster
+    .latch_delay  (4'd2), // this delay should be tuned such that the delayed latch_en in the priority encoder causes
+    .latch_in     (latch_in),
+    .vpfs_in      (vpfs_truncated), // IN  1536   bit cluster inputs
+    .cnts_in      (cnts),           // IN  1536*3 bit cluster counts
+    .cnt          (cnt_enc ),       // OUT 11-bit counts    of first found cluster
+    .adr          (adr_enc )        // OUT 11-bit addresses of first found cluster
   );
 
 //------------------------------------------------------------------------------------------------------------------
 // Latch addresses for output
 //------------------------------------------------------------------------------------------------------------------
 
-  always @(posedge clock4x) begin
-    case (phase)
-      3'd4: cnt[0] <= cnt_enc;
-      3'd5: cnt[1] <= cnt_enc;
-      3'd6: cnt[2] <= cnt_enc;
-      3'd7: cnt[3] <= cnt_enc;
-      3'd0: cnt[4] <= cnt_enc;
-      3'd1: cnt[5] <= cnt_enc;
-      3'd2: cnt[6] <= cnt_enc;
-      //3'd3: cnt[7] <= cnt_enc;
-    endcase
+  parameter MXADRBITS = 11;
+  parameter MXCNTBITS = 3;
 
-    case (phase)
-      3'd4: adr[0] <= adr_enc;
-      3'd5: adr[1] <= adr_enc;
-      3'd6: adr[2] <= adr_enc;
-      3'd7: adr[3] <= adr_enc;
-      3'd0: adr[4] <= adr_enc;
-      3'd1: adr[5] <= adr_enc;
-      3'd2: adr[6] <= adr_enc;
-      //3'd3: adr[7] <= adr_enc;
-    endcase
+  reg [MXADRBITS*8-1:0] adr_sr;
+  reg [MXCNTBITS*8-1:0] cnt_sr;
+
+  always @(posedge clock4x) begin
+    cnt_sr <= {cnt_sr[MXCNTBITS*7-1:0], cnt_enc};
+    adr_sr <= {adr_sr[MXADRBITS*7-1:0], adr_enc};
   end
 
 //-------------------------------------------------------------------------------------------------------------------
 // Outputs
 // ------------------------------------------------------------------------------------------------------------------
 
-  always @(posedge clock4x) begin
-    if (phase==3'd3) begin
-      adr0 <= adr[0]  ;
-      adr1 <= adr[1]  ;
-      adr2 <= adr[2]  ;
-      adr3 <= adr[3]  ;
-      adr4 <= adr[4]  ;
-      adr5 <= adr[5]  ;
-      adr6 <= adr[6]  ;
-      adr7 <= adr_enc ;
 
-      cnt0 <= cnt[0]  ;
-      cnt1 <= cnt[1]  ;
-      cnt2 <= cnt[2]  ;
-      cnt3 <= cnt[3]  ;
-      cnt4 <= cnt[4]  ;
-      cnt5 <= cnt[5]  ;
-      cnt6 <= cnt[6]  ;
-      cnt7 <= cnt_enc ;
+  always @(posedge clock4x) begin
+    if (latch_en) begin
+      adr7 <= adr_sr[MXADRBITS*1-1:MXADRBITS*0] ;
+      adr6 <= adr_sr[MXADRBITS*2-1:MXADRBITS*1] ;
+      adr5 <= adr_sr[MXADRBITS*3-1:MXADRBITS*2] ;
+      adr4 <= adr_sr[MXADRBITS*4-1:MXADRBITS*3] ;
+      adr3 <= adr_sr[MXADRBITS*5-1:MXADRBITS*4] ;
+      adr2 <= adr_sr[MXADRBITS*6-1:MXADRBITS*5] ;
+      adr1 <= adr_sr[MXADRBITS*7-1:MXADRBITS*6] ;
+      adr0 <= adr_sr[MXADRBITS*8-1:MXADRBITS*7] ;
+
+      cnt7 <= cnt_sr[MXCNTBITS*1-1:MXCNTBITS*0] ;
+      cnt6 <= cnt_sr[MXCNTBITS*2-1:MXCNTBITS*1] ;
+      cnt5 <= cnt_sr[MXCNTBITS*3-1:MXCNTBITS*2] ;
+      cnt4 <= cnt_sr[MXCNTBITS*4-1:MXCNTBITS*3] ;
+      cnt3 <= cnt_sr[MXCNTBITS*5-1:MXCNTBITS*4] ;
+      cnt2 <= cnt_sr[MXCNTBITS*6-1:MXCNTBITS*5] ;
+      cnt1 <= cnt_sr[MXCNTBITS*7-1:MXCNTBITS*6] ;
+      cnt0 <= cnt_sr[MXCNTBITS*8-1:MXCNTBITS*7] ;
     end
   end
+
+  wire [MXADRBITS-1:0] adr [7:0];
+  wire [MXCNTBITS-1:0] cnt [7:0];
+
+  assign adr[7] = adr_sr[MXADRBITS*1-1:MXADRBITS*0] ;
+  assign adr[6] = adr_sr[MXADRBITS*2-1:MXADRBITS*1] ;
+  assign adr[5] = adr_sr[MXADRBITS*3-1:MXADRBITS*2] ;
+  assign adr[4] = adr_sr[MXADRBITS*4-1:MXADRBITS*3] ;
+  assign adr[3] = adr_sr[MXADRBITS*5-1:MXADRBITS*4] ;
+  assign adr[2] = adr_sr[MXADRBITS*6-1:MXADRBITS*5] ;
+  assign adr[1] = adr_sr[MXADRBITS*7-1:MXADRBITS*6] ;
+  assign adr[0] = adr_sr[MXADRBITS*8-1:MXADRBITS*7] ;
+
+  assign cnt[7] = cnt_sr[MXCNTBITS*1-1:MXCNTBITS*0] ;
+  assign cnt[6] = cnt_sr[MXCNTBITS*2-1:MXCNTBITS*1] ;
+  assign cnt[5] = cnt_sr[MXCNTBITS*3-1:MXCNTBITS*2] ;
+  assign cnt[4] = cnt_sr[MXCNTBITS*4-1:MXCNTBITS*3] ;
+  assign cnt[3] = cnt_sr[MXCNTBITS*5-1:MXCNTBITS*4] ;
+  assign cnt[2] = cnt_sr[MXCNTBITS*6-1:MXCNTBITS*5] ;
+  assign cnt[1] = cnt_sr[MXCNTBITS*7-1:MXCNTBITS*6] ;
+  assign cnt[0] = cnt_sr[MXCNTBITS*8-1:MXCNTBITS*7] ;
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule

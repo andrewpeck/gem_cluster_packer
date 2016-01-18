@@ -25,13 +25,23 @@ module first8of1536_mux (
   output [10:0]      adr7
 );
 
-
-parameter [2:0] offset = 3'd2;
-
-reg [2:0] phase=offset;
+reg [2:0] phase=3'd0;
 wire cycle = phase[2];
+reg latch=0;
 always @(posedge clock4x) begin
-  phase <= (global_reset) ? offset : phase+1'b1;
+  phase <= (global_reset) ? 1'b0 : phase+1'b1;
+  latch <= (phase==3'd0);
+end
+
+//----------------------------------------------------------------------------------------------------------------------
+// latch_enable
+//----------------------------------------------------------------------------------------------------------------------
+
+parameter [3:0] cycle_delay=3'd4;
+(* max_fanout = 100 *) reg cycle_en;
+SRL16E u_cycledly (.CLK(clock4x),.CE(1'b1),.D(cycle),.A0(cycle_delay[0]),.A1(cycle_delay[1]),.A2(cycle_delay[2]),.A3(cycle_delay[3]),.Q(cycle_dly));
+always @(posedge clock4x) begin
+  cycle_en <= (cycle_dly);
 end
 
 wire [10:0] adr0_a, adr1_a, adr2_a, adr3_a, adr4_a, adr5_a, adr6_a, adr7_a;
@@ -39,21 +49,22 @@ wire [10:0] adr0_b, adr1_b, adr2_b, adr3_b, adr4_b, adr5_b, adr6_b, adr7_b;
 wire  [2:0] cnt0_a, cnt1_a, cnt2_a, cnt3_a, cnt4_a, cnt5_a, cnt6_a, cnt7_a;
 wire  [2:0] cnt0_b, cnt1_b, cnt2_b, cnt3_b, cnt4_b, cnt5_b, cnt6_b, cnt7_b;
 
-assign {cnt0,adr0} = (cycle==1'b0) ? {cnt0_a, adr0_a} : {cnt0_b, adr0_b};
-assign {cnt1,adr1} = (cycle==1'b0) ? {cnt1_a, adr1_a} : {cnt1_b, adr1_b};
-assign {cnt2,adr2} = (cycle==1'b0) ? {cnt2_a, adr2_a} : {cnt2_b, adr2_b};
-assign {cnt3,adr3} = (cycle==1'b0) ? {cnt3_a, adr3_a} : {cnt3_b, adr3_b};
-assign {cnt4,adr4} = (cycle==1'b0) ? {cnt4_a, adr4_a} : {cnt4_b, adr4_b};
-assign {cnt5,adr5} = (cycle==1'b0) ? {cnt5_a, adr5_a} : {cnt5_b, adr5_b};
-assign {cnt6,adr6} = (cycle==1'b0) ? {cnt6_a, adr6_a} : {cnt6_b, adr6_b};
-assign {cnt7,adr7} = (cycle==1'b0) ? {cnt7_a, adr7_a} : {cnt7_b, adr7_b};
+assign {cnt0,adr0} = (cycle_en) ? {cnt0_a, adr0_a} : {cnt0_b, adr0_b};
+assign {cnt1,adr1} = (cycle_en) ? {cnt1_a, adr1_a} : {cnt1_b, adr1_b};
+assign {cnt2,adr2} = (cycle_en) ? {cnt2_a, adr2_a} : {cnt2_b, adr2_b};
+assign {cnt3,adr3} = (cycle_en) ? {cnt3_a, adr3_a} : {cnt3_b, adr3_b};
+assign {cnt4,adr4} = (cycle_en) ? {cnt4_a, adr4_a} : {cnt4_b, adr4_b};
+assign {cnt5,adr5} = (cycle_en) ? {cnt5_a, adr5_a} : {cnt5_b, adr5_b};
+assign {cnt6,adr6} = (cycle_en) ? {cnt6_a, adr6_a} : {cnt6_b, adr6_b};
+assign {cnt7,adr7} = (cycle_en) ? {cnt7_a, adr7_a} : {cnt7_b, adr7_b};
 
 first8of1536 u_first8_a (
     .global_reset(global_reset),
     .clock4x(clock4x),
     .vpfs (vpfs),
     .cnts (cnts),
-    .delay(4'd0),
+    .latch_in (latch),
+    .latch_delay(4'd0),
 
     .adr0(adr0_a),
     .adr1(adr1_a),
@@ -76,7 +87,8 @@ first8of1536 u_first8_a (
 
 first8of1536 u_first8_b (
     .clock4x(clock4x),
-    .delay(4'd3),
+    .latch_in (latch),
+    .latch_delay(4'd3),
     .global_reset(global_reset),
     .vpfs (vpfs),
     .cnts (cnts),

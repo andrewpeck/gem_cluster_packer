@@ -44,65 +44,49 @@ module truncate_clusters (
   input           clock,
   input     global_reset,
 
-  input [3:0] delay,
+  input latch_in,
+  input [3:0] latch_delay,
 
   input [1535:0]  vpfs_in,
 
   output [1535:0] vpfs_out
 );
 
-reg [1535:0] vpf_ff;
-
-//----------------------------------------------------------------------------------------------------------------------
-// reset
-//----------------------------------------------------------------------------------------------------------------------
-
-SRL16E #(.INIT(16'hffff)) u00 (.CLK(clock),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
-reg reset=1;
-always @(posedge clock) reset <= reset_dly;
-
 //----------------------------------------------------------------------------------------------------------------------
 // phase
 //----------------------------------------------------------------------------------------------------------------------
 
-//(* KEEP = "TRUE" *)
-//(* equivalent_register_removal = "NO" *)
-//(* max_fanout = 100 *)
-reg latch_en;
-reg [2:0] phase=3'd0;
+(* max_fanout = 100 *)
+reg latch_en=0;
+SRL16E u_latchdly (.CLK(clock),.CE(1'b1),.D(latch_in),.A0(latch_delay[0]),.A1(latch_delay[1]),.A2(latch_delay[2]),.A3(latch_delay[3]),.Q(latch_dly));
 always @(posedge clock) begin
-  phase <= (reset) ? 3'd0 : phase+1'b1;
-  latch_en <= (phase==3'd0);
+  latch_en <= (latch_dly);
 end
 
 
-parameter MXSEGS  = 16;
+parameter MXSEGS  = 24;
 parameter SEGSIZE = 1536/MXSEGS;
 
 wire [SEGSIZE-1:0] segment           [MXSEGS-1:0];
 wire [SEGSIZE-1:0] segment_copy      [MXSEGS-1:0];
-wire [SEGSIZE-1:0] segment_truncated [MXSEGS-1:0];
 wire [0:0]         segment_keep      [MXSEGS-1:0];
-reg  [0:0]         segment_active    [MXSEGS-1:0];
+wire [0:0]         segment_active    [MXSEGS-1:0];
 reg  [SEGSIZE-1:0] segment_ff        [MXSEGS-1:0];
-reg  [SEGSIZE-1:0] twos_complement   [MXSEGS-1:0];
 
 genvar iseg;
 generate;
 for (iseg=0; iseg<MXSEGS; iseg=iseg+1) begin: segloop
+  initial segment_ff      [iseg] = {SEGSIZE{1'b0}};
+
 
   // remap cluster inputs into Segments
   assign segment[iseg]        = {vpfs_in [(iseg+1)*SEGSIZE-1:iseg*SEGSIZE]};
 
- // mark segment as active it has any clusters
+  // mark segment as active it has any clusters
+  assign segment_active[iseg] = |segment_ff[iseg];
 
   // copy of segment with least significant 1 removed
-  always @(posedge clock) begin
-    twos_complement[iseg] <= ~(~segment_ff[iseg]+1);
-    segment_active[iseg]  <= |segment_ff[iseg];
-  end
-
-  assign segment_copy[iseg] = segment_ff[iseg] & (twos_complement[iseg] | {SEGSIZE{segment_keep[iseg]}});
+  assign segment_copy[iseg]      =  segment_ff[iseg] & ({SEGSIZE{segment_keep[iseg]}} | ~(~segment_ff[iseg]+1));
 
   // with latch_en, our ff latches the incoming clusters, otherwise we latch the copied segments
   always @(posedge clock) begin
@@ -126,24 +110,42 @@ endgenerate
 //    and looking at the timing report
 
 // segments are kept (untruncated) if any preceeding segment has clusters
-assign segment_keep [15]  =  segment_active[14] | segment_active[13] | segment_active[12] | segment_active[11] | segment_active[10] | segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [14]  =  segment_active[13] | segment_active[12] | segment_active[11] | segment_active[10] | segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [13]  =  segment_active[12] | segment_active[11] | segment_active[10] | segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [12]  =  segment_active[11] | segment_active[10] | segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [11]  =  segment_active[10] | segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [10]  =  segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [9]   =  segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [8]   =  segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [7]   =  segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [6]   =  segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [5]   =  segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [4]   =  segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [3]   =  segment_active[2]  | segment_active[1]  | segment_active[0];
-assign segment_keep [2]   =  segment_active[1]  | segment_active[0];
-assign segment_keep [1]   =  segment_active[0];
-assign segment_keep [0]   =  0;
 
-assign vpfs_out = { segment_ff[15], segment_ff[14], segment_ff[13], segment_ff[12],
+assign segment_keep [23] =  segment_active[22] | segment_active[21]    | segment_keep[20];
+assign segment_keep [22] =  segment_active[21]                         | segment_keep[20];
+assign segment_keep [21] =  segment_active[20]                         | segment_keep[20];
+
+assign segment_keep [20] =  segment_active[19] | segment_active[18]    | segment_keep[17];
+assign segment_keep [19] =  segment_active[18]                         | segment_keep[17];
+assign segment_keep [18] =  segment_active[17]                         | segment_keep[17];
+
+assign segment_keep [17] =  segment_active[16] | segment_active[15]    | segment_keep[14];
+assign segment_keep [16] =  segment_active[15]                         | segment_keep[14];
+assign segment_keep [15] =  segment_active[14]                         | segment_keep[14];
+
+assign segment_keep [14] =  segment_active[13] | segment_active[12]    | segment_keep[11];
+assign segment_keep [13] =  segment_active[12]                         | segment_keep[11];
+assign segment_keep [12] =  segment_active[11]                         | segment_keep[11];
+
+assign segment_keep [11] =  segment_active[10] | segment_active[9]     | segment_keep[8];
+assign segment_keep [10] =  segment_active[9]                          | segment_keep[8];
+assign segment_keep [9]  =  segment_active[8]                          | segment_keep[8];
+
+assign segment_keep [8]  =  segment_active[7]  | segment_active[6]     | segment_keep[5];
+assign segment_keep [7]  =  segment_active[6]                          | segment_keep[5];
+assign segment_keep [6]  =  segment_active[5]                          | segment_keep[5];
+
+assign segment_keep [5]  =  segment_active[4]  | segment_active[3]     | segment_keep[2];
+assign segment_keep [4]  =  segment_active[3]                          | segment_keep[2];
+assign segment_keep [3]  =  segment_active[2]                          | segment_keep[2];
+
+assign segment_keep [2]  =  segment_active[1]  | segment_active[0];
+assign segment_keep [1]  =  segment_active[0];
+assign segment_keep [0]  =  0;
+
+assign vpfs_out = { segment_ff[23], segment_ff[22], segment_ff[21], segment_ff[20],
+                    segment_ff[19], segment_ff[18], segment_ff[17], segment_ff[16],
+                    segment_ff[15], segment_ff[14], segment_ff[13], segment_ff[12],
                     segment_ff[11], segment_ff[10], segment_ff[9],  segment_ff[8],
                     segment_ff[7],  segment_ff[6],  segment_ff[5],  segment_ff[4],
                     segment_ff[3],  segment_ff[2],  segment_ff[1],  segment_ff[0]};

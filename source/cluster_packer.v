@@ -113,14 +113,14 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   reg [MXKEYS-1:0] partition7;
 
   always @(posedge clock4x) begin
-    partition0 <= {vfat16, vfat8,  vfat0};
-    partition1 <= {vfat17, vfat9,  vfat1};
-    partition2 <= {vfat18, vfat10, vfat2};
-    partition3 <= {vfat19, vfat11, vfat3};
-    partition4 <= {vfat20, vfat12, vfat4};
-    partition5 <= {vfat21, vfat13, vfat5};
-    partition6 <= {vfat22, vfat14, vfat6};
-    partition7 <= {vfat23, vfat15, vfat7};
+    partition0 <= {vfat2,  vfat1,   vfat0};
+    partition1 <= {vfat5,  vfat4,   vfat3};
+    partition2 <= {vfat8,  vfat7,   vfat6};
+    partition3 <= {vfat11, vfat10,  vfat9};
+    partition4 <= {vfat14, vfat13,  vfat12};
+    partition5 <= {vfat17, vfat16,  vfat15};
+    partition6 <= {vfat20, vfat19,  vfat18};
+    partition7 <= {vfat23, vfat22,  vfat21};
   end
 
   // pad the partition to handle the edge cases

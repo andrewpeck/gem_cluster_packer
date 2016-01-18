@@ -5,10 +5,11 @@ module priority1536 (
   input 	clock,
   input   global_reset,
 
-  input   [3:0] delay,
+  input   [3:0] latch_delay,
+  input         latch_in,
 
-  input   [MXPADS  -1:0] vpfs,
-  input   [MXPADS*3-1:0] cnts,
+  input   [MXPADS  -1:0] vpfs_in,
+  input   [MXPADS*3-1:0] cnts_in,
 
   output  [10:0] adr,
   output  [2:0]  cnt
@@ -16,40 +17,24 @@ module priority1536 (
 
 parameter MXPADS = 1536;
 
-//----------------------------------------------------------------------------------------------------------------------
-// reset
-//----------------------------------------------------------------------------------------------------------------------
-
-SRL16E #(.INIT(16'hffff)) u00 (.CLK(clock),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
-reg reset=1;
-always @(posedge clock) reset <= reset_dly;
-
-//----------------------------------------------------------------------------------------------------------------------
-// phase
-//----------------------------------------------------------------------------------------------------------------------
-
-(* max_fanout = 20 *)
-reg [2:0] phase=3'd0;
-(* max_fanout = 20 *)
-reg latch_en;
-always @(posedge clock) begin
-  phase    <= (reset) ? 3'd0 : phase+1'b1;
-  latch_en <= (phase==3'd0);
-end
-
-
-//----------------------------------------------------------------------------------------------------------------------
+//     //----------------------------------------------------------------------------------------------------------------------
+//     // reset
+//     //----------------------------------------------------------------------------------------------------------------------
 //
+//     SRL16E #(.INIT(16'hffff)) u_reset (.CLK(clock),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
+//     reg reset=1;
+//     always @(posedge clock) reset <= reset_dly;
+
+//----------------------------------------------------------------------------------------------------------------------
+// latch_enable
 //----------------------------------------------------------------------------------------------------------------------
 
-  wire [1535:0] vpfs_in;
-  `ifdef debug_priority1536
-    reg [1535:0] vpf_ff;
-    always @ (posedge clock) vpf_ff <= vpfs;
-    assign vpfs_in = vpf_ff;
-  `else
-    assign vpfs_in = vpfs;
-  `endif
+(* max_fanout = 100 *) reg latch_en=0;
+wire [3:0] delay = (latch_delay-1'b1);
+SRL16E u_latchdly (.CLK(clock),.CE(1'b1),.D(latch_in),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(latch_dly));
+always @(posedge clock) begin
+  latch_en <= (latch_delay==0) ? latch_in : latch_dly;
+end
 
 //----------------------------------------------------------------------------------------------------------------------
 //
@@ -57,12 +42,12 @@ end
 
   (* KEEP = "TRUE" *)
   (* shreg_extract = "no" *)
-  reg [2:0] cnts_in [MXPADS-1:0];
+  reg [2:0] cnts [MXPADS-1:0];
   genvar ipad;
   generate
   for (ipad=0; ipad<MXPADS; ipad=ipad+1) begin:padloop
     always @(posedge clock)
-      if (latch_en) cnts_in [ipad] <= cnts[ipad*3+2:ipad*3];
+      if (latch_en) cnts [ipad] <= cnts_in [ipad*3+2:ipad*3];
   end
   endgenerate
 
@@ -113,7 +98,7 @@ generate
 for (ihit=0; ihit<768; ihit=ihit+1) begin: s0
   //assign {vpf_s0[ihit], key_s0[ihit]} = (vpfs_in[ihit*2+1]) ?  {vpfs_in[ihit*2+1],1'b1} :{vpfs_in[ihit*2],  1'b0};
   //assign {vpf_s0[ihit], key_s0[ihit]} = (vpfs_in[ihit*2]) ? {vpfs_in[ihit*2],  1'b0} : {vpfs_in[ihit*2+1],1'b1} ;
-  assign {vpf_s0[ihit], cnt_s0[ihit], key_s0[ihit]} = (vpfs_in[ihit*2]) ? {vpfs_in[ihit*2], cnts_in[ihit*2], 1'b0} : {vpfs_in[ihit*2+1], cnts_in[ihit*2+1], 1'b1} ;
+  assign {vpf_s0[ihit], cnt_s0[ihit], key_s0[ihit]} = (vpfs_in[ihit*2]) ? {vpfs_in[ihit*2], cnts[ihit*2], 1'b0} : {vpfs_in[ihit*2+1], cnts[ihit*2+1], 1'b1} ;
 end
 endgenerate
 
