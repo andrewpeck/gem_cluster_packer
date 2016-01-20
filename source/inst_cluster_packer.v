@@ -30,14 +30,14 @@ module inst_cluster_packer (
 
   input truncate_clusters,
 
-  output [13:0] cluster0,
-  output [13:0] cluster1,
-  output [13:0] cluster2,
-  output [13:0] cluster3,
-  output [13:0] cluster4,
-  output [13:0] cluster5,
-  output [13:0] cluster6,
-  output [13:0] cluster7
+  output reg [13:0] cluster0,
+  output reg [13:0] cluster1,
+  output reg [13:0] cluster2,
+  output reg [13:0] cluster3,
+  output reg [13:0] cluster4,
+  output reg [13:0] cluster5,
+  output reg [13:0] cluster6,
+  output reg [13:0] cluster7
 );
 
 //synthesis attribute ALLCLOCKNETS of inst_cluster_packer is ""
@@ -58,30 +58,30 @@ module inst_cluster_packer (
 //  );      // OUT
 
 wire [15:0] vfat [23:0];
-assign vfat[0] = vfat0;
-assign vfat[1] = vfat1;
-assign vfat[2] = vfat2;
-assign vfat[3] = vfat3;
-assign vfat[4] = vfat4;
-assign vfat[5] = vfat5;
-assign vfat[6] = vfat6;
-assign vfat[7] = vfat7;
-assign vfat[8] = vfat8;
-assign vfat[9] = vfat9;
-assign vfat[10] = vfat10;
-assign vfat[11] = vfat11;
-assign vfat[12] = vfat12;
-assign vfat[13] = vfat13;
-assign vfat[14] = vfat14;
-assign vfat[15] = vfat15;
-assign vfat[16] = vfat16;
-assign vfat[17] = vfat17;
-assign vfat[18] = vfat18;
-assign vfat[19] = vfat19;
-assign vfat[20] = vfat20;
-assign vfat[21] = vfat21;
-assign vfat[22] = vfat22;
-assign vfat[23] = vfat23;
+assign vfat[0]   =  vfat0;
+assign vfat[1]   =  vfat1;
+assign vfat[2]   =  vfat2;
+assign vfat[3]   =  vfat3;
+assign vfat[4]   =  vfat4;
+assign vfat[5]   =  vfat5;
+assign vfat[6]   =  vfat6;
+assign vfat[7]   =  vfat7;
+assign vfat[8]   =  vfat8;
+assign vfat[9]   =  vfat9;
+assign vfat[10]  =  vfat10;
+assign vfat[11]  =  vfat11;
+assign vfat[12]  =  vfat12;
+assign vfat[13]  =  vfat13;
+assign vfat[14]  =  vfat14;
+assign vfat[15]  =  vfat15;
+assign vfat[16]  =  vfat16;
+assign vfat[17]  =  vfat17;
+assign vfat[18]  =  vfat18;
+assign vfat[19]  =  vfat19;
+assign vfat[20]  =  vfat20;
+assign vfat[21]  =  vfat21;
+assign vfat[22]  =  vfat22;
+assign vfat[23]  =  vfat23;
 
 reg [15:0] w0 [23:0];
 reg [15:0] w1 [23:0];
@@ -112,13 +112,13 @@ for (ivfat=0; ivfat<24; ivfat=ivfat+1) begin: fatloop
     3'd0: w0[ivfat]        <= vfat[ivfat];
     3'd1: w1[ivfat]        <= vfat[ivfat];
     3'd2: w2[ivfat]        <= vfat[ivfat];
-    //3'd3: w3[ivfat]        <= vfat[ivfat];
+    3'd3: w3[ivfat]        <= vfat[ivfat];
   endcase
   end
 
   always @(posedge clock4x) begin
-    if (bytecnt==3'd3)
-      vfat_sbit[ivfat] <= {vfat[ivfat], w2[ivfat], w1[ivfat], w0[ivfat]};
+    if (bytecnt==3'd0)
+      vfat_sbit[ivfat] <= {w3[ivfat], w2[ivfat], w1[ivfat], w0[ivfat]};
   end
 
 end
@@ -169,14 +169,16 @@ cluster_packer u_cluster_packer (
     .cluster7 (cluster[7])
 );
 
-assign cluster0 = cluster[0];
-assign cluster1 = cluster[1];
-assign cluster2 = cluster[2];
-assign cluster3 = cluster[3];
-assign cluster4 = cluster[4];
-assign cluster5 = cluster[5];
-assign cluster6 = cluster[6];
-assign cluster7 = cluster[7];
+always @(posedge clock4x) begin
+    cluster0 <= cluster[0];
+    cluster1 <= cluster[1];
+    cluster2 <= cluster[2];
+    cluster3 <= cluster[3];
+    cluster4 <= cluster[4];
+    cluster5 <= cluster[5];
+    cluster6 <= cluster[6];
+    cluster7 <= cluster[7];
+end
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule
