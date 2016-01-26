@@ -103,38 +103,31 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   // remap vfats into partitions
   //--------------------------------------------------------------------------------
 
-  reg [MXKEYS-1:0] partition0;
-  reg [MXKEYS-1:0] partition1;
-  reg [MXKEYS-1:0] partition2;
-  reg [MXKEYS-1:0] partition3;
-  reg [MXKEYS-1:0] partition4;
-  reg [MXKEYS-1:0] partition5;
-  reg [MXKEYS-1:0] partition6;
-  reg [MXKEYS-1:0] partition7;
+  reg [MXKEYS-1:0] partition [7:0];
 
   always @(posedge clock4x) begin
-    partition0 <= {vfat2,  vfat1,   vfat0};
-    partition1 <= {vfat5,  vfat4,   vfat3};
-    partition2 <= {vfat8,  vfat7,   vfat6};
-    partition3 <= {vfat11, vfat10,  vfat9};
-    partition4 <= {vfat14, vfat13,  vfat12};
-    partition5 <= {vfat17, vfat16,  vfat15};
-    partition6 <= {vfat20, vfat19,  vfat18};
-    partition7 <= {vfat23, vfat22,  vfat21};
+    partition[0] <= {vfat2,  vfat1,   vfat0};
+    partition[1] <= {vfat5,  vfat4,   vfat3};
+    partition[2] <= {vfat8,  vfat7,   vfat6};
+    partition[3] <= {vfat11, vfat10,  vfat9};
+    partition[4] <= {vfat14, vfat13,  vfat12};
+    partition[5] <= {vfat17, vfat16,  vfat15};
+    partition[6] <= {vfat20, vfat19,  vfat18};
+    partition[7] <= {vfat23, vfat22,  vfat21};
   end
 
-  // pad the partition to handle the edge cases
+  // zero pad the partition to handle the edge cases for counting
   //--------------------------------------------------------------------------------
   wire [(MXKEYS-1)+8:0] partition_padded [MXROWS-1:0];
 
-  assign partition_padded[0] = {{8{1'b0}}, partition0};
-  assign partition_padded[1] = {{8{1'b0}}, partition1};
-  assign partition_padded[2] = {{8{1'b0}}, partition2};
-  assign partition_padded[3] = {{8{1'b0}}, partition3};
-  assign partition_padded[4] = {{8{1'b0}}, partition4};
-  assign partition_padded[5] = {{8{1'b0}}, partition5};
-  assign partition_padded[6] = {{8{1'b0}}, partition6};
-  assign partition_padded[7] = {{8{1'b0}}, partition7};
+  assign partition_padded[0] = {{8{1'b0}}, partition[0]};
+  assign partition_padded[1] = {{8{1'b0}}, partition[1]};
+  assign partition_padded[2] = {{8{1'b0}}, partition[2]};
+  assign partition_padded[3] = {{8{1'b0}}, partition[3]};
+  assign partition_padded[4] = {{8{1'b0}}, partition[4]};
+  assign partition_padded[5] = {{8{1'b0}}, partition[5]};
+  assign partition_padded[6] = {{8{1'b0}}, partition[6]};
+  assign partition_padded[7] = {{8{1'b0}}, partition[7]};
 
   // count cluster size and assign valid pattern flags
   //--------------------------------------------------------------------------------
@@ -160,9 +153,9 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
       // or (2) are preceded by a Size=8 cluster (and cluster truncation is turned off)
       //        if we have size > 16 cluster, the end will get cut off
       always @(posedge clock4x) begin
-        if      (ikey==0) vpfs  [(MXKEYS*irow)+ikey] <= partition_padded[irow][ikey];
-        else if (ikey <9) vpfs  [(MXKEYS*irow)+ikey] <= partition_padded[irow][ikey:ikey-1]==2'b10;
-        else              vpfs  [(MXKEYS*irow)+ikey] <= partition_padded[irow][ikey:ikey-1]==2'b10; // || (!truncate_clusters && partition_padded[irow][ikey-1:ikey-9]==9'b111111110) ;
+        if      (ikey==0) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
+        else if (ikey <9) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10;
+        else              vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10 || (!truncate_clusters && partition[irow][ikey-1:ikey-9]==9'b111111110) ;
       end
 
     end // row loop
