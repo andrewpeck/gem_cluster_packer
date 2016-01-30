@@ -1,0 +1,11 @@
+#NET "lhc_clock" TNM_NET = "lhc_clock";
+#TIMESPEC "TS_lhc_clock" = PERIOD "lhc_clock" 25.0 ns HIGH 50%;
+
+#NET "clock1x" TNM_NET = "clock1x";
+#TIMESPEC "TS_clock1x" = PERIOD "clock1x" 25.0 ns HIGH 50%;
+
+NET "clock4x" TNM_NET = "clock4x";
+TIMESPEC "TS_clock4x" = PERIOD "clock4x" 6.25 ns HIGH 50%;
+
+#NET "clock8x" TNM_NET = "clock8x";
+#TIMESPEC "TS_clock8x" = PERIOD "clock8x" 3.125 ns HIGH 50%;
