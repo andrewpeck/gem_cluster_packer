@@ -9,7 +9,6 @@
 module cluster_packer (
     input  clock4x,
     input  global_reset,
-    input  reverse_priority_order,
     input  truncate_clusters,
 
     input  [MXSBITS-1:0] vfat0,
@@ -180,7 +179,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   wire [MXADRBITS-1:0] adr_encoder [MXCLUSTERS-1:0];
   wire [MXCNTBITS-1:0] cnt_encoder [MXCLUSTERS-1:0];
 
-  first8of1536_mux u_first8_mux (
+  encoder_mux u_encoder_mux (
     .clock4x (clock4x),
 
     .global_reset (global_reset),
