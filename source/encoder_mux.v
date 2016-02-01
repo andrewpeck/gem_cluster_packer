@@ -1,16 +1,22 @@
 //----------------------------------------------------------------------------------------------------------------------
 // encoder_mux.v
 //
-// The cluster_packer is based around two priority encoding modules (first8of1536). One encoder handles the S-bits received at "even" bunch crossings, while the other handles S-bits received at the "odd" bunch crossing.
+// The cluster_packer is based around two priority encoding modules
+// (first8of1536). One encoder handles the S-bits received at "even" bunch
+// crossings, while the other handles S-bits received at the "odd" bunch
+// crossing.
+//
+// This module and submodule is only based on a 160 MHz clock, so it is essentially blind to the 40MHz system clock!
 //----------------------------------------------------------------------------------------------------------------------
 
 module encoder_mux (
+
   input clock4x,
   input global_reset,
 
-  input  [1536-1:0]    vpfs,
+  input  [1536-1:0]    vpfs_in,
 
-  input  [1536*3-1:0]  cnts,
+  input  [1536*3-1:0]  cnts_in,
 
   output [2:0]      cnt0,
   output [2:0]      cnt1,
@@ -82,8 +88,8 @@ for (iencoder=0; iencoder<2; iencoder=iencoder+1) begin: encloop
 first8of1536 u_first8_a (
     .global_reset(global_reset),
     .clock4x(clock4x),
-    .vpfs (vpfs),
-    .cnts (cnts),
+    .vpfs_in (vpfs_in),
+    .cnts_in (cnts_in),
     .latch_in (latch),
     .latch_delay(iencoder*4'd4),
 

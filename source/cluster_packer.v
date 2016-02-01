@@ -184,8 +184,8 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
 
     .global_reset (global_reset),
 
-    .vpfs (vpfs),
-    .cnts (cnts),
+    .vpfs_in (vpfs),
+    .cnts_in (cnts),
 
     .adr0 (adr_encoder[0]),
     .adr1 (adr_encoder[1]),

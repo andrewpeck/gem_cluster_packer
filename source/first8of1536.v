@@ -7,8 +7,8 @@ module first8of1536 (
     input [3:0] latch_delay,
     input       latch_in,
 
-    input  [1536  -1:0] vpfs,
-    input  [1536*3-1:0] cnts,
+    input  [1536  -1:0] vpfs_in,
+    input  [1536*3-1:0] cnts_in,
 
     output reg [2:0]      cnt0,
     output reg [2:0]      cnt1,
@@ -38,13 +38,13 @@ module first8of1536 (
   wire   [0:0] cluster_found [1:0];
   wire   [2:0] cnt_enc [1:0];
 
-  (* KEEP = "TRUE" *)
-  (* shreg_extract = "no" *)
-  reg [1535:0] vpfs_in;
-  always @(posedge clock4x) begin
-    if   (global_reset) vpfs_in <= 1536'd0;
-    else                vpfs_in <= vpfs;
-  end
+  // (* KEEP = "TRUE" *)
+  // (* shreg_extract = "no" *)
+  // reg [1535:0] vpfs_in;
+  // always @(posedge clock4x) begin
+  //   if   (global_reset) vpfs_in <= 1536'd0;
+  //   else                vpfs_in <= vpfs;
+  // end
 
 //----------------------------------------------------------------------------------------------------------------------
 // latch_enable
@@ -92,7 +92,7 @@ module first8of1536 (
         .latch_delay   (latch_delay+ENCODER_LATENCY), // this delay should be tuned such that the delayed latch_en in the priority encoder causes
         .latch_in      (latch_in),
         .vpfs_in       (vpfs_truncated[768  *(ienc+1)-1:768  *ienc]),
-        .cnts_in       (cnts          [768*3*(ienc+1)-1:768*3*ienc]),
+        .cnts_in       (cnts_in       [768*3*(ienc+1)-1:768*3*ienc]),
         .cnt           (cnt_enc[ienc]),       // OUT 11-bit counts    of first found cluster
         .adr           (adr_enc[ienc]),       // OUT 11-bit addresses of first found cluster
         .cluster_found (cluster_found[ienc])
