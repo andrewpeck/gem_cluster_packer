@@ -37,23 +37,23 @@ module merge16 (
 
     input [15:0] vpfs,
 
-    output reg [MXADRBITS-1:0] adr0,
-    output reg [MXADRBITS-1:0] adr1,
-    output reg [MXADRBITS-1:0] adr2,
-    output reg [MXADRBITS-1:0] adr3,
-    output reg [MXADRBITS-1:0] adr4,
-    output reg [MXADRBITS-1:0] adr5,
-    output reg [MXADRBITS-1:0] adr6,
-    output reg [MXADRBITS-1:0] adr7,
+    output [MXADRBITS-1:0] adr0,
+    output [MXADRBITS-1:0] adr1,
+    output [MXADRBITS-1:0] adr2,
+    output [MXADRBITS-1:0] adr3,
+    output [MXADRBITS-1:0] adr4,
+    output [MXADRBITS-1:0] adr5,
+    output [MXADRBITS-1:0] adr6,
+    output [MXADRBITS-1:0] adr7,
 
-    output reg [MXCNTBITS-1:0] cnt0,
-    output reg [MXCNTBITS-1:0] cnt1,
-    output reg [MXCNTBITS-1:0] cnt2,
-    output reg [MXCNTBITS-1:0] cnt3,
-    output reg [MXCNTBITS-1:0] cnt4,
-    output reg [MXCNTBITS-1:0] cnt5,
-    output reg [MXCNTBITS-1:0] cnt6,
-    output reg [MXCNTBITS-1:0] cnt7
+    output [MXCNTBITS-1:0] cnt0,
+    output [MXCNTBITS-1:0] cnt1,
+    output [MXCNTBITS-1:0] cnt2,
+    output [MXCNTBITS-1:0] cnt3,
+    output [MXCNTBITS-1:0] cnt4,
+    output [MXCNTBITS-1:0] cnt5,
+    output [MXCNTBITS-1:0] cnt6,
+    output [MXCNTBITS-1:0] cnt7
 );
 
 parameter MXADRBITS=11;
@@ -129,46 +129,44 @@ parameter MXCNTBITS=3;
     // stage 1: sort fours (4,8), (5,9), (6,10), (7,11)
     //------------------------------------------------------------------------------------------------------------------
 
-    wire [2:0]           cnt_s1 [15:0];
-    wire [MXADRBITS-1:0] adr_s1 [15:0];
+    reg [2:0]           cnt_s1 [15:0];
+    reg [MXADRBITS-1:0] adr_s1 [15:0];
 
-    //always @(posedge clock4x) begin
-    assign {adr_s1[0],  cnt_s1[0]} = {adr_s0[0], cnt_s0[0]};
-    assign {adr_s1[1],  cnt_s1[1]} = {adr_s0[1], cnt_s0[1]};
-    assign {adr_s1[2],  cnt_s1[2]} = {adr_s0[2], cnt_s0[2]};
-    assign {adr_s1[3],  cnt_s1[3]} = {adr_s0[3], cnt_s0[3]};
+    always @(posedge clock4x) begin
+           {adr_s1[0],  cnt_s1[0]} <= {adr_s0[0], cnt_s0[0]};
+           {adr_s1[1],  cnt_s1[1]} <= {adr_s0[1], cnt_s0[1]};
+           {adr_s1[2],  cnt_s1[2]} <= {adr_s0[2], cnt_s0[2]};
+           {adr_s1[3],  cnt_s1[3]} <= {adr_s0[3], cnt_s0[3]};
 
-    assign {{adr_s1[4],  cnt_s1[4]},  {adr_s1[8],   cnt_s1[8]}}  = adr_s0[4]  < adr_s0[8]  ? {{adr_s0[4], cnt_s0[4]}, {adr_s0[8],  cnt_s0[8]}}  : {{adr_s0[8],   cnt_s0[8]},  {adr_s0[4], cnt_s0[4]}};
-    assign {{adr_s1[5],  cnt_s1[5]},  {adr_s1[9],   cnt_s1[9]}}  = adr_s0[5]  < adr_s0[9]  ? {{adr_s0[5], cnt_s0[5]}, {adr_s0[9],  cnt_s0[9]}}  : {{adr_s0[9],   cnt_s0[9]},  {adr_s0[5], cnt_s0[5]}};
-    assign {{adr_s1[6],  cnt_s1[6]},  {adr_s1[10],  cnt_s1[10]}} = adr_s0[6]  < adr_s0[10] ? {{adr_s0[6], cnt_s0[6]}, {adr_s0[10], cnt_s0[10]}} : {{adr_s0[10],  cnt_s0[10]}, {adr_s0[6], cnt_s0[6]}};
-    assign {{adr_s1[7],  cnt_s1[7]},  {adr_s1[11],  cnt_s1[11]}} = adr_s0[7]  < adr_s0[11] ? {{adr_s0[7], cnt_s0[7]}, {adr_s0[11], cnt_s0[11]}} : {{adr_s0[11],  cnt_s0[11]}, {adr_s0[7], cnt_s0[7]}};
+           {{adr_s1[4],  cnt_s1[4]},  {adr_s1[8],   cnt_s1[8]}}  <= adr_s0[4]  < adr_s0[8]  ? {{adr_s0[4], cnt_s0[4]}, {adr_s0[8],  cnt_s0[8]}}  : {{adr_s0[8],   cnt_s0[8]},  {adr_s0[4], cnt_s0[4]}};
+           {{adr_s1[5],  cnt_s1[5]},  {adr_s1[9],   cnt_s1[9]}}  <= adr_s0[5]  < adr_s0[9]  ? {{adr_s0[5], cnt_s0[5]}, {adr_s0[9],  cnt_s0[9]}}  : {{adr_s0[9],   cnt_s0[9]},  {adr_s0[5], cnt_s0[5]}};
+           {{adr_s1[6],  cnt_s1[6]},  {adr_s1[10],  cnt_s1[10]}} <= adr_s0[6]  < adr_s0[10] ? {{adr_s0[6], cnt_s0[6]}, {adr_s0[10], cnt_s0[10]}} : {{adr_s0[10],  cnt_s0[10]}, {adr_s0[6], cnt_s0[6]}};
+           {{adr_s1[7],  cnt_s1[7]},  {adr_s1[11],  cnt_s1[11]}} <= adr_s0[7]  < adr_s0[11] ? {{adr_s0[7], cnt_s0[7]}, {adr_s0[11], cnt_s0[11]}} : {{adr_s0[11],  cnt_s0[11]}, {adr_s0[7], cnt_s0[7]}};
 
-    assign {adr_s1[12],  cnt_s1[12]} = {adr_s0[12], cnt_s0[12]};
-    assign {adr_s1[13],  cnt_s1[13]} = {adr_s0[13], cnt_s0[13]};
-    assign {adr_s1[14],  cnt_s1[14]} = {adr_s0[14], cnt_s0[14]};
-    assign {adr_s1[15],  cnt_s1[15]} = {adr_s0[15], cnt_s0[15]};
-    //end
+           {adr_s1[12],  cnt_s1[12]} <= {adr_s0[12], cnt_s0[12]};
+           {adr_s1[13],  cnt_s1[13]} <= {adr_s0[13], cnt_s0[13]};
+           {adr_s1[14],  cnt_s1[14]} <= {adr_s0[14], cnt_s0[14]};
+           {adr_s1[15],  cnt_s1[15]} <= {adr_s0[15], cnt_s0[15]};
+    end
 
     // stage 2: sort twos (2,4), (3,5), (6,8), (7,9)
     //------------------------------------------------------------------------------------------------------------------
 
-    reg [2:0]           cnt_s2 [15:0];
-    reg [MXADRBITS-1:0] adr_s2 [15:0];
+    wire [2:0]           cnt_s2 [15:0];
+    wire [MXADRBITS-1:0] adr_s2 [15:0];
 
-    always @(posedge clock4x) begin
-    {adr_s2[0],  cnt_s2[0]} <= {adr_s1[0], cnt_s1[0]};
-    {adr_s2[1],  cnt_s2[1]} <= {adr_s1[1], cnt_s1[1]};
+    assign {adr_s2[0],  cnt_s2[0]} = {adr_s1[0], cnt_s1[0]};
+    assign {adr_s2[1],  cnt_s2[1]} = {adr_s1[1], cnt_s1[1]};
 
-    {{adr_s2[2],  cnt_s2[2]},  {adr_s2[4],  cnt_s2[4]}}  <= adr_s1[2]  < adr_s1[4]  ? {{adr_s1[2],  cnt_s1[2]},  {adr_s1[4],  cnt_s1[4]}}  : {{adr_s1[4],  cnt_s1[4]},  {adr_s1[2],  cnt_s1[2]}};
-    {{adr_s2[3],  cnt_s2[3]},  {adr_s2[5],  cnt_s2[5]}}  <= adr_s1[3]  < adr_s1[5]  ? {{adr_s1[3],  cnt_s1[3]},  {adr_s1[5],  cnt_s1[5]}}  : {{adr_s1[5],  cnt_s1[5]},  {adr_s1[3],  cnt_s1[3]}};
-    {{adr_s2[6],  cnt_s2[6]},  {adr_s2[8],  cnt_s2[8]}}  <= adr_s1[6]  < adr_s1[8]  ? {{adr_s1[6],  cnt_s1[6]},  {adr_s1[8],  cnt_s1[8]}}  : {{adr_s1[8],  cnt_s1[8]},  {adr_s1[6],  cnt_s1[6]}};
-    {{adr_s2[7],  cnt_s2[7]},  {adr_s2[9],  cnt_s2[9]}}  <= adr_s1[7]  < adr_s1[9]  ? {{adr_s1[7],  cnt_s1[7]},  {adr_s1[9],  cnt_s1[9]}}  : {{adr_s1[9],  cnt_s1[9]},  {adr_s1[7],  cnt_s1[7]}};
-    {{adr_s2[10], cnt_s2[10]}, {adr_s2[12], cnt_s2[12]}} <= adr_s1[10] < adr_s1[12] ? {{adr_s1[10], cnt_s1[10]}, {adr_s1[12], cnt_s1[12]}} : {{adr_s1[12], cnt_s1[12]}, {adr_s1[10], cnt_s1[10]}};
-    {{adr_s2[11], cnt_s2[11]}, {adr_s2[13], cnt_s2[13]}} <= adr_s1[11] < adr_s1[13] ? {{adr_s1[11], cnt_s1[11]}, {adr_s1[13], cnt_s1[13]}} : {{adr_s1[13], cnt_s1[13]}, {adr_s1[11], cnt_s1[11]}};
+    assign {{adr_s2[2],  cnt_s2[2]},  {adr_s2[4],  cnt_s2[4]}}  = adr_s1[2]  < adr_s1[4]  ? {{adr_s1[2],  cnt_s1[2]},  {adr_s1[4],  cnt_s1[4]}}  : {{adr_s1[4],  cnt_s1[4]},  {adr_s1[2],  cnt_s1[2]}};
+    assign {{adr_s2[3],  cnt_s2[3]},  {adr_s2[5],  cnt_s2[5]}}  = adr_s1[3]  < adr_s1[5]  ? {{adr_s1[3],  cnt_s1[3]},  {adr_s1[5],  cnt_s1[5]}}  : {{adr_s1[5],  cnt_s1[5]},  {adr_s1[3],  cnt_s1[3]}};
+    assign {{adr_s2[6],  cnt_s2[6]},  {adr_s2[8],  cnt_s2[8]}}  = adr_s1[6]  < adr_s1[8]  ? {{adr_s1[6],  cnt_s1[6]},  {adr_s1[8],  cnt_s1[8]}}  : {{adr_s1[8],  cnt_s1[8]},  {adr_s1[6],  cnt_s1[6]}};
+    assign {{adr_s2[7],  cnt_s2[7]},  {adr_s2[9],  cnt_s2[9]}}  = adr_s1[7]  < adr_s1[9]  ? {{adr_s1[7],  cnt_s1[7]},  {adr_s1[9],  cnt_s1[9]}}  : {{adr_s1[9],  cnt_s1[9]},  {adr_s1[7],  cnt_s1[7]}};
+    assign {{adr_s2[10], cnt_s2[10]}, {adr_s2[12], cnt_s2[12]}} = adr_s1[10] < adr_s1[12] ? {{adr_s1[10], cnt_s1[10]}, {adr_s1[12], cnt_s1[12]}} : {{adr_s1[12], cnt_s1[12]}, {adr_s1[10], cnt_s1[10]}};
+    assign {{adr_s2[11], cnt_s2[11]}, {adr_s2[13], cnt_s2[13]}} = adr_s1[11] < adr_s1[13] ? {{adr_s1[11], cnt_s1[11]}, {adr_s1[13], cnt_s1[13]}} : {{adr_s1[13], cnt_s1[13]}, {adr_s1[11], cnt_s1[11]}};
 
-    {adr_s2[14],  cnt_s2[14]} <= {adr_s1[14], cnt_s1[14]};
-    {adr_s2[15],  cnt_s2[15]} <= {adr_s1[15], cnt_s1[15]};
-    end
+    assign {adr_s2[14],  cnt_s2[14]} = {adr_s1[14], cnt_s1[14]};
+    assign {adr_s2[15],  cnt_s2[15]} = {adr_s1[15], cnt_s1[15]};
 
     // stage 3: swap odd pairs
     //------------------------------------------------------------------------------------------------------------------
@@ -194,25 +192,23 @@ parameter MXCNTBITS=3;
 // Latch Results for Output
 //----------------------------------------------------------------------------------------------------------------------
 
-    always @(posedge clock4x) begin
-        adr0 <= adr_s3[0];
-        adr1 <= adr_s3[1];
-        adr2 <= adr_s3[2];
-        adr3 <= adr_s3[3];
-        adr4 <= adr_s3[4];
-        adr5 <= adr_s3[5];
-        adr6 <= adr_s3[6];
-        adr7 <= adr_s3[7];
+    assign adr0 = adr_s3[0];
+    assign adr1 = adr_s3[1];
+    assign adr2 = adr_s3[2];
+    assign adr3 = adr_s3[3];
+    assign adr4 = adr_s3[4];
+    assign adr5 = adr_s3[5];
+    assign adr6 = adr_s3[6];
+    assign adr7 = adr_s3[7];
 
-        cnt0 <= cnt_s3[0];
-        cnt1 <= cnt_s3[1];
-        cnt2 <= cnt_s3[2];
-        cnt3 <= cnt_s3[3];
-        cnt4 <= cnt_s3[4];
-        cnt5 <= cnt_s3[5];
-        cnt6 <= cnt_s3[6];
-        cnt7 <= cnt_s3[7];
-    end
+    assign cnt0 = cnt_s3[0];
+    assign cnt1 = cnt_s3[1];
+    assign cnt2 = cnt_s3[2];
+    assign cnt3 = cnt_s3[3];
+    assign cnt4 = cnt_s3[4];
+    assign cnt5 = cnt_s3[5];
+    assign cnt6 = cnt_s3[6];
+    assign cnt7 = cnt_s3[7];
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule
