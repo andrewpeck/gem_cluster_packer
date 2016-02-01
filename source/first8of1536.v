@@ -51,8 +51,8 @@ module first8of1536 (
 //----------------------------------------------------------------------------------------------------------------------
 
   parameter [3:0] TRUNCATE_LATENCY = 0;
-  parameter [3:0]  ENCODER_LATENCY = 2;
-  parameter [3:0]    TOTAL_LATENCY = 13;
+  parameter [3:0]  ENCODER_LATENCY = 1;
+  parameter [3:0]    TOTAL_LATENCY = 10;
 
   (* max_fanout = 100 *) reg latch_en=0;
   wire [3:0] delay = latch_delay + TOTAL_LATENCY;
@@ -127,7 +127,7 @@ for (iclust=0; iclust<8; iclust=iclust+1) begin: clust_loop
 end
 endgenerate
 
-merge16 u_8of16 (
+merge16 u_merge16 (
     .clock4x(clock4x),
 
     .vpfs(vpf_s1),

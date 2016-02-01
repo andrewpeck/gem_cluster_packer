@@ -49,7 +49,7 @@ always @(posedge clock4x) begin
   latch <= (phase==3'd0);
 end
 
-parameter [3:0] mux_sel_delay=3;
+parameter [3:0] mux_sel_delay=0;
 (* max_fanout = 100 *) reg mux_sel;
 SRL16E u_mux_seldly (.CLK(clock4x),.CE(1'b1),.D(phase[2]),.A0(mux_sel_delay[0]),.A1(mux_sel_delay[1]),.A2(mux_sel_delay[2]),.A3(mux_sel_delay[3]),.Q(mux_sel_dly));
 always @(posedge clock4x) mux_sel <= (mux_sel_dly);
