@@ -14,29 +14,20 @@ module priority768 (
   output cluster_found,
 
   output  [10:0] adr,
-  output  [2:0]  cnt
+  output   [2:0] cnt
 );
 
 parameter MXPADS = 768;
-
-//     //----------------------------------------------------------------------------------------------------------------------
-//     // reset
-//     //----------------------------------------------------------------------------------------------------------------------
-//
-//     SRL16E #(.INIT(16'hffff)) u_reset (.CLK(clock),.CE(1'b1),.D(global_reset),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(reset_dly));
-//     reg reset=1;
-//     always @(posedge clock) reset <= reset_dly;
 
 //----------------------------------------------------------------------------------------------------------------------
 // latch_enable
 //----------------------------------------------------------------------------------------------------------------------
 
-(* max_fanout = 100 *) reg latch_en=0;
-wire [3:0] delay = (latch_delay-1'b1);
-SRL16E u_latchdly (.CLK(clock),.CE(1'b1),.D(latch_in),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(latch_dly));
-always @(posedge clock) begin
-  latch_en <= (latch_delay==0) ? latch_in : latch_dly;
-end
+reg latch_en=0;
+wire [3:0] latch_delay_offs = latch_delay - 1'b1;
+SRL16E u_latchdly (.CLK(clock),.CE(1'b1),.D(latch_in),.A0(latch_delay_offs[0]),.A1(latch_delay_offs[1]),.A2(latch_delay_offs[2]),.A3(latch_delay_offs[3]),.Q(latch_dly));
+always @(posedge clock)
+  latch_en <= (latch_delay==1'b0) ? (latch_in) : (latch_dly);
 
 //----------------------------------------------------------------------------------------------------------------------
 //
