@@ -1,7 +1,23 @@
-`timescale 1ns / 100 ps
-
 //----------------------------------------------------------------------------------------------------------------------
+// cluster.packer.v
+//----------------------------------------------------------------------------------------------------------------------
+`timescale 1ns / 100 ps
+//----------------------------------------------------------------------------------------------------------------------
+// clock 0: generate a cluster size count for each pad; generate cluster primary flags (vpfs)
+// clock 1: vpfs and counts are routed through logic, and latched locally in the cluster_truncator and priority768 modules
 //
+//           cluster_truncator           |  priority encoder
+//----------------------------------------------------------------------------------------------------------------------
+// clock 2:  (n-1) truncated clusters
+// clock 3:  (n-2) truncated clusters    ;  latch 1st cluster result
+// clock 4:  (n-3) truncated clusters    ;  latch 2nd cluster result
+// clock 7:  (n-4) truncated clusters    ;  latch 3rd cluster result
+// clock 8:  (n-5) truncated clusters    ;  latch 4th cluster result
+// clock 9:  (n-6) truncated clusters    ;  latch 5th cluster result
+// clock 10: (n-7) truncated clusters    ;  latch 6th cluster result
+// clock 11:                             ;  latch 7th cluster result
+// clock 12: merge16 result stage 1
+// clock 13: merge16 result stage 2 returns addresses/counts of first 8 clusters
 //----------------------------------------------------------------------------------------------------------------------
 
 //synthesis attribute ALLCLOCKNETS of cluster_packer is "240MHz"
@@ -164,17 +180,6 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
 //----------------------------------------------------------------------------------------------------------------------
 // clock 3-12: priority encoding
 //----------------------------------------------------------------------------------------------------------------------
-  // clock 3:                latch local copies at first8 priority encoders & cluster truncators
-  // clock 4:  produce (n-1) truncated clusters
-  // clock 5:  produce (n-2) truncated clusters    ;  latch 1st cluster result
-  // clock 6:  produce (n-3) truncated clusters    ;  latch 2nd cluster result
-  // clock 7:  produce (n-4) truncated clusters    ;  latch 3rd cluster result
-  // clock 8:  produce (n-5) truncated clusters    ;  latch 4th cluster result
-  // clock 9:  produce (n-6) truncated clusters    ;  latch 5th cluster result
-  // clock 10: produce (n-7) truncated clusters    ;  latch 6th cluster result
-  // clock 11: produce (n-8) truncated clusters    ;  latch 7th cluster result
-  // clock 12:                                     ;  latch clusters (1-8)
-  //--------------------------------------------------------------------------------------------------------------------
 
   wire [MXADRBITS-1:0] adr_encoder [MXCLUSTERS-1:0];
   wire [MXCNTBITS-1:0] cnt_encoder [MXCLUSTERS-1:0];
