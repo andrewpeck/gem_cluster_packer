@@ -60,8 +60,10 @@ parameter SEGSIZE = 768/MXSEGS;
 
 //(* max_fanout = 100 *)
 reg latch_en=0;
-SRL16E u_latchdly (.CLK(clock),.CE(1'b1),.D(latch_in),.A0(latch_delay[0]),.A1(latch_delay[1]),.A2(latch_delay[2]),.A3(latch_delay[3]),.Q(latch_dly));
-always @(posedge clock) latch_en <= (latch_dly);
+wire [3:0] latch_delay_offs = latch_delay - 1'b1;
+SRL16E u_latchdly (.CLK(clock),.CE(1'b1),.D(latch_in),.A0(latch_delay_offs[0]),.A1(latch_delay_offs[1]),.A2(latch_delay_offs[2]),.A3(latch_delay_offs[3]),.Q(latch_dly));
+always @(posedge clock)
+  latch_en <= (latch_delay==1'b0) ? (latch_in) : (latch_dly);
 
 wire [SEGSIZE-1:0] segment           [MXSEGS-1:0];
 wire [SEGSIZE-1:0] segment_copy      [MXSEGS-1:0];
