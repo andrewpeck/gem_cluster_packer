@@ -33,16 +33,18 @@ always @(posedge clock)
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-  (* KEEP = "TRUE" *)
-  (* shreg_extract = "no" *)
+  // (* KEEP = "TRUE" *)
+  // (* shreg_extract = "no" *)
+
   reg [2:0] cnts [MXPADS-1:0];
   genvar ipad;
   generate
   for (ipad=0; ipad<MXPADS; ipad=ipad+1) begin:padloop
-    always @(posedge clock)
-      if (latch_en) cnts [ipad] <= cnts_in [ipad*3+2:ipad*3];
+      always @(posedge clock)
+        if (latch_en) cnts[ipad] <= cnts_in [ipad*3+2:ipad*3];
   end
   endgenerate
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // Parameters and Interconnects
@@ -82,7 +84,7 @@ wire [2:0] cnt_s6 [  5:0];
 wire [2:0] cnt_s7 [  2:0];
 reg  [2:0] cnt_s8 [  0:0];
 
-// Stage 0 : Best 384 of 768
+// Stage 0 : 384 of 768
 genvar ihit;
 generate
 for (ihit=0; ihit<384; ihit=ihit+1) begin: s0
@@ -91,21 +93,21 @@ end
 endgenerate
 
 
-// Stage 1: Best 192 of 384
+// Stage 1: 192 of 384
 generate
 for (ihit=0; ihit<192; ihit=ihit+1) begin: s1
   assign   {vpf_s1[ihit], cnt_s1[ihit], key_s1[ihit]} = vpf_s0[ihit*2] ?  {vpf_s0[ihit*2  ], cnt_s0[ihit*2], {1'b0,key_s0[ihit*2  ]}} : {vpf_s0[ihit*2+1], cnt_s0[ihit*2+1], {1'b1,key_s0[ihit*2+1]}} ;
 end
 endgenerate
 
-// Stage 2: Best 192 of 384
+// Stage 2: 192 of 384
 generate
 for (ihit=0; ihit<96; ihit=ihit+1) begin: s2
   assign {vpf_s2[ihit], cnt_s2[ihit], key_s2[ihit]} = vpf_s1[ihit*2] ?  {vpf_s1[ihit*2  ], cnt_s1[ihit*2], {1'b0,key_s1[ihit*2  ]}} : {vpf_s1[ihit*2+1], cnt_s1[ihit*2+1], {1'b1,key_s1[ihit*2+1]}} ;
 end
 endgenerate
 
-// Stage 3: Best 96 of 192
+// Stage 3: 96 of 192
 generate
 for (ihit=0; ihit<48; ihit=ihit+1) begin: s3
   always @(posedge clock)
@@ -113,35 +115,35 @@ for (ihit=0; ihit<48; ihit=ihit+1) begin: s3
 end
 endgenerate
 
-// Stage 4: Best 48 of 96
+// Stage 4: 48 of 96
 generate
 for (ihit=0; ihit<24; ihit=ihit+1) begin: s4
   assign {vpf_s4[ihit], cnt_s4[ihit], key_s4[ihit]} = vpf_s3[ihit*2] ?  {vpf_s3[ihit*2  ], cnt_s3[ihit*2], {1'b0,key_s3[ihit*2  ]}} : {vpf_s3[ihit*2+1], cnt_s3[ihit*2+1], {1'b1,key_s3[ihit*2+1]}} ;
 end
 endgenerate
 
-// stage 5: best 24 of 48
+// stage 5: 24 of 48
 generate
 for (ihit=0; ihit<12; ihit=ihit+1) begin: s5
   assign {vpf_s5[ihit], cnt_s5[ihit], key_s5[ihit]} = vpf_s4[ihit*2] ?  {vpf_s4[ihit*2  ], cnt_s4[ihit*2], {1'b0,key_s4[ihit*2  ]}} : {vpf_s4[ihit*2+1], cnt_s4[ihit*2+1], {1'b1,key_s4[ihit*2+1]}} ;
 end
 endgenerate
 
-// stage 6: best 12 of 24
+// stage 6: 12 of 24
 generate
 for (ihit=0; ihit<6; ihit=ihit+1) begin: s6
   assign   {vpf_s6[ihit], cnt_s6[ihit], key_s6[ihit]} = vpf_s5[ihit*2] ?  {vpf_s5[ihit*2  ], cnt_s5[ihit*2], {1'b0,key_s5[ihit*2  ]}} : {vpf_s5[ihit*2+1], cnt_s5[ihit*2+1], {1'b1,key_s5[ihit*2+1]}} ;
 end
 endgenerate
 
-// stage 7: best 6 of 12
+// stage 7: 6 of 12
 generate
 for (ihit=0; ihit<3; ihit=ihit+1) begin: s7
   assign {vpf_s7[ihit], cnt_s7[ihit], key_s7[ihit]} = vpf_s6[ihit*2] ?  {vpf_s6[ihit*2  ], cnt_s6[ihit*2], {1'b0,key_s6[ihit*2  ]}} : {vpf_s6[ihit*2+1], cnt_s6[ihit*2+1], {1'b1,key_s6[ihit*2+1]}} ;
 end
 endgenerate
 
-// Stage 6: Best 1 of 3 Parallel Encoder
+// Stage 6: 1 of 3 Parallel Encoder
 always @(*) begin
   if      (vpf_s7[0]) {vpf_s8[0], cnt_s8[0], key_s8[0]} = {vpf_s7[0], cnt_s7[0], {2'b00, key_s7[0]}};
   else if (vpf_s7[1]) {vpf_s8[0], cnt_s8[0], key_s8[0]} = {vpf_s7[1], cnt_s7[1], {2'b01, key_s7[1]}};
