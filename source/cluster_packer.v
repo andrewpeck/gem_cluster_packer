@@ -52,14 +52,14 @@ module cluster_packer (
     input  [MXSBITS-1:0] vfat22,
     input  [MXSBITS-1:0] vfat23,
 
-    output [MXCLSTBITS-1:0] cluster0,
-    output [MXCLSTBITS-1:0] cluster1,
-    output [MXCLSTBITS-1:0] cluster2,
-    output [MXCLSTBITS-1:0] cluster3,
-    output [MXCLSTBITS-1:0] cluster4,
-    output [MXCLSTBITS-1:0] cluster5,
-    output [MXCLSTBITS-1:0] cluster6,
-    output [MXCLSTBITS-1:0] cluster7
+    output reg [MXCLSTBITS-1:0] cluster0,
+    output reg [MXCLSTBITS-1:0] cluster1,
+    output reg [MXCLSTBITS-1:0] cluster2,
+    output reg [MXCLSTBITS-1:0] cluster3,
+    output reg [MXCLSTBITS-1:0] cluster4,
+    output reg [MXCLSTBITS-1:0] cluster5,
+    output reg [MXCLSTBITS-1:0] cluster6,
+    output reg [MXCLSTBITS-1:0] cluster7,
 
     output overflow
 );
@@ -81,7 +81,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   // Startup -- keeps outputs off during powerup
   //---------------------------------------------
 
-  wire [3:0] powerup_dly = 4'd0;
+  wire [3:0] powerup_dly = 4'd12;
 
   reg powerup_ff  = 0;
   //srl16e_bbl #(1) u_startup (.clock(clock4x), .ce(!powerup), .adr(powerup_dly),  .d(1'b1), .q(powerup));
@@ -256,14 +256,16 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   endgenerate
 
 
-  assign cluster0 = cluster[0];
-  assign cluster1 = cluster[1];
-  assign cluster2 = cluster[2];
-  assign cluster3 = cluster[3];
-  assign cluster4 = cluster[4];
-  assign cluster5 = cluster[5];
-  assign cluster6 = cluster[6];
-  assign cluster7 = cluster[7];
+  always @(posedge clock4x) begin
+         cluster0 <= (reset) ? {3'd0,11'h7FE} : cluster[0];
+         cluster1 <= (reset) ? {3'd0,11'h7FE} : cluster[1];
+         cluster2 <= (reset) ? {3'd0,11'h7FE} : cluster[2];
+         cluster3 <= (reset) ? {3'd0,11'h7FE} : cluster[3];
+         cluster4 <= (reset) ? {3'd0,11'h7FE} : cluster[4];
+         cluster5 <= (reset) ? {3'd0,11'h7FE} : cluster[5];
+         cluster6 <= (reset) ? {3'd0,11'h7FE} : cluster[6];
+         cluster7 <= (reset) ? {3'd0,11'h7FE} : cluster[7];
+  end
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule
