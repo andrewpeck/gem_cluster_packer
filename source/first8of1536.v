@@ -51,7 +51,7 @@ module first8of1536 (
 //----------------------------------------------------------------------------------------------------------------------
 
   parameter [3:0] TRUNCATE_LATENCY = 0;
-  parameter [3:0]  ENCODER_LATENCY = 1;
+  parameter [3:0]  ENCODER_LATENCY = 0;
   parameter [3:0]    TOTAL_LATENCY = 10;
 
   (* max_fanout = 100 *) reg latch_en=0;
