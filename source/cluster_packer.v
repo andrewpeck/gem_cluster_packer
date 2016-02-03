@@ -60,6 +60,8 @@ module cluster_packer (
     output [MXCLSTBITS-1:0] cluster5,
     output [MXCLSTBITS-1:0] cluster6,
     output [MXCLSTBITS-1:0] cluster7
+
+    output overflow
 );
 
 parameter MXSBITS    = 64;         // S-bits per vfat
@@ -176,6 +178,32 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
     end // row loop
     end // key_loop
   endgenerate
+
+  // We count the number of cluster primaries. If it is greater than 8,
+  // generate an overflow flag. This can be used to change the fiber's frame
+  // separator to flag this to the receiving devices
+  wire [7:0] cluster_count;
+  count_clusters u_count_clusters (
+    .clock4x(clock4x),
+    .vpfs(vpfs),
+    .cnt   (cluster_count),
+    .overflow(overflow_out)
+  );
+  parameter [3:0] OVERFLOW_DELAY = 9;
+  SRL16E u_overflow_delay (
+    .CLK (clock4x),
+    .CE  (1'b1),
+    .D   (overflow_out),
+    .Q   (overflow_dly),
+    .A0  (OVERFLOW_DELAY[0]),
+    .A1 ( OVERFLOW_DELAY[1]),
+    .A2 ( OVERFLOW_DELAY[2]),
+    .A3 ( OVERFLOW_DELAY[3])
+  );
+
+  reg overflow;
+  always @(posedge clock4x)
+    overflow <= overflow_dly;
 
 //----------------------------------------------------------------------------------------------------------------------
 // clock 3-12: priority encoding

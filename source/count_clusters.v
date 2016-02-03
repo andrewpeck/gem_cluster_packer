@@ -3,7 +3,7 @@ module count_clusters (
 
     input  [MXPADS-1:0] vpfs,
 
-    output [MXCNTBITS-1:0] cnt,
+    output reg [7:0] cnt,
 
     output overflow
 );
@@ -38,12 +38,7 @@ endgenerate
 
 generate
 for (icnt=0; icnt<(32); icnt=icnt+1) begin: cnt_s4_loop
-  // if we have VFAT2, we only have 192 S-bits, so we can start the adder tree here.
-  `ifdef VFAT3
     assign cnt_s4[icnt] = cnt_s3[(icnt+1)*2-1] + cnt_s3[icnt*2];
-  `else
-    assign cnt_s4[icnt] = fast6count(vpfs[(icnt+1)*6-1:icnt*6]);
-  `endif
 end
 endgenerate
 
