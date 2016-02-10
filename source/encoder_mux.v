@@ -85,7 +85,7 @@ assign {cnt7,adr7} = mux_sel ? {vec_cnt7[0], vec_adr7[0]} : {vec_cnt7[1], vec_ad
 genvar iencoder;
 generate
 for (iencoder=0; iencoder<2; iencoder=iencoder+1) begin: encloop
-first8of1536 u_first8_a (
+first8of1536 u_first8 (
     .global_reset(global_reset),
     .clock4x(clock4x),
     .vpfs_in (vpfs_in),
