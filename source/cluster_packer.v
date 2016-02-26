@@ -1,3 +1,5 @@
+`define VFAT_V2
+
 //----------------------------------------------------------------------------------------------------------------------
 // cluster.packer.v
 //----------------------------------------------------------------------------------------------------------------------
@@ -64,6 +66,7 @@ module cluster_packer (
     output overflow
 );
 
+
 parameter MXSBITS    = 64;         // S-bits per vfat
 parameter MXKEYS     = 3*MXSBITS;  // S-bits per partition
 parameter MXPADS     = 24*MXSBITS; // S-bits per chamber
@@ -73,6 +76,10 @@ parameter MXADRBITS  = 11;         // Number of address bits per cluster
 parameter MXCLSTBITS = 14;         // Number of total   bits per cluster
 parameter MXOUTBITS  = 56;         // Number of total   bits per packet
 parameter MXCLUSTERS = 8;          // Number of clusters per bx
+
+`ifdef VFAT_V2 parameter [1535:0] VFAT_MASK = {8{8'b00000001}};
+`else          parameter [1535:0] VFAT_MASK = {8{8'b11111111}};
+`endif
 
 //----------------------------------------------------------------------------------------------------------------------
 // State machine power-up reset + global reset
@@ -123,14 +130,14 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   reg [MXKEYS-1:0] partition [7:0];
 
   always @(posedge clock4x) begin
-    partition[0] <= {vfat2,  vfat1,   vfat0};
-    partition[1] <= {vfat5,  vfat4,   vfat3};
-    partition[2] <= {vfat8,  vfat7,   vfat6};
-    partition[3] <= {vfat11, vfat10,  vfat9};
-    partition[4] <= {vfat14, vfat13,  vfat12};
-    partition[5] <= {vfat17, vfat16,  vfat15};
-    partition[6] <= {vfat20, vfat19,  vfat18};
-    partition[7] <= {vfat23, vfat22,  vfat21};
+    partition[0] <= {VFAT_MASK & vfat2,  VFAT_MASK & vfat1,   VFAT_MASK & vfat0};
+    partition[1] <= {VFAT_MASK & vfat5,  VFAT_MASK & vfat4,   VFAT_MASK & vfat3};
+    partition[2] <= {VFAT_MASK & vfat8,  VFAT_MASK & vfat7,   VFAT_MASK & vfat6};
+    partition[3] <= {VFAT_MASK & vfat11, VFAT_MASK & vfat10,  VFAT_MASK & vfat9};
+    partition[4] <= {VFAT_MASK & vfat14, VFAT_MASK & vfat13,  VFAT_MASK & vfat12};
+    partition[5] <= {VFAT_MASK & vfat17, VFAT_MASK & vfat16,  VFAT_MASK & vfat15};
+    partition[6] <= {VFAT_MASK & vfat20, VFAT_MASK & vfat19,  VFAT_MASK & vfat18};
+    partition[7] <= {VFAT_MASK & vfat23, VFAT_MASK & vfat22,  VFAT_MASK & vfat21};
   end
 
   // zero pad the partition to handle the edge cases for counting
@@ -151,6 +158,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   reg  [MXPADS  -1:0] vpfs;
   wire [MXPADS*3-1:0] cnts;
 
+
   genvar ikey;
   genvar irow;
   genvar ibit;
@@ -158,22 +166,35 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
     for (irow=0; irow<MXROWS; irow=irow+1) begin: cluster_count_rowloop
     for (ikey=0; ikey<MXKEYS; ikey=ikey+1) begin: cluster_count_keyloop
 
-      consecutive_count ucntseq (
-        .clock (clock4x),
-        .sbit  (partition_padded[irow][ikey+7:ikey+1]),
-        .count (cnts[(MXKEYS*irow*3)+(ikey+1)*3-1:(MXKEYS*irow*3)+ikey*3])
-      );
 
-      // first pad is always a cluster if it has an S-bit
-      // other pads are cluster if they:
-      //    (1) are preceded by a Zero (i.e. they start a cluster)
-      // or (2) are preceded by a Size=8 cluster (and cluster truncation is turned off)
-      //        if we have size > 16 cluster, the end will get cut off
-      always @(posedge clock4x) begin
-        if      (ikey==0) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
-        else if (ikey <9) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10;
-        else              vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10 || (!truncate_clusters && partition[irow][ikey-1:ikey-9]==9'b111111110) ;
-      end
+      `ifdef VFAT_V2
+
+        assign cnts[(MXKEYS*irow*3)+(ikey+1)*3-1:(MXKEYS*irow*3)+ikey*3] = 3'd7;
+
+        always @(posedge clock4x) begin
+          vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
+        end
+
+      `else
+
+        // first pad is always a cluster if it has an S-bit
+        // other pads are cluster if they:
+        //    (1) are preceded by a Zero (i.e. they start a cluster)
+        // or (2) are preceded by a Size=8 cluster (and cluster truncation is turned off)
+        //        if we have size > 16 cluster, the end will get cut off
+        always @(posedge clock4x) begin
+          if      (ikey==0) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
+          else if (ikey <9) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10;
+          else              vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10 || (!truncate_clusters && partition[irow][ikey-1:ikey-9]==9'b111111110) ;
+        end
+
+        consecutive_count ucntseq (
+          .clock (clock4x),
+          .sbit  (partition_padded[irow][ikey+7:ikey+1]),
+          .count (cnts[(MXKEYS*irow*3)+(ikey+1)*3-1:(MXKEYS*irow*3)+ikey*3])
+        );
+
+      `endif
 
     end // row loop
     end // key_loop
@@ -251,10 +272,9 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
       //  14 bit hit format encoding
       //   hit[10:0]  = pad
       //   hit[13:11] = n adjacent pads hit  up to 7
-      assign cluster[icluster] = {cnt_encoder[icluster], adr_encoder[icluster]};
+      assign cluster[icluster] = {cnt_encoder[icluster], adr_encoder[icluster] };
     end
   endgenerate
-
 
   always @(posedge clock4x) begin
          cluster0 <= (reset) ? {3'd0,11'h7FE} : cluster[0];

@@ -14,7 +14,8 @@ wire [2:0] cnt_s1 [255:0];
 wire [3:0] cnt_s2 [127:0];
 wire [4:0] cnt_s3  [63:0];
 wire [5:0] cnt_s4  [31:0];
-reg  [6:0] cnt_s5  [15:0];
+wire [6:0] cnt_s5  [15:0];
+reg  [7:0] cnt_s6  [ 7:0];
 
 genvar icnt;
 
@@ -44,14 +45,20 @@ endgenerate
 
 generate
 for (icnt=0; icnt<(16); icnt=icnt+1) begin: cnt_s5_loop
+    assign cnt_s5[icnt] = cnt_s4[(icnt+1)*2-1] + cnt_s4[icnt*2];
+end
+endgenerate
+
+generate
+for (icnt=0; icnt<(8); icnt=icnt+1) begin: cnt_s6_loop
   always @(posedge clock4x)
-    cnt_s5[icnt] <= cnt_s4[(icnt+1)*2-1] + cnt_s4[icnt*2];
+    cnt_s6[icnt] <= cnt_s5[(icnt+1)*2-1] + cnt_s5[icnt*2];
 end
 endgenerate
 
 always @(posedge clock4x) begin
-  cnt <=   (cnt_s5[0]  + cnt_s5[1]  + cnt_s5[2]  + cnt_s5[3]  + cnt_s5[4]  + cnt_s5[5]  + cnt_s5[6]  + cnt_s5[7]
-          + cnt_s5[8]  + cnt_s5[9]  + cnt_s5[10] + cnt_s5[11] + cnt_s5[12] + cnt_s5[13] + cnt_s5[14] + cnt_s5[15]);
+  cnt <=   cnt_s6[0]  + cnt_s6[1]  + cnt_s6[2]  + cnt_s6[3]  + cnt_s6[4]  + cnt_s6[5]  + cnt_s6[6]  + cnt_s6[7];
+          //+ cnt_s6[8]  + cnt_s6[9]  + cnt_s6[10] + cnt_s6[11] + cnt_s6[12] + cnt_s6[13] + cnt_s6[14] + cnt_s6[15]);
 end
 
 assign overflow = (cnt > 8);
