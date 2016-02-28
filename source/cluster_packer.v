@@ -75,8 +75,8 @@ parameter MXCLSTBITS = 14;         // Number of total   bits per cluster
 parameter MXOUTBITS  = 56;         // Number of total   bits per packet
 parameter MXCLUSTERS = 8;          // Number of clusters per bx
 
-`ifdef VFAT_V2 parameter [1535:0] VFAT_MASK = {8{8'b00000001}};
-`else          parameter [1535:0] VFAT_MASK = {8{8'b11111111}};
+`ifdef VFAT_V2 parameter [63:0] VFAT_MASK = {8{8'b00000001}};
+`else          parameter [63:0] VFAT_MASK = {8{8'b11111111}};
 `endif
 
 //----------------------------------------------------------------------------------------------------------------------
