@@ -3,103 +3,78 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="C:/Users/Andrew/Dropbox/CMS/GEM/cluster_packer/work/best1of192_tb_isim_beh1.wdb" id="1" type="auto">
+      <db_ref path="/home/andrew/Dropbox/CMS/GEM/cluster_packer/work/best1of192_tb_isim_beh1.wdb" id="1" type="auto">
          <top_modules>
             <top_module name="glbl" />
             <top_module name="tb_cluster_packer" />
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="14" />
+   <WVObjectSize size="5" />
    <wvobject fp_name="group22" type="group">
       <obj_property name="label">truncate</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /\encloop[1].u_truncate /latch_en" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">latch_en</obj_property>
-         <obj_property name="ObjectShortName">latch_en</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /\encloop[1].u_truncate /vpfs_in" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">vpfs_in[767:0]</obj_property>
-         <obj_property name="ObjectShortName">vpfs_in[767:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
    </wvobject>
    <wvobject fp_name="group25" type="group">
       <obj_property name="label">priority</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /\encloop[0].u_priority /latch_en" type="logic" db_ref_id="1">
-         <obj_property name="ElementShortName">latch_en</obj_property>
-         <obj_property name="ObjectShortName">latch_en</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /\encloop[0].u_priority /vpfs_in" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">vpfs_in[767:0]</obj_property>
-         <obj_property name="ObjectShortName">vpfs_in[767:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /\encloop[0].u_priority /cnts_in" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">cnts_in[2303:0]</obj_property>
-         <obj_property name="ObjectShortName">cnts_in[2303:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-   </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /adr_sr" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">adr_sr[1:0,87:0]</obj_property>
-      <obj_property name="ObjectShortName">adr_sr[1:0,87:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /latch_en" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">latch_en</obj_property>
-      <obj_property name="ObjectShortName">latch_en</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /u_merge16/adr0" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">adr0[10:0]</obj_property>
-      <obj_property name="ObjectShortName">adr0[10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /u_merge16/adr1" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">adr1[10:0]</obj_property>
-      <obj_property name="ObjectShortName">adr1[10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /u_merge16/adr2" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">adr2[10:0]</obj_property>
-      <obj_property name="ObjectShortName">adr2[10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /u_merge16/adr3" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">adr3[10:0]</obj_property>
-      <obj_property name="ObjectShortName">adr3[10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /u_merge16/adr4" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">adr4[10:0]</obj_property>
-      <obj_property name="ObjectShortName">adr4[10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /u_merge16/adr5" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">adr5[10:0]</obj_property>
-      <obj_property name="ObjectShortName">adr5[10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /u_merge16/adr6" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">adr6[10:0]</obj_property>
-      <obj_property name="ObjectShortName">adr6[10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first8_a /u_merge16/adr7" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">adr7[10:0]</obj_property>
-      <obj_property name="ObjectShortName">adr7[10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/cluster_count" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">cluster_count[7:0]</obj_property>
-      <obj_property name="ObjectShortName">cluster_count[7:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/overflow" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">overflow</obj_property>
       <obj_property name="ObjectShortName">overflow</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cluster_packer/cnt" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">cnt[7:0,2:0]</obj_property>
+      <obj_property name="ObjectShortName">cnt[7:0,2:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cluster_packer/adr" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">adr[7:0,10:0]</obj_property>
+      <obj_property name="ObjectShortName">adr[7:0,10:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <wvobject fp_name="/tb_cluster_packer/adr[7]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[7,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr[7,10:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/adr[6]" type="array" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="ElementShortName">[6,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr[6,10:0]</obj_property>
+         <obj_property name="label">[6,10:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/adr[5]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[5,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr[5,10:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/adr[4]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[4,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr[4,10:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/adr[3]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[3,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr[3,10:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/adr[2]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[2,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr[2,10:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/adr[1]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[1,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr[1,10:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/adr[0]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[0,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr[0,10:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
    </wvobject>
 </wave_config>

@@ -1,5 +1,3 @@
-`define VFAT_V2
-
 module cluster_packer_vfat2 (
     input  clock4x,
     input  global_reset,
@@ -71,20 +69,20 @@ assign vfat2_sbits[23]  =  vfat23;
 
 wire [63:0] vfat3_sbits [23:0]; 
 
-genvar ifat2bit;
+genvar ibit;
 genvar ivfat;
 generate
-  for (ivfat=0; ivfat<23; ivfat=ivfat+1) begin: vfat_loop
-  for (ifat2bit=0; ifat2bit<7; ifat2bit=ifat2bit+1) begin: bit_loop
-    assign  vfat3_sbits[ivfat][(ifat2bit+1)*8-1:ifat2bit*8] = {8{fat2_bits[ifat2bit]}};
-  end
+  for (ivfat=0; ivfat<24; ivfat=ivfat+1) begin: vfat_loop
+    for (ibit=0; ibit<8; ibit=ibit+1) begin: bit_loop
+      assign  vfat3_sbits[ivfat][(ibit+1)*8-1:ibit*8] = {8{vfat2_sbits[ivfat][ibit]}};
+    end
   end
 endgenerate
 
 cluster_packer u_cluster_packer (
     .clock4x(clock4x),
 
-    .global_reset (reset),
+    .global_reset (global_reset),
 
     .vfat0  (vfat3_sbits[0]),
     .vfat1  (vfat3_sbits[1]),
@@ -113,12 +111,16 @@ cluster_packer u_cluster_packer (
 
     .truncate_clusters (truncate_clusters),
 
-    .cluster0 (cluster[0]),
-    .cluster1 (cluster[1]),
-    .cluster2 (cluster[2]),
-    .cluster3 (cluster[3]),
-    .cluster4 (cluster[4]),
-    .cluster5 (cluster[5]),
-    .cluster6 (cluster[6]),
-    .cluster7 (cluster[7])
+    .cluster0 (cluster0),
+    .cluster1 (cluster1),
+    .cluster2 (cluster2),
+    .cluster3 (cluster3),
+    .cluster4 (cluster4),
+    .cluster5 (cluster5),
+    .cluster6 (cluster6),
+    .cluster7 (cluster7), 
+
+    .overflow (overflow)
 );
+
+endmodule

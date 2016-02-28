@@ -64,6 +64,7 @@ module cluster_packer (
     output overflow
 );
 
+`include "hardware_version.v"
 
 parameter MXSBITS    = 64;         // S-bits per vfat
 parameter MXKEYS     = 3*MXSBITS;  // S-bits per partition
@@ -223,9 +224,10 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
     .A3 ( OVERFLOW_DELAY[3])
   );
 
-  reg overflow;
+  reg overflow_ff = 0; 
   always @(posedge clock4x)
-    overflow <= overflow_dly;
+    overflow_ff <= (reset) ? 0 : overflow_dly;
+  assign overflow = overflow_ff;
 
 //----------------------------------------------------------------------------------------------------------------------
 // clock 3-12: priority encoding
