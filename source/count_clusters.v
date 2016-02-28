@@ -1,14 +1,12 @@
 module count_clusters (
     input clock4x,
 
-    input  [MXPADS-1:0] vpfs,
+    input  [1535:0] vpfs,
 
     output reg [7:0] cnt,
 
     output overflow
 );
-
-`include "global_definitions.v"
 
 wire [2:0] cnt_s1 [255:0];
 wire [3:0] cnt_s2 [127:0];
