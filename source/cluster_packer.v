@@ -167,30 +167,30 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
 
       `ifdef VFAT_V2
 
-        assign cnts[(MXKEYS*irow*3)+(ikey+1)*3-1:(MXKEYS*irow*3)+ikey*3] = 3'd7;
+          assign cnts[(MXKEYS*irow*3)+(ikey+1)*3-1:(MXKEYS*irow*3)+ikey*3] = 3'd7;
 
-        always @(posedge clock4x) begin
-          vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
-        end
+          always @(posedge clock4x) begin
+            vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
+          end
 
       `else
 
-        // first pad is always a cluster if it has an S-bit
-        // other pads are cluster if they:
-        //    (1) are preceded by a Zero (i.e. they start a cluster)
-        // or (2) are preceded by a Size=8 cluster (and cluster truncation is turned off)
-        //        if we have size > 16 cluster, the end will get cut off
-        always @(posedge clock4x) begin
-          if      (ikey==0) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
-          else if (ikey <9) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10;
-          else              vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10 || (!truncate_clusters && partition[irow][ikey-1:ikey-9]==9'b111111110) ;
-        end
+          // first pad is always a cluster if it has an S-bit
+          // other pads are cluster if they:
+          //    (1) are preceded by a Zero (i.e. they start a cluster)
+          // or (2) are preceded by a Size=8 cluster (and cluster truncation is turned off)
+          //        if we have size > 16 cluster, the end will get cut off
+          always @(posedge clock4x) begin
+            if      (ikey==0) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
+            else if (ikey <9) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10;
+            else              vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10 || (!truncate_clusters && partition[irow][ikey:ikey-9]==10'b1111111110) ;
+          end
 
-        consecutive_count ucntseq (
-          .clock (clock4x),
-          .sbit  (partition_padded[irow][ikey+7:ikey+1]),
-          .count (cnts[(MXKEYS*irow*3)+(ikey+1)*3-1:(MXKEYS*irow*3)+ikey*3])
-        );
+          consecutive_count ucntseq (
+            .clock (clock4x),
+            .sbit  (partition_padded[irow][ikey+7:ikey+1]),
+            .count (cnts[(MXKEYS*irow*3)+(ikey+1)*3-1:(MXKEYS*irow*3)+ikey*3])
+          );
 
       `endif
 
@@ -208,6 +208,9 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
     .cnt   (cluster_count),
     .overflow(overflow_out)
   );
+
+
+  // the output of the overflow flag should be delayed to lineup with the outputs from the priority encoding modules 
   parameter [3:0] OVERFLOW_DELAY = 9;
   SRL16E u_overflow_delay (
     .CLK (clock4x),
