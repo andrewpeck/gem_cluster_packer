@@ -18,6 +18,7 @@ initial begin
     reset = 0;
 end
 
+`define vfat3
 `ifdef vfat3
   reg  [1535:0] sbits;
 
@@ -32,8 +33,7 @@ end
   //    #25   sbits=1536'h0;
   //
   //
-      #12.5 sbits = {1536'd0};
-      #25   sbits = {732'd0, 36'h0ff0ff0ff, 732'd0, 36'h0ff0ff0ff};
+      #12.5 sbits = {732'd0, 36'h0ff0ff0ff, 732'd0, 36'h0ff0ff0ff};
       #25   sbits = {732'd0, 36'hf0f0f0f0f, 732'd0, 36'h0f0f0f0f0};
       #25   sbits = {732'd0, 36'h555555555, 732'd0, 36'hAAAAAAAAA};
       #25   sbits = {732'd0, 36'hAAAAAAAAA, 732'd0, 36'h555555555};
