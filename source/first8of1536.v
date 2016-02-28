@@ -33,6 +33,14 @@ module first8of1536 (
 // Interconnects
 //----------------------------------------------------------------------------------------------------------------------
 
+  wire [2:0] cnts_unrolled [1535:0]; 
+  genvar ipad; 
+  generate
+    for (ipad=0; ipad<1536; ipad=ipad+1) begin:padloop
+      assign cnts_unrolled [ipad] = cnts_in [ipad*3+2:ipad*3];
+    end
+  endgenerate
+
   wire [1535:0] vpfs_truncated;
   wire   [10:0] adr_enc [1:0];
   wire   [0:0] cluster_found [1:0];
