@@ -74,12 +74,12 @@ genvar ivfat;
 generate
   for (ivfat=0; ivfat<24; ivfat=ivfat+1) begin: vfat_loop
     for (ibit=0; ibit<8; ibit=ibit+1) begin: bit_loop
-      assign  vfat3_sbits[ivfat][(ibit+1)*8-1:ibit*8] = {8{vfat2_sbits[ivfat][ibit]}};
+      assign  vfat3_sbits[ivfat][(ibit+1)*8-1:ibit*8] = {7'b0,vfat2_sbits[ivfat][ibit]};
     end
   end
 endgenerate
 
-cluster_packer u_cluster_packer (
+cluster_packer #(.VFAT_V2(1)) u_cluster_packer (
     .clock4x(clock4x),
 
     .global_reset (global_reset),
