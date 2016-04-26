@@ -9,9 +9,9 @@ module count_clusters (
 );
 
 wire [2:0] cnt_s1 [255:0];
-wire [3:0] cnt_s2 [127:0];
+reg  [3:0] cnt_s2 [127:0];
 wire [4:0] cnt_s3  [63:0];
-wire [5:0] cnt_s4  [31:0];
+reg  [5:0] cnt_s4  [31:0];
 wire [6:0] cnt_s5  [15:0];
 reg  [7:0] cnt_s6  [ 7:0];
 
@@ -25,7 +25,8 @@ endgenerate
 
 generate
 for (icnt=0; icnt<(128); icnt=icnt+1) begin: cnt_s2_loop
-  assign cnt_s2[icnt] = cnt_s1[(icnt+1)*2-1] + cnt_s1[icnt*2];
+  always @(posedge clock4x)
+      cnt_s2[icnt] <= cnt_s1[(icnt+1)*2-1] + cnt_s1[icnt*2];
 end
 endgenerate
 
@@ -37,7 +38,8 @@ endgenerate
 
 generate
 for (icnt=0; icnt<(32); icnt=icnt+1) begin: cnt_s4_loop
-    assign cnt_s4[icnt] = cnt_s3[(icnt+1)*2-1] + cnt_s3[icnt*2];
+  always @(posedge clock4x)
+           cnt_s4[icnt] <= cnt_s3[(icnt+1)*2-1] + cnt_s3[icnt*2];
 end
 endgenerate
 

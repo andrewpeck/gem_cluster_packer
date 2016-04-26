@@ -202,7 +202,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
 
 
   // the output of the overflow flag should be delayed to lineup with the outputs from the priority encoding modules 
-  parameter [3:0] OVERFLOW_DELAY = 9;
+  parameter [3:0] OVERFLOW_DELAY = 7;
   SRL16E u_overflow_delay (
     .CLK (clock4x),
     .CE  (1'b1),
