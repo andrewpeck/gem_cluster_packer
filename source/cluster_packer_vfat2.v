@@ -1,7 +1,9 @@
 module cluster_packer_vfat2 (
     input  clock4x,
+    input  clock1x, 
     input  global_reset,
     input  truncate_clusters,
+    input  oneshot_en, 
 
     input  [7:0] vfat0,
     input  [7:0] vfat1,
@@ -81,6 +83,7 @@ endgenerate
 
 cluster_packer #(.VFAT_V2(1)) u_cluster_packer (
     .clock4x(clock4x),
+    .clock1x(clock1x),
 
     .global_reset (global_reset),
 
@@ -110,6 +113,7 @@ cluster_packer #(.VFAT_V2(1)) u_cluster_packer (
     .vfat23 (vfat3_sbits[23]),
 
     .truncate_clusters (truncate_clusters),
+    .oneshot_en (oneshot_en),
 
     .cluster0 (cluster0),
     .cluster1 (cluster1),

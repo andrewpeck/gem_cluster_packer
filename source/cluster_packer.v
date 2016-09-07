@@ -24,8 +24,10 @@
 
 module cluster_packer (
     input  clock4x,
+    input  clock1x,
     input  global_reset,
     input  truncate_clusters,
+    input  oneshot_en, 
 
     input  [MXSBITS-1:0] vfat0,
     input  [MXSBITS-1:0] vfat1,
@@ -61,6 +63,7 @@ module cluster_packer (
     output reg [MXCLSTBITS-1:0] cluster6,
     output reg [MXCLSTBITS-1:0] cluster7,
 
+
     output overflow
 );
 
@@ -78,6 +81,15 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
 //----------------------------------------------------------------------------------------------------------------------
 // State machine power-up reset + global reset
 //----------------------------------------------------------------------------------------------------------------------
+
+  initial cluster0 = 0;
+  initial cluster1 = 0;
+  initial cluster2 = 0;
+  initial cluster3 = 0;
+  initial cluster4 = 0;
+  initial cluster5 = 0;
+  initial cluster6 = 0;
+  initial cluster7 = 0;
 
   // Startup -- keeps outputs off during powerup
   //---------------------------------------------
@@ -114,6 +126,54 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   wire ready = powerup_ff && reset_done_ff;
   wire reset = !ready;
 
+
+//----------------------------------------------------------------------------------------------------------------------
+// clock 0: fire oneshots to prevent stuck bits and shorten the monostables
+//----------------------------------------------------------------------------------------------------------------------
+
+  wire [MXSBITS-1:0] vfat_s0 [24:0];
+  wire [MXSBITS-1:0] vfat_s1 [24:0];
+
+  assign vfat_s0[0]  = vfat0;
+  assign vfat_s0[1]  = vfat1;
+  assign vfat_s0[2]  = vfat2;
+  assign vfat_s0[3]  = vfat3;
+  assign vfat_s0[4]  = vfat4;
+  assign vfat_s0[5]  = vfat5;
+  assign vfat_s0[6]  = vfat6;
+  assign vfat_s0[7]  = vfat7;
+  assign vfat_s0[8]  = vfat8;
+  assign vfat_s0[9]  = vfat9;
+  assign vfat_s0[10] = vfat10;
+  assign vfat_s0[11] = vfat11;
+  assign vfat_s0[12] = vfat12;
+  assign vfat_s0[13] = vfat13;
+  assign vfat_s0[14] = vfat14;
+  assign vfat_s0[15] = vfat15;
+  assign vfat_s0[16] = vfat16;
+  assign vfat_s0[17] = vfat17;
+  assign vfat_s0[18] = vfat18;
+  assign vfat_s0[19] = vfat19;
+  assign vfat_s0[20] = vfat20;
+  assign vfat_s0[21] = vfat21;
+  assign vfat_s0[22] = vfat22;
+  assign vfat_s0[23] = vfat23;
+
+  genvar os_vfat;
+  genvar os_sbit;
+  generate
+  for (os_vfat=0; os_vfat<24;      os_vfat=os_vfat+1'b1) begin  : os_vfatloop
+    for (os_sbit=0; os_sbit<MXSBITS; os_sbit=os_sbit+1'b1) begin  : os_sbitloop
+      x_oneshot sbit_oneshot (
+        .d      (vfat_s0[os_vfat][os_sbit]),
+        .q      (vfat_s1[os_vfat][os_sbit]),
+        .clock  (clock1x), 
+        .enable (oneshot_en)
+      );
+    end
+  end
+  endgenerate
+
 //----------------------------------------------------------------------------------------------------------------------
 // clock 1: Count cluster multiplicity for each pad
 //----------------------------------------------------------------------------------------------------------------------
@@ -124,14 +184,14 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   reg [MXKEYS-1:0] partition [7:0];
 
   always @(posedge clock4x) begin
-    partition[0] <= {vfat16, vfat8,   vfat0};
-    partition[1] <= {vfat17, vfat9,   vfat1};
-    partition[2] <= {vfat18, vfat10,  vfat2};
-    partition[3] <= {vfat19, vfat11,  vfat3};
-    partition[4] <= {vfat20, vfat12,  vfat4};
-    partition[5] <= {vfat21, vfat13,  vfat5};
-    partition[6] <= {vfat22, vfat14,  vfat6};
-    partition[7] <= {vfat23, vfat15,  vfat7};
+    partition[0] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
+    partition[1] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
+    partition[2] <= {vfat_s1[18], vfat_s1[10],  vfat_s1[2]};
+    partition[3] <= {vfat_s1[19], vfat_s1[11],  vfat_s1[3]};
+    partition[4] <= {vfat_s1[20], vfat_s1[12],  vfat_s1[4]};
+    partition[5] <= {vfat_s1[21], vfat_s1[13],  vfat_s1[5]};
+    partition[6] <= {vfat_s1[22], vfat_s1[14],  vfat_s1[6]};
+    partition[7] <= {vfat_s1[23], vfat_s1[15],  vfat_s1[7]};
   end
 
   // zero pad the partition to handle the edge cases for counting
@@ -149,21 +209,20 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
 
   // count cluster size and assign valid pattern flags
   //--------------------------------------------------------------------------------
-  reg  [MXPADS  -1:0] vpfs;
+  reg  [MXPADS  -1:0] vpfs=0;
   wire [MXPADS*3-1:0] cnts;
 
-
-  parameter VFAT_V2 = 0; 
+  parameter VFAT_V2 = 0;
   genvar ikey;
   genvar irow;
   genvar ibit;
   generate
     for (irow=0; irow<MXROWS; irow=irow+1) begin: cluster_count_rowloop
     for (ikey=0; ikey<MXKEYS; ikey=ikey+1) begin: cluster_count_keyloop
-        
+
         if (VFAT_V2)  begin
             assign cnts[(MXKEYS*irow*3)+(ikey+1)*3-1:(MXKEYS*irow*3)+ikey*3] = 3'd7;
-            always @(posedge clock4x) 
+            always @(posedge clock4x)
               vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
         end
         else begin
@@ -201,7 +260,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   );
 
 
-  // the output of the overflow flag should be delayed to lineup with the outputs from the priority encoding modules 
+  // the output of the overflow flag should be delayed to lineup with the outputs from the priority encoding modules
   parameter [3:0] OVERFLOW_DELAY = 7;
   SRL16E u_overflow_delay (
     .CLK (clock4x),
@@ -214,9 +273,9 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
     .A3 ( OVERFLOW_DELAY[3])
   );
 
-  reg overflow_ff = 0; 
+  reg overflow_ff = 0;
   always @(posedge clock4x)
-    overflow_ff <= (reset) ? 0 : overflow_dly;
+    overflow_ff <= (reset) ? 1'b0 : overflow_dly;
   assign overflow = overflow_ff;
 
 //----------------------------------------------------------------------------------------------------------------------
