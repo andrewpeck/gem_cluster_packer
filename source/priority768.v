@@ -150,9 +150,9 @@ always @(*) begin
   else                {vpf_s8[0], cnt_s8[0], key_s8[0]} = {vpf_s7[2], cnt_s7[2], {2'b10, key_s7[2]}};
 end
 
-assign adr           = key_s8[0];
-assign cluster_found = vpf_s8[0];
-assign cnt           = cnt_s8[0];
+assign adr           =                      key_s8[0];
+assign cluster_found =                      vpf_s8[0];
+assign cnt           = {3{cluster_found}} & cnt_s8[0];
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule
