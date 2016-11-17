@@ -1,3 +1,4 @@
+		`define invert_partitions
 //----------------------------------------------------------------------------------------------------------------------
 // cluster.packer.v
 //----------------------------------------------------------------------------------------------------------------------
@@ -184,14 +185,25 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   reg [MXKEYS-1:0] partition [7:0];
 
   always @(posedge clock4x) begin
-    partition[0] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
-    partition[1] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
-    partition[2] <= {vfat_s1[18], vfat_s1[10],  vfat_s1[2]};
-    partition[3] <= {vfat_s1[19], vfat_s1[11],  vfat_s1[3]};
-    partition[4] <= {vfat_s1[20], vfat_s1[12],  vfat_s1[4]};
-    partition[5] <= {vfat_s1[21], vfat_s1[13],  vfat_s1[5]};
-    partition[6] <= {vfat_s1[22], vfat_s1[14],  vfat_s1[6]};
-    partition[7] <= {vfat_s1[23], vfat_s1[15],  vfat_s1[7]};
+    `ifdef invert_partitions  // need to make a choice about whether strip-0 is in partition 0 or 7
+      partition[7] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
+      partition[6] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
+      partition[5] <= {vfat_s1[18], vfat_s1[10],  vfat_s1[2]};
+      partition[4] <= {vfat_s1[19], vfat_s1[11],  vfat_s1[3]};
+      partition[3] <= {vfat_s1[20], vfat_s1[12],  vfat_s1[4]};
+      partition[2] <= {vfat_s1[21], vfat_s1[13],  vfat_s1[5]};
+      partition[1] <= {vfat_s1[22], vfat_s1[14],  vfat_s1[6]};
+      partition[0] <= {vfat_s1[23], vfat_s1[15],  vfat_s1[7]};
+    `else
+      partition[0] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
+      partition[1] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
+      partition[2] <= {vfat_s1[18], vfat_s1[10],  vfat_s1[2]};
+      partition[3] <= {vfat_s1[19], vfat_s1[11],  vfat_s1[3]};
+      partition[4] <= {vfat_s1[20], vfat_s1[12],  vfat_s1[4]};
+      partition[5] <= {vfat_s1[21], vfat_s1[13],  vfat_s1[5]};
+      partition[6] <= {vfat_s1[22], vfat_s1[14],  vfat_s1[6]};
+      partition[7] <= {vfat_s1[23], vfat_s1[15],  vfat_s1[7]};
+    `endif
   end
 
   // zero pad the partition to handle the edge cases for counting
