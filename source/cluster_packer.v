@@ -1,4 +1,4 @@
-		`define invert_partitions
+`define invert_partitions
 //----------------------------------------------------------------------------------------------------------------------
 // cluster.packer.v
 //----------------------------------------------------------------------------------------------------------------------
@@ -24,11 +24,13 @@
 //synthesis attribute ALLCLOCKNETS of cluster_packer is "240MHz"
 
 module cluster_packer (
-    input  clock4x,
-    input  clock1x,
-    input  global_reset,
-    input  truncate_clusters,
-    input  oneshot_en, 
+
+    input        clock4x,
+    input        clock1x,
+    input        global_reset,
+    output [7:0] cluster_count_o,
+    input        truncate_clusters,
+    input        oneshot_en, 
 
     input  [MXSBITS-1:0] vfat0,
     input  [MXSBITS-1:0] vfat1,
@@ -263,6 +265,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   // We count the number of cluster primaries. If it is greater than 8,
   // generate an overflow flag. This can be used to change the fiber's frame
   // separator to flag this to the receiving devices
+
   wire [7:0] cluster_count;
   count_clusters u_count_clusters (
     .clock4x(clock4x),
@@ -271,6 +274,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
     .overflow(overflow_out)
   );
 
+  assign cluster_count_o = reset ? 0 : cluster_count;
 
   // the output of the overflow flag should be delayed to lineup with the outputs from the priority encoding modules
   parameter [3:0] OVERFLOW_DELAY = 7;

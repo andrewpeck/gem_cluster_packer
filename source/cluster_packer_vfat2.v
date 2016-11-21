@@ -5,6 +5,8 @@ module cluster_packer_vfat2 (
     input  truncate_clusters,
     input  oneshot_en, 
 
+    output [7:0] cluster_count,
+
     input  [7:0] vfat0,
     input  [7:0] vfat1,
     input  [7:0] vfat2,
@@ -123,6 +125,8 @@ cluster_packer #(.VFAT_V2(1)) u_cluster_packer (
     .cluster5 (cluster5),
     .cluster6 (cluster6),
     .cluster7 (cluster7), 
+
+    .cluster_count (cluster_count[7:0]),
 
     .overflow (overflow)
 );
