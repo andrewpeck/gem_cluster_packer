@@ -18,7 +18,8 @@
 // clock 10: (n-7) truncated clusters    ;  latch 6th cluster result
 // clock 11:                             ;  latch 7th cluster result
 // clock 12: merge16 result stage 1
-// clock 13: merge16 result stage 2 returns addresses/counts of first 8 clusters
+// clock 13: merge16 result stage 2
+// clock 14: merge16 result stage 3 returns addresses/counts of first 8 clusters
 //----------------------------------------------------------------------------------------------------------------------
 
 //synthesis attribute ALLCLOCKNETS of cluster_packer is "240MHz"

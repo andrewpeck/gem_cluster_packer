@@ -17,7 +17,7 @@
   input  d;
   input  clock;
   output q;
-  input  enable; 
+  input  enable;
 
 // State Machine declarations
   reg [2:0] sm;    // synthesis attribute safe_implementation of sm is "yes";

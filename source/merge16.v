@@ -114,17 +114,26 @@ parameter MXCNTBITS=3;
     // stage 0: sort eights (0,8), (1,9), (2,10), (3,11), (4,12), (5,13), (6,14), (7,15)
     //------------------------------------------------------------------------------------------------------------------
 
-    wire [2:0]           cnt_s0 [15:0];
-    wire [MXADRBITS-1:0] adr_s0 [15:0];
+    reg  [2:0]           cnt_s0 [15:0];
+    reg  [MXADRBITS-1:0] adr_s0 [15:0];
+    `define s0_latch 1
 
-    assign {{adr_s0[0], cnt_s0[0]},  {adr_s0[8],  cnt_s0[8]}}   =  adr[0] < adr[8]  ? {{adr[0], cnt[0]}, {adr[8], cnt[8]}}   : {{adr[8],  cnt[8]},  {adr[0], cnt[0]}};
-    assign {{adr_s0[1], cnt_s0[1]},  {adr_s0[9],  cnt_s0[9]}}   =  adr[1] < adr[9]  ? {{adr[1], cnt[1]}, {adr[9], cnt[9]}}   : {{adr[9],  cnt[9]},  {adr[1], cnt[1]}};
-    assign {{adr_s0[2], cnt_s0[2]},  {adr_s0[10], cnt_s0[10]}}  =  adr[2] < adr[10] ? {{adr[2], cnt[2]}, {adr[10], cnt[10]}} : {{adr[10], cnt[10]}, {adr[2], cnt[2]}};
-    assign {{adr_s0[3], cnt_s0[3]},  {adr_s0[11], cnt_s0[11]}}  =  adr[3] < adr[11] ? {{adr[3], cnt[3]}, {adr[11], cnt[11]}} : {{adr[11], cnt[11]}, {adr[3], cnt[3]}};
-    assign {{adr_s0[4], cnt_s0[4]},  {adr_s0[12], cnt_s0[12]}}  =  adr[4] < adr[12] ? {{adr[4], cnt[4]}, {adr[12], cnt[12]}} : {{adr[12], cnt[12]}, {adr[4], cnt[4]}};
-    assign {{adr_s0[5], cnt_s0[5]},  {adr_s0[13], cnt_s0[13]}}  =  adr[5] < adr[13] ? {{adr[5], cnt[5]}, {adr[13], cnt[13]}} : {{adr[13], cnt[13]}, {adr[5], cnt[5]}};
-    assign {{adr_s0[6], cnt_s0[6]},  {adr_s0[14], cnt_s0[14]}}  =  adr[6] < adr[14] ? {{adr[6], cnt[6]}, {adr[14], cnt[14]}} : {{adr[14], cnt[14]}, {adr[6], cnt[6]}};
-    assign {{adr_s0[7], cnt_s0[7]},  {adr_s0[15], cnt_s0[15]}}  =  adr[7] < adr[15] ? {{adr[7], cnt[7]}, {adr[15], cnt[15]}} : {{adr[15], cnt[15]}, {adr[7], cnt[7]}};
+    `ifdef s0_latch
+      always @(posedge clock4x) begin
+    `else
+      always @(posedge *) begin
+    `endif
+
+           {{adr_s0[0], cnt_s0[0]},  {adr_s0[8],  cnt_s0[8]}}   <=  adr[0] < adr[8]  ? {{adr[0], cnt[0]}, {adr[8], cnt[8]}}   : {{adr[8],  cnt[8]},  {adr[0], cnt[0]}};
+           {{adr_s0[1], cnt_s0[1]},  {adr_s0[9],  cnt_s0[9]}}   <=  adr[1] < adr[9]  ? {{adr[1], cnt[1]}, {adr[9], cnt[9]}}   : {{adr[9],  cnt[9]},  {adr[1], cnt[1]}};
+           {{adr_s0[2], cnt_s0[2]},  {adr_s0[10], cnt_s0[10]}}  <=  adr[2] < adr[10] ? {{adr[2], cnt[2]}, {adr[10], cnt[10]}} : {{adr[10], cnt[10]}, {adr[2], cnt[2]}};
+           {{adr_s0[3], cnt_s0[3]},  {adr_s0[11], cnt_s0[11]}}  <=  adr[3] < adr[11] ? {{adr[3], cnt[3]}, {adr[11], cnt[11]}} : {{adr[11], cnt[11]}, {adr[3], cnt[3]}};
+           {{adr_s0[4], cnt_s0[4]},  {adr_s0[12], cnt_s0[12]}}  <=  adr[4] < adr[12] ? {{adr[4], cnt[4]}, {adr[12], cnt[12]}} : {{adr[12], cnt[12]}, {adr[4], cnt[4]}};
+           {{adr_s0[5], cnt_s0[5]},  {adr_s0[13], cnt_s0[13]}}  <=  adr[5] < adr[13] ? {{adr[5], cnt[5]}, {adr[13], cnt[13]}} : {{adr[13], cnt[13]}, {adr[5], cnt[5]}};
+           {{adr_s0[6], cnt_s0[6]},  {adr_s0[14], cnt_s0[14]}}  <=  adr[6] < adr[14] ? {{adr[6], cnt[6]}, {adr[14], cnt[14]}} : {{adr[14], cnt[14]}, {adr[6], cnt[6]}};
+           {{adr_s0[7], cnt_s0[7]},  {adr_s0[15], cnt_s0[15]}}  <=  adr[7] < adr[15] ? {{adr[7], cnt[7]}, {adr[15], cnt[15]}} : {{adr[15], cnt[15]}, {adr[7], cnt[7]}};
+
+      end
 
     // stage 1: sort fours (4,8), (5,9), (6,10), (7,11)
     //------------------------------------------------------------------------------------------------------------------
@@ -152,21 +161,31 @@ parameter MXCNTBITS=3;
     // stage 2: sort twos (2,4), (3,5), (6,8), (7,9)
     //------------------------------------------------------------------------------------------------------------------
 
-    wire [2:0]           cnt_s2 [15:0];
-    wire [MXADRBITS-1:0] adr_s2 [15:0];
+    reg [2:0]           cnt_s2 [15:0];
+    reg [MXADRBITS-1:0] adr_s2 [15:0];
 
-    assign {adr_s2[0],  cnt_s2[0]} = {adr_s1[0], cnt_s1[0]};
-    assign {adr_s2[1],  cnt_s2[1]} = {adr_s1[1], cnt_s1[1]};
+    `define s2_latch 0
 
-    assign {{adr_s2[2],  cnt_s2[2]},  {adr_s2[4],  cnt_s2[4]}}  = adr_s1[2]  < adr_s1[4]  ? {{adr_s1[2],  cnt_s1[2]},  {adr_s1[4],  cnt_s1[4]}}  : {{adr_s1[4],  cnt_s1[4]},  {adr_s1[2],  cnt_s1[2]}};
-    assign {{adr_s2[3],  cnt_s2[3]},  {adr_s2[5],  cnt_s2[5]}}  = adr_s1[3]  < adr_s1[5]  ? {{adr_s1[3],  cnt_s1[3]},  {adr_s1[5],  cnt_s1[5]}}  : {{adr_s1[5],  cnt_s1[5]},  {adr_s1[3],  cnt_s1[3]}};
-    assign {{adr_s2[6],  cnt_s2[6]},  {adr_s2[8],  cnt_s2[8]}}  = adr_s1[6]  < adr_s1[8]  ? {{adr_s1[6],  cnt_s1[6]},  {adr_s1[8],  cnt_s1[8]}}  : {{adr_s1[8],  cnt_s1[8]},  {adr_s1[6],  cnt_s1[6]}};
-    assign {{adr_s2[7],  cnt_s2[7]},  {adr_s2[9],  cnt_s2[9]}}  = adr_s1[7]  < adr_s1[9]  ? {{adr_s1[7],  cnt_s1[7]},  {adr_s1[9],  cnt_s1[9]}}  : {{adr_s1[9],  cnt_s1[9]},  {adr_s1[7],  cnt_s1[7]}};
-    assign {{adr_s2[10], cnt_s2[10]}, {adr_s2[12], cnt_s2[12]}} = adr_s1[10] < adr_s1[12] ? {{adr_s1[10], cnt_s1[10]}, {adr_s1[12], cnt_s1[12]}} : {{adr_s1[12], cnt_s1[12]}, {adr_s1[10], cnt_s1[10]}};
-    assign {{adr_s2[11], cnt_s2[11]}, {adr_s2[13], cnt_s2[13]}} = adr_s1[11] < adr_s1[13] ? {{adr_s1[11], cnt_s1[11]}, {adr_s1[13], cnt_s1[13]}} : {{adr_s1[13], cnt_s1[13]}, {adr_s1[11], cnt_s1[11]}};
+    `ifdef s2_latch
+      always @(posedge clock4x) begin
+    `else
+      always @(posedge *) begin
+    `endif
 
-    assign {adr_s2[14],  cnt_s2[14]} = {adr_s1[14], cnt_s1[14]};
-    assign {adr_s2[15],  cnt_s2[15]} = {adr_s1[15], cnt_s1[15]};
+           {adr_s2[0],  cnt_s2[0]} <= {adr_s1[0], cnt_s1[0]};
+           {adr_s2[1],  cnt_s2[1]} <= {adr_s1[1], cnt_s1[1]};
+
+           {{adr_s2[2],  cnt_s2[2]},  {adr_s2[4],  cnt_s2[4]}}  <= adr_s1[2]  < adr_s1[4]  ? {{adr_s1[2],  cnt_s1[2]},  {adr_s1[4],  cnt_s1[4]}}  : {{adr_s1[4],  cnt_s1[4]},  {adr_s1[2],  cnt_s1[2]}};
+           {{adr_s2[3],  cnt_s2[3]},  {adr_s2[5],  cnt_s2[5]}}  <= adr_s1[3]  < adr_s1[5]  ? {{adr_s1[3],  cnt_s1[3]},  {adr_s1[5],  cnt_s1[5]}}  : {{adr_s1[5],  cnt_s1[5]},  {adr_s1[3],  cnt_s1[3]}};
+           {{adr_s2[6],  cnt_s2[6]},  {adr_s2[8],  cnt_s2[8]}}  <= adr_s1[6]  < adr_s1[8]  ? {{adr_s1[6],  cnt_s1[6]},  {adr_s1[8],  cnt_s1[8]}}  : {{adr_s1[8],  cnt_s1[8]},  {adr_s1[6],  cnt_s1[6]}};
+           {{adr_s2[7],  cnt_s2[7]},  {adr_s2[9],  cnt_s2[9]}}  <= adr_s1[7]  < adr_s1[9]  ? {{adr_s1[7],  cnt_s1[7]},  {adr_s1[9],  cnt_s1[9]}}  : {{adr_s1[9],  cnt_s1[9]},  {adr_s1[7],  cnt_s1[7]}};
+           {{adr_s2[10], cnt_s2[10]}, {adr_s2[12], cnt_s2[12]}} <= adr_s1[10] < adr_s1[12] ? {{adr_s1[10], cnt_s1[10]}, {adr_s1[12], cnt_s1[12]}} : {{adr_s1[12], cnt_s1[12]}, {adr_s1[10], cnt_s1[10]}};
+           {{adr_s2[11], cnt_s2[11]}, {adr_s2[13], cnt_s2[13]}} <= adr_s1[11] < adr_s1[13] ? {{adr_s1[11], cnt_s1[11]}, {adr_s1[13], cnt_s1[13]}} : {{adr_s1[13], cnt_s1[13]}, {adr_s1[11], cnt_s1[11]}};
+
+           {adr_s2[14],  cnt_s2[14]} <= {adr_s1[14], cnt_s1[14]};
+           {adr_s2[15],  cnt_s2[15]} <= {adr_s1[15], cnt_s1[15]};
+
+    end
 
     // stage 3: swap odd pairs
     //------------------------------------------------------------------------------------------------------------------
