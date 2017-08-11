@@ -14,6 +14,7 @@ wire [4:0] cnt_s3  [63:0];
 reg  [5:0] cnt_s4  [31:0];
 wire [6:0] cnt_s5  [15:0];
 reg  [7:0] cnt_s6  [ 7:0];
+reg  [7:0] cnt_s7  [ 1:0];
 
 genvar icnt;
 
@@ -57,8 +58,12 @@ end
 endgenerate
 
 always @(posedge clock4x) begin
-  cnt <=   cnt_s6[0]  + cnt_s6[1]  + cnt_s6[2]  + cnt_s6[3]  + cnt_s6[4]  + cnt_s6[5]  + cnt_s6[6]  + cnt_s6[7];
-          //+ cnt_s6[8]  + cnt_s6[9]  + cnt_s6[10] + cnt_s6[11] + cnt_s6[12] + cnt_s6[13] + cnt_s6[14] + cnt_s6[15]);
+  cnt_s7[0] <=   cnt_s6[0]  + cnt_s6[1]  + cnt_s6[2]  + cnt_s6[3];
+  cnt_s7[1] <=   cnt_s6[4]  + cnt_s6[5]  + cnt_s6[6]  + cnt_s6[7];
+end
+
+always @(posedge clock4x) begin
+  cnt <= cnt_s7[0] + cnt_s7[1];
 end
 
 assign overflow = (cnt > 8);
