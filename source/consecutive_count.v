@@ -41,9 +41,9 @@ module consecutive_count  ( // one logic step, could run at 320 MHz easy!
    function [2:0] cons_count;  // do a fast count of 6 consecutive bits, in a single logic step!
       input [6:1] s;  // note bits 6:1 = sbit[i+7:i+2] are used here, and bit0 (sbit[i+1]) is implied true (else count gets reset)
       begin           //   of course sbit[i] is also assumed to be true (it's required to be a valid cluster pattern)
-	 cons_count[2] = &s[3:1];   // 4+ s-bits in a row will always trigger bit 2 of the count
-	 cons_count[1] = &s[5:1] |  s[3:1]==3'b011 |  s[2:1]==2'b01; // count 2,3,6,7... not 1,4,5
-	 cons_count[0] = &s[6:1] | s[5:1]==5'b01111 | s[3:1]==3'b011 | s[1]==1'b0; // count 1,3,5,7... not 2,4,6
+      cons_count[2] = &s[3:1];   // 4+ s-bits in a row will always trigger bit 2 of the count
+      cons_count[1] = &s[5:1] |  s[3:1]==3'b011 |  s[2:1]==2'b01; // count 2,3,6,7... not 1,4,5
+      cons_count[0] = &s[6:1] | s[5:1]==5'b01111 | s[3:1]==3'b011 | s[1]==1'b0; // count 1,3,5,7... not 2,4,6
       end
    endfunction
 

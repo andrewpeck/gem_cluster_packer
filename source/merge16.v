@@ -63,7 +63,10 @@ parameter MXCNTBITS=3;
 // vectorize inputs
 //----------------------------------------------------------------------------------------------------------------------
 
-    `ifdef debug
+    `define input_latch 1
+
+    `ifdef input_latch
+
     reg [MXADRBITS-1:0] adr [15:0];   reg [MXCNTBITS-1:0] cnt [15:0];
 
     // use the inverted vpf flag to set the addresses to max value (7FF) if a valid flag wasn't found.
@@ -124,8 +127,8 @@ parameter MXCNTBITS=3;
       always @(posedge *) begin
     `endif
 
-           {{adr_s0[0], cnt_s0[0]},  {adr_s0[8],  cnt_s0[8]}}   <=  adr[0] < adr[8]  ? {{adr[0], cnt[0]}, {adr[8], cnt[8]}}   : {{adr[8],  cnt[8]},  {adr[0], cnt[0]}};
-           {{adr_s0[1], cnt_s0[1]},  {adr_s0[9],  cnt_s0[9]}}   <=  adr[1] < adr[9]  ? {{adr[1], cnt[1]}, {adr[9], cnt[9]}}   : {{adr[9],  cnt[9]},  {adr[1], cnt[1]}};
+           {{adr_s0[0], cnt_s0[0]},  {adr_s0[8],  cnt_s0[8]}}   <=  adr[0] < adr[8]  ? {{adr[0], cnt[0]}, {adr[8],  cnt[ 8]}} : {{adr[8],  cnt[ 8]}, {adr[0], cnt[0]}};
+           {{adr_s0[1], cnt_s0[1]},  {adr_s0[9],  cnt_s0[9]}}   <=  adr[1] < adr[9]  ? {{adr[1], cnt[1]}, {adr[9],  cnt[ 9]}} : {{adr[9],  cnt[ 9]}, {adr[1], cnt[1]}};
            {{adr_s0[2], cnt_s0[2]},  {adr_s0[10], cnt_s0[10]}}  <=  adr[2] < adr[10] ? {{adr[2], cnt[2]}, {adr[10], cnt[10]}} : {{adr[10], cnt[10]}, {adr[2], cnt[2]}};
            {{adr_s0[3], cnt_s0[3]},  {adr_s0[11], cnt_s0[11]}}  <=  adr[3] < adr[11] ? {{adr[3], cnt[3]}, {adr[11], cnt[11]}} : {{adr[11], cnt[11]}, {adr[3], cnt[3]}};
            {{adr_s0[4], cnt_s0[4]},  {adr_s0[12], cnt_s0[12]}}  <=  adr[4] < adr[12] ? {{adr[4], cnt[4]}, {adr[12], cnt[12]}} : {{adr[12], cnt[12]}, {adr[4], cnt[4]}};
@@ -142,10 +145,10 @@ parameter MXCNTBITS=3;
     reg [MXADRBITS-1:0] adr_s1 [15:0];
 
     always @(posedge clock4x) begin
-           {adr_s1[0],  cnt_s1[0]} <= {adr_s0[0], cnt_s0[0]};
-           {adr_s1[1],  cnt_s1[1]} <= {adr_s0[1], cnt_s0[1]};
-           {adr_s1[2],  cnt_s1[2]} <= {adr_s0[2], cnt_s0[2]};
-           {adr_s1[3],  cnt_s1[3]} <= {adr_s0[3], cnt_s0[3]};
+           {adr_s1[0],   cnt_s1[0]}  <= {adr_s0[0],  cnt_s0[0]};
+           {adr_s1[1],   cnt_s1[1]}  <= {adr_s0[1],  cnt_s0[1]};
+           {adr_s1[2],   cnt_s1[2]}  <= {adr_s0[2],  cnt_s0[2]};
+           {adr_s1[3],   cnt_s1[3]}  <= {adr_s0[3],  cnt_s0[3]};
 
            {{adr_s1[4],  cnt_s1[4]},  {adr_s1[8],   cnt_s1[8]}}  <= adr_s0[4]  < adr_s0[8]  ? {{adr_s0[4], cnt_s0[4]}, {adr_s0[8],  cnt_s0[8]}}  : {{adr_s0[8],   cnt_s0[8]},  {adr_s0[4], cnt_s0[4]}};
            {{adr_s1[5],  cnt_s1[5]},  {adr_s1[9],   cnt_s1[9]}}  <= adr_s0[5]  < adr_s0[9]  ? {{adr_s0[5], cnt_s0[5]}, {adr_s0[9],  cnt_s0[9]}}  : {{adr_s0[9],   cnt_s0[9]},  {adr_s0[5], cnt_s0[5]}};
@@ -164,7 +167,7 @@ parameter MXCNTBITS=3;
     reg [2:0]           cnt_s2 [15:0];
     reg [MXADRBITS-1:0] adr_s2 [15:0];
 
-    `define s2_latch 0
+    `define s2_latch 1
 
     `ifdef s2_latch
       always @(posedge clock4x) begin

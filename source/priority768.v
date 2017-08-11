@@ -2,11 +2,8 @@
 `timescale 1ns / 100 ps
 
 module priority768 (
-  input 	clock,
-  input   global_reset,
 
-  input   [3:0] latch_delay,
-  input         latch_in,
+  input clock,
 
   input   [768  -1:0] vpfs_in,
   input   [768*3-1:0] cnts_in,
@@ -20,36 +17,65 @@ module priority768 (
 parameter MXPADS = 768;
 
 //----------------------------------------------------------------------------------------------------------------------
-// latch_enable
-//----------------------------------------------------------------------------------------------------------------------
-
-reg latch_en=0;
-wire [3:0] latch_delay_offs = latch_delay - 4'd1;
-SRL16E u_latchdly (.CLK(clock),.CE(1'b1),.D(latch_in),.A0(latch_delay_offs[0]),.A1(latch_delay_offs[1]),.A2(latch_delay_offs[2]),.A3(latch_delay_offs[3]),.Q(latch_dly));
-always @(posedge clock)
-  latch_en <= (latch_delay==1'b0) ? (latch_in) : (latch_dly);
-
-//----------------------------------------------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-  // (* KEEP = "TRUE" *)
-  // (* shreg_extract = "no" *)
+  // register vpfs by 1 for fanout
 
+  // delay counts by 2 clock to align with data coming out of truncator
   reg [2:0] cnts [MXPADS-1:0];
+  reg [MXPADS-1:0] vpfs;
+  wire   [768*3-1:0] cnts_dly;
+
   genvar ipad;
   generate
   for (ipad=0; ipad<MXPADS; ipad=ipad+1) begin:padloop
-      always @(posedge clock)
-        if (latch_en) cnts[ipad] <= cnts_in [ipad*3+2:ipad*3];
+
+  SRL16E cntdly0 (
+    .CE  (1'b1),
+    .CLK (clock),
+    .D   (cnts_in [ipad*3+0]),
+    .Q   (cnts_dly[ipad*3+0]),
+    .A0  (1'b0),
+    .A1  (1'b0),
+    .A2  (1'b0),
+    .A3  (1'b0)
+  );
+
+  SRL16E cntdly1 (
+    .CE  (1'b1),
+    .CLK (clock),
+    .D   (cnts_in [ipad*3+1]),
+    .Q   (cnts_dly[ipad*3+1]),
+    .A0  (1'b0),
+    .A1  (1'b0),
+    .A2  (1'b0),
+    .A3  (1'b0)
+  );
+
+  SRL16E cntdly2 (
+    .CE  (1'b1),
+    .CLK (clock),
+    .D   (cnts_in [ipad*3+2]),
+    .Q   (cnts_dly[ipad*3+2]),
+    .A0  (1'b0),
+    .A1  (1'b0),
+    .A2  (1'b0),
+    .A3  (1'b0)
+  );
+
+  always @(posedge clock)
+    cnts[ipad] <= cnts_dly [ipad*3+2:ipad*3];
+
+  always @(posedge clock)
+    vpfs[ipad] <= vpfs_in[ipad];
+
   end
   endgenerate
-
 
 //----------------------------------------------------------------------------------------------------------------------
 // Parameters and Interconnects
 //----------------------------------------------------------------------------------------------------------------------
-
 
 parameter MXKEYS    = 768;
 parameter MXKEYBITS = 10;
@@ -88,7 +114,7 @@ reg  [2:0] cnt_s8 [  0:0];
 genvar ihit;
 generate
 for (ihit=0; ihit<384; ihit=ihit+1) begin: s0
-  assign {vpf_s0[ihit], cnt_s0[ihit], key_s0[ihit]} = (vpfs_in[ihit*2]) ? {vpfs_in[ihit*2], cnts[ihit*2], 1'b0} : {vpfs_in[ihit*2+1], cnts[ihit*2+1], 1'b1} ;
+  assign {vpf_s0[ihit], cnt_s0[ihit], key_s0[ihit]} = (vpfs[ihit*2]) ? {vpfs[ihit*2], cnts[ihit*2], 1'b0} : {vpfs[ihit*2+1], cnts[ihit*2+1], 1'b1} ;
 end
 endgenerate
 

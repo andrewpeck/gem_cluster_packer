@@ -28,10 +28,11 @@ module cluster_packer (
 
     input        clock4x,
     input        clock1x,
+    input        frame_clock,
     input        reset_i,
     output [7:0] cluster_count_o,
     input        truncate_clusters,
-    input        oneshot_en, 
+    input        oneshot_en,
 
     input  [MXSBITS-1:0] vfat0,
     input  [MXSBITS-1:0] vfat1,
@@ -70,11 +71,6 @@ module cluster_packer (
 
     output overflow
 );
-
-  reg reset = 1;
-  always @(posedge clock) begin
-    reset <= reset_i;
-  end
 
 parameter MXSBITS    = 64;         // S-bits per vfat
 parameter MXKEYS     = 3*MXSBITS;  // S-bits per partition
@@ -117,23 +113,26 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   reg reset_done_ff = 1;
   wire [3:0] reset_dly=4'd0;
 
-  //srl16e_bbl #(1) u_reset_dly (.clock(clock4x), .ce(1'b1), .adr(reset_dly),  .d(global_reset), .q(reset_delayed));
+  //srl16e_bbl #(1) u_reset_dly (.clock(clock1x), .ce(1'b1), .adr(reset_dly),  .d(global_reset), .q(reset_delayed));
   SRL16E u_reset (
-    .CLK (clock4x),
+    .CLK (clock1x),
     .CE  (1'b1),
-    .D   (reset),
+    .D   (reset_i),
     .Q   (reset_delayed),
     .A0  (reset_dly[0]),.A1 ( reset_dly[1]),.A2 ( reset_dly[2]),.A3 ( reset_dly[3])
   );
 
-  always @(posedge clock4x) begin
-    if       (reset && reset_done_ff)                   reset_done_ff <= 1'b0;
-    else if (!reset && reset_delayed && !reset_done_ff) reset_done_ff <= 1'b1;
-    else                                                       reset_done_ff <= reset_done_ff;
+  always @(posedge clock1x) begin
+    if       (reset_i && reset_done_ff)                   reset_done_ff <= 1'b0;
+    else if (!reset_i && reset_delayed && !reset_done_ff) reset_done_ff <= 1'b1;
+    else                                                  reset_done_ff <= reset_done_ff;
   end
 
-  wire ready = powerup_ff && reset_done_ff;
-  wire reset = !ready;
+  reg ready, reset;
+  always @(posedge clock1x) begin
+    ready <= powerup_ff && reset_done_ff;
+    reset <= !ready;
+  end
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -176,7 +175,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
       x_oneshot sbit_oneshot (
         .d      (vfat_s0[os_vfat][os_sbit]),
         .q      (vfat_s1[os_vfat][os_sbit]),
-        .clock  (clock1x), 
+        .clock  (clock1x),
         .enable (oneshot_en)
       );
     end
@@ -216,16 +215,20 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
 
   // zero pad the partition to handle the edge cases for counting
   //--------------------------------------------------------------------------------
+
+
   wire [(MXKEYS-1)+8:0] partition_padded [MXROWS-1:0];
 
-  assign partition_padded[0] = {{8{1'b0}}, partition[0]};
-  assign partition_padded[1] = {{8{1'b0}}, partition[1]};
-  assign partition_padded[2] = {{8{1'b0}}, partition[2]};
-  assign partition_padded[3] = {{8{1'b0}}, partition[3]};
-  assign partition_padded[4] = {{8{1'b0}}, partition[4]};
-  assign partition_padded[5] = {{8{1'b0}}, partition[5]};
-  assign partition_padded[6] = {{8{1'b0}}, partition[6]};
-  assign partition_padded[7] = {{8{1'b0}}, partition[7]};
+  reg pad = 0;
+
+  assign partition_padded[0] = {{8{pad}}, partition[0]};
+  assign partition_padded[1] = {{8{pad}}, partition[1]};
+  assign partition_padded[2] = {{8{pad}}, partition[2]};
+  assign partition_padded[3] = {{8{pad}}, partition[3]};
+  assign partition_padded[4] = {{8{pad}}, partition[4]};
+  assign partition_padded[5] = {{8{pad}}, partition[5]};
+  assign partition_padded[6] = {{8{pad}}, partition[6]};
+  assign partition_padded[7] = {{8{pad}}, partition[7]};
 
   // count cluster size and assign valid pattern flags
   //--------------------------------------------------------------------------------
@@ -252,9 +255,9 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
           // or (2) are preceded by a Size=8 cluster (and cluster truncation is turned off)
           //        if we have size > 16 cluster, the end will get cut off
           always @(posedge clock4x) begin
-            if      (ikey==0) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
-            else if (ikey <9) vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10;
-            else              vpfs  [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10 || (!truncate_clusters && partition[irow][ikey:ikey-9]==10'b1111111110) ;
+            if      (ikey == 0) vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
+            else if (ikey  < 9) vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10;
+            else if (ikey >= 9) vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10 || (!truncate_clusters && partition[irow][ikey:ikey-9]==10'b1111111110) ;
           end
 
           consecutive_count ucntseq (
@@ -281,7 +284,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
     .overflow(overflow_out)
   );
 
-  assign cluster_count_o = reset ? 0 : cluster_count;
+  assign cluster_count_o = reset ? 8'd0 : cluster_count;
 
   // the output of the overflow flag should be delayed to lineup with the outputs from the priority encoding modules
   parameter [3:0] OVERFLOW_DELAY = 7;
@@ -309,9 +312,10 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   wire [MXCNTBITS-1:0] cnt_encoder [MXCLUSTERS-1:0];
 
   encoder_mux u_encoder_mux (
+
     .clock4x (clock4x),
 
-    .global_reset (reset),
+    .frame_clock (frame_clock),
 
     .vpfs_in (vpfs),
     .cnts_in (cnts),

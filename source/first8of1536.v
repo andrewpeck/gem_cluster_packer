@@ -1,11 +1,10 @@
 `timescale 1ns / 100 ps
 
 module first8of1536 (
-    input clock4x,
-    input global_reset,
 
-    input [3:0] latch_delay,
-    input       latch_in,
+    input clock4x,
+
+    input frame_clock,
 
     input  [1536  -1:0] vpfs_in,
     input  [1536*3-1:0] cnts_in,
@@ -29,6 +28,7 @@ module first8of1536 (
     output reg [10:0]      adr7
 );
 
+
 //----------------------------------------------------------------------------------------------------------------------
 // Interconnects
 //----------------------------------------------------------------------------------------------------------------------
@@ -41,33 +41,18 @@ module first8of1536 (
     end
   endgenerate
 
+//----------------------------------------------------------------------------------------------------------------------
+// Signals
+//----------------------------------------------------------------------------------------------------------------------
+
   wire [1535:0] vpfs_truncated;
   wire   [10:0] adr_enc [1:0];
   wire   [0:0] cluster_found [1:0];
   wire   [2:0] cnt_enc [1:0];
 
-  // (* KEEP = "TRUE" *)
-  // (* shreg_extract = "no" *)
-  // reg [1535:0] vpfs_in;
-  // always @(posedge clock4x) begin
-  //   if   (global_reset) vpfs_in <= 1536'd0;
-  //   else                vpfs_in <= vpfs;
-  // end
-
 //----------------------------------------------------------------------------------------------------------------------
-// latch_enable
+// Encoders
 //----------------------------------------------------------------------------------------------------------------------
-
-  parameter [3:0] TRUNCATE_LATENCY = 0;
-  parameter [3:0]  ENCODER_LATENCY = 0;
-  parameter [3:0]    TOTAL_LATENCY = 10;
-
-  (* max_fanout = 100 *) reg latch_en=0;
-  wire [3:0] delay = latch_delay + TOTAL_LATENCY;
-  SRL16E u_latchdly (.CLK(clock4x),.CE(1'b1),.D(latch_in),.A0(delay[0]),.A1(delay[1]),.A2(delay[2]),.A3(delay[3]),.Q(latch_dly));
-  always @(posedge clock4x) begin
-    latch_en <= (latch_dly);
-  end
 
   parameter MXADRBITS = 11;
   parameter MXCNTBITS = 3;
@@ -81,13 +66,14 @@ module first8of1536 (
   generate;
   for (ienc=0; ienc<2; ienc=ienc+1) begin: encloop
 
+      initial adr_sr[ienc] <= -1;
+      initial cnt_sr[ienc] <= -1;
+
       // cluster truncator
       //------------------
       truncate_clusters u_truncate (
         .clock        (clock4x),
-        .global_reset (global_reset),
-        .latch_delay  (latch_delay+TRUNCATE_LATENCY),
-        .latch_in     (latch_in),
+        .frame_clock  (frame_clock),
         .vpfs_in      (vpfs_in       [768*(ienc+1)-1:768*ienc]),
         .vpfs_out     (vpfs_truncated[768*(ienc+1)-1:768*ienc])
       );
@@ -96,9 +82,6 @@ module first8of1536 (
       //--------------------------
       priority768 u_priority (
         .clock         (clock4x),       // IN  160 MHz clock
-        .global_reset  (global_reset),
-        .latch_delay   (latch_delay+ENCODER_LATENCY), // this delay should be tuned such that the delayed latch_en in the priority encoder causes
-        .latch_in      (latch_in),
         .vpfs_in       (vpfs_truncated[768  *(ienc+1)-1:768  *ienc]),
         .cnts_in       (cnts_in       [768*3*(ienc+1)-1:768*3*ienc]),
         .cnt           (cnt_enc[ienc]),       // OUT 11-bit counts    of first found cluster
@@ -125,7 +108,7 @@ genvar iclust;
 generate;
 for (iclust=0; iclust<8; iclust=iclust+1) begin: clust_loop
     assign adr_s1  [iclust] = adr_sr[0][MXADRBITS*(8-iclust)-1:MXADRBITS*(7-iclust)] ;
-    assign adr_s1[iclust+8] = adr_sr[1][MXADRBITS*(8-iclust)-1:MXADRBITS*(7-iclust)]+768;
+    assign adr_s1[iclust+8] = adr_sr[1][MXADRBITS*(8-iclust)-1:MXADRBITS*(7-iclust)]+11'd768;
 
     assign cnt_s1  [iclust] = cnt_sr[0][MXCNTBITS*(8-iclust)-1:MXCNTBITS*(7-iclust)];
     assign cnt_s1[iclust+8] = cnt_sr[1][MXCNTBITS*(8-iclust)-1:MXCNTBITS*(7-iclust)];
@@ -139,7 +122,6 @@ merge16 u_merge16 (
     .clock4x(clock4x),
 
     .vpfs(vpf_s1),
-
 
     .adr_in0  ( adr_s1[0]),
     .adr_in1  ( adr_s1[1]),
@@ -199,8 +181,7 @@ merge16 u_merge16 (
 // Outputs
 // ------------------------------------------------------------------------------------------------------------------
 
-  always @(posedge clock4x) begin
-    if (latch_en) begin
+  always @(posedge frame_clock) begin
       adr0 <= adr[0];
       adr1 <= adr[1];
       adr2 <= adr[2];
@@ -218,7 +199,6 @@ merge16 u_merge16 (
       cnt5 <= cnt[5];
       cnt6 <= cnt[6];
       cnt7 <= cnt[7];
-    end
   end
 
 //----------------------------------------------------------------------------------------------------------------------
