@@ -24,7 +24,7 @@ parameter MXPADS = 768;
 //----------------------------------------------------------------------------------------------------------------------
 
 reg latch_en=0;
-wire [3:0] latch_delay_offs = latch_delay - 1'b1;
+wire [3:0] latch_delay_offs = latch_delay - 4'd1;
 SRL16E u_latchdly (.CLK(clock),.CE(1'b1),.D(latch_in),.A0(latch_delay_offs[0]),.A1(latch_delay_offs[1]),.A2(latch_delay_offs[2]),.A3(latch_delay_offs[3]),.Q(latch_dly));
 always @(posedge clock)
   latch_en <= (latch_delay==1'b0) ? (latch_in) : (latch_dly);

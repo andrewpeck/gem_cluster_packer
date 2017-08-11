@@ -28,7 +28,7 @@ module cluster_packer (
 
     input        clock4x,
     input        clock1x,
-    input        global_reset,
+    input        reset_i,
     output [7:0] cluster_count_o,
     input        truncate_clusters,
     input        oneshot_en, 
@@ -70,6 +70,11 @@ module cluster_packer (
 
     output overflow
 );
+
+  reg reset = 1;
+  always @(posedge clock) begin
+    reset <= reset_i;
+  end
 
 parameter MXSBITS    = 64;         // S-bits per vfat
 parameter MXKEYS     = 3*MXSBITS;  // S-bits per partition
@@ -116,14 +121,14 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   SRL16E u_reset (
     .CLK (clock4x),
     .CE  (1'b1),
-    .D   (global_reset),
+    .D   (reset),
     .Q   (reset_delayed),
     .A0  (reset_dly[0]),.A1 ( reset_dly[1]),.A2 ( reset_dly[2]),.A3 ( reset_dly[3])
   );
 
   always @(posedge clock4x) begin
-    if       (global_reset && reset_done_ff)                   reset_done_ff <= 1'b0;
-    else if (!global_reset && reset_delayed && !reset_done_ff) reset_done_ff <= 1'b1;
+    if       (reset && reset_done_ff)                   reset_done_ff <= 1'b0;
+    else if (!reset && reset_delayed && !reset_done_ff) reset_done_ff <= 1'b1;
     else                                                       reset_done_ff <= reset_done_ff;
   end
 
@@ -268,6 +273,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   // separator to flag this to the receiving devices
 
   wire [7:0] cluster_count;
+
   count_clusters u_count_clusters (
     .clock4x(clock4x),
     .vpfs(vpfs),
@@ -305,7 +311,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   encoder_mux u_encoder_mux (
     .clock4x (clock4x),
 
-    .global_reset (global_reset),
+    .global_reset (reset),
 
     .vpfs_in (vpfs),
     .cnts_in (cnts),

@@ -12,7 +12,7 @@
 module encoder_mux (
 
   input clock4x,
-  input global_reset,
+  input reset,
 
   input  [1536-1:0]    vpfs_in,
 
@@ -45,7 +45,7 @@ module encoder_mux (
 reg [2:0] phase=3'd0;
 reg latch=0;
 always @(posedge clock4x) begin
-  phase <= (global_reset) ? 1'b0 : phase+1'b1;
+  phase <= (reset) ? 1'b0 : phase+1'b1;
   latch <= (phase==3'd0);
 end
 
@@ -86,7 +86,7 @@ genvar iencoder;
 generate
 for (iencoder=0; iencoder<2; iencoder=iencoder+1) begin: encloop
 first8of1536 u_first8 (
-    .global_reset(global_reset),
+    .global_reset(reset),
     .clock4x(clock4x),
     .vpfs_in (vpfs_in),
     .cnts_in (cnts_in),
