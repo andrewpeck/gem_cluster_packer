@@ -11,36 +11,62 @@
 //  04/26/2010  Mod for ISE 11.5
 //  07/12/2010  Port to ISE 12, convert to nonblocking operators
 //  09/06/2016  Mod to reduce latency by 1bx
+//  08/11/2017  Mod to add programmable deadtime
 //-----------------------------------------------------------------------------------------------------------------
-  module x_oneshot (d,clock,q,enable);
+  module x_oneshot (d,clock,slowclk,deadtime_i,q);
+
+  parameter ENABLE   = 1;
+
+  parameter NBITS    = 4;
 
   input  d;
   input  clock;
+  input [NBITS-1:0] deadtime_i;
+  input  slowclk;
   output q;
-  input  enable;
 
 // State Machine declarations
   reg [2:0] sm;    // synthesis attribute safe_implementation of sm is "yes";
   parameter idle  =  0;
   parameter hold  =  1;
 
+  reg [NBITS-1:0] deadtime;
+  always @(posedge slowclk) begin
+    deadtime <= deadtime_i;
+  end
+
+  reg [NBITS-1:0] halt = 3'd0;
+  always @(posedge slowclk) begin
+    if (d && (!ENABLE || sm==idle))
+      halt <= deadtime-1;
+    else if (halt!=0)
+      halt <= halt - 1'b1;
+    else
+      halt <= 0;
+  end
+
+  wire done = (halt==0);
+
+
 // One-shot state machine
   initial sm = idle;
 
   always @(posedge clock) begin
     case (sm)
-      idle:    if (d) sm <= hold;
-      hold:    if(!d) sm <= idle;
-      default:        sm <= idle;
+      idle:    if (d)         sm <= hold;
+      hold:    if(!d && done) sm <= idle;
+      default:                sm <= idle;
     endcase
   end
 
 // Output FF
   reg  q = 0;
 
+  generate
   always @(posedge clock) begin
-    q <= d && (!enable || sm==idle);
+    q <= d && (!ENABLE || sm==idle);
   end
+  endgenerate
 
 // Debug state machine display
 `ifdef DEBUG_X_ONESHOT

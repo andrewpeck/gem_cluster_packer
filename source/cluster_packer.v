@@ -26,13 +26,12 @@
 
 module cluster_packer (
 
-    input        clock4x,
-    input        clock1x,
-    input        frame_clock,
-    input        reset_i,
-    output [7:0] cluster_count_o,
-    input        truncate_clusters,
-    input        oneshot_en,
+    input            clock4x,
+    input            clock1x,
+    input            frame_clock,
+    input            reset_i,
+    output reg [7:0] cluster_count,
+    input      [3:0] deadtime_i,
 
     input  [MXSBITS-1:0] vfat0,
     input  [MXSBITS-1:0] vfat1,
@@ -68,20 +67,23 @@ module cluster_packer (
     output reg [MXCLSTBITS-1:0] cluster6,
     output reg [MXCLSTBITS-1:0] cluster7,
 
-
     output overflow
 );
 
-parameter MXSBITS    = 64;         // S-bits per vfat
-parameter MXKEYS     = 3*MXSBITS;  // S-bits per partition
-parameter MXPADS     = 24*MXSBITS; // S-bits per chamber
-parameter MXROWS     = 8;          // Eta partitions per chamber
-parameter MXCNTBITS  = 3;          // Number of count   bits per cluster
-parameter MXADRBITS  = 11;         // Number of address bits per cluster
-parameter MXCLSTBITS = 14;         // Number of total   bits per cluster
-parameter MXOUTBITS  = 56;         // Number of total   bits per packet
-parameter MXCLUSTERS = 8;          // Number of clusters per bx
+  parameter ONESHOT_EN        = 1;
+  parameter TRUNCATE_CLUSTERS = 1;
 
+  parameter MXSBITS    = 64;         // S-bits per vfat
+  parameter MXKEYS     = 3*MXSBITS;  // S-bits per partition
+  parameter MXPADS     = 24*MXSBITS; // S-bits per chamber
+  parameter MXROWS     = 8;          // Eta partitions per chamber
+  parameter MXCNTBITS  = 3;          // Number of count   bits per cluster
+  parameter MXADRBITS  = 11;         // Number of address bits per cluster
+  parameter MXCLSTBITS = 14;         // Number of total   bits per cluster
+  parameter MXOUTBITS  = 56;         // Number of total   bits per packet
+  parameter MXCLUSTERS = 8;          // Number of clusters per bx
+
+  parameter VFAT_V2    = 0;
 
 //----------------------------------------------------------------------------------------------------------------------
 // State machine power-up reset + global reset
@@ -167,16 +169,25 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   assign vfat_s0[22] = vfat22;
   assign vfat_s0[23] = vfat23;
 
+  reg [3:0] deadtime;
+  always @(posedge clock1x) begin
+    deadtime <= deadtime_i;
+  end
+
   genvar os_vfat;
   genvar os_sbit;
   generate
   for (os_vfat=0; os_vfat<24;      os_vfat=os_vfat+1'b1) begin  : os_vfatloop
     for (os_sbit=0; os_sbit<MXSBITS; os_sbit=os_sbit+1'b1) begin  : os_sbitloop
-      x_oneshot sbit_oneshot (
-        .d      (vfat_s0[os_vfat][os_sbit]),
-        .q      (vfat_s1[os_vfat][os_sbit]),
-        .clock  (clock1x),
-        .enable (oneshot_en)
+      x_oneshot #(
+        .ENABLE  (ONESHOT_EN)
+      )
+      sbit_oneshot (
+        .d          (vfat_s0[os_vfat][os_sbit]),
+        .q          (vfat_s1[os_vfat][os_sbit]),
+        .deadtime_i (deadtime),
+        .clock      (clock4x),
+        .slowclk    (clock1x)
       );
     end
   end
@@ -235,7 +246,6 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   reg  [MXPADS  -1:0] vpfs=0;
   wire [MXPADS*3-1:0] cnts;
 
-  parameter VFAT_V2 = 0;
   genvar ikey;
   genvar irow;
   genvar ibit;
@@ -257,7 +267,7 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
           always @(posedge clock4x) begin
             if      (ikey == 0) vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
             else if (ikey  < 9) vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10;
-            else if (ikey >= 9) vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10 || (!truncate_clusters && partition[irow][ikey:ikey-9]==10'b1111111110) ;
+            else if (ikey >= 9) vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10 || (!TRUNCATE_CLUSTERS && partition[irow][ikey:ikey-9]==10'b1111111110) ;
           end
 
           consecutive_count ucntseq (
@@ -275,16 +285,19 @@ parameter MXCLUSTERS = 8;          // Number of clusters per bx
   // generate an overflow flag. This can be used to change the fiber's frame
   // separator to flag this to the receiving devices
 
-  wire [7:0] cluster_count;
+  wire [7:0] cluster_count_comb;
 
   count_clusters u_count_clusters (
-    .clock4x(clock4x),
-    .vpfs(vpfs),
-    .cnt   (cluster_count),
-    .overflow(overflow_out)
+    .clock4x    (clock4x),
+    .vpfs_i     (vpfs),
+    .cnt_o      (cluster_count_comb),
+    .overflow_o (overflow_out)
   );
 
-  assign cluster_count_o = reset ? 8'd0 : cluster_count;
+  always @(posedge clock1x)
+    cluster_count <= reset ? 8'd0 : cluster_count_comb;
+
+  // FIXME: need to align overflow and cluster count to data
 
   // the output of the overflow flag should be delayed to lineup with the outputs from the priority encoding modules
   parameter [3:0] OVERFLOW_DELAY = 7;
