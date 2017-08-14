@@ -33,6 +33,8 @@ module cluster_packer (
     output reg [7:0] cluster_count,
     input      [3:0] deadtime_i,
 
+    input            trig_stop_i,
+
     input  [MXSBITS-1:0] vfat0,
     input  [MXSBITS-1:0] vfat1,
     input  [MXSBITS-1:0] vfat2,
@@ -105,8 +107,8 @@ module cluster_packer (
 
   reg powerup_ff  = 0;
   //srl16e_bbl #(1) u_startup (.clock(clock4x), .ce(!powerup), .adr(powerup_dly),  .d(1'b1), .q(powerup));
-  SRL16E u_startup (.CLK(clock4x),.CE(!powerup),.D(1'b1),.A0(powerup_dly[0]),.A1(powerup_dly[1]),.A2(powerup_dly[2]),.A3(powerup_dly[3]),.Q(powerup));
-  always @(posedge clock4x) begin
+  SRL16E u_startup (.CLK(clock1x),.CE(!powerup),.D(1'b1),.A0(powerup_dly[0]),.A1(powerup_dly[1]),.A2(powerup_dly[2]),.A3(powerup_dly[3]),.Q(powerup));
+  always @(posedge clock1x) begin
     powerup_ff <= powerup;
   end
 
@@ -368,15 +370,19 @@ module cluster_packer (
     end
   endgenerate
 
+  reg trig_stop;
+  always @(posedge clock1x)
+    trig_stop <= trig_stop_i;
+
   always @(posedge clock4x) begin
-         cluster0 <= (reset) ? {3'd0,11'h7FE} : cluster[0];
-         cluster1 <= (reset) ? {3'd0,11'h7FE} : cluster[1];
-         cluster2 <= (reset) ? {3'd0,11'h7FE} : cluster[2];
-         cluster3 <= (reset) ? {3'd0,11'h7FE} : cluster[3];
-         cluster4 <= (reset) ? {3'd0,11'h7FE} : cluster[4];
-         cluster5 <= (reset) ? {3'd0,11'h7FE} : cluster[5];
-         cluster6 <= (reset) ? {3'd0,11'h7FE} : cluster[6];
-         cluster7 <= (reset) ? {3'd0,11'h7FE} : cluster[7];
+         cluster0 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[0];
+         cluster1 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[1];
+         cluster2 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[2];
+         cluster3 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[3];
+         cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[4];
+         cluster5 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[5];
+         cluster6 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[6];
+         cluster7 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[7];
   end
 
 //----------------------------------------------------------------------------------------------------------------------
