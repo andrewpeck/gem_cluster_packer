@@ -63,7 +63,7 @@ parameter MXCNTBITS=3;
 // vectorize inputs
 //----------------------------------------------------------------------------------------------------------------------
 
-    `define input_latch 1
+    //`define input_latch 1
 
     `ifdef input_latch
 
@@ -73,44 +73,44 @@ parameter MXCNTBITS=3;
     // this allows us to just sort based on address (preferring smallest
     // address) and takes care automatically of flagging invalid clusters with invalid addresses
     always @(posedge clock4x) begin
-     adr[0]  <= {11{~vpfs[0 ]}} | adr_in0;              cnt[0]  <= cnt_in0;
-     adr[1]  <= {11{~vpfs[1 ]}} | adr_in1;              cnt[1]  <= cnt_in1;
-     adr[2]  <= {11{~vpfs[2 ]}} | adr_in2;              cnt[2]  <= cnt_in2;
-     adr[3]  <= {11{~vpfs[3 ]}} | adr_in3;              cnt[3]  <= cnt_in3;
-     adr[4]  <= {11{~vpfs[4 ]}} | adr_in4;              cnt[4]  <= cnt_in4;
-     adr[5]  <= {11{~vpfs[5 ]}} | adr_in5;              cnt[5]  <= cnt_in5;
-     adr[6]  <= {11{~vpfs[6 ]}} | adr_in6;              cnt[6]  <= cnt_in6;
-     adr[7]  <= {11{~vpfs[7 ]}} | adr_in7;              cnt[7]  <= cnt_in7;
-     adr[8]  <= {11{~vpfs[8 ]}} | adr_in8;              cnt[8]  <= cnt_in8;
-     adr[9]  <= {11{~vpfs[9 ]}} | adr_in9;              cnt[9]  <= cnt_in9;
-     adr[10] <= {11{~vpfs[10]}} | adr_in10;             cnt[10] <= cnt_in10;
-     adr[11] <= {11{~vpfs[11]}} | adr_in11;             cnt[11] <= cnt_in11;
-     adr[12] <= {11{~vpfs[12]}} | adr_in12;             cnt[12] <= cnt_in12;
-     adr[13] <= {11{~vpfs[13]}} | adr_in13;             cnt[13] <= cnt_in13;
-     adr[14] <= {11{~vpfs[14]}} | adr_in14;             cnt[14] <= cnt_in14;
-     adr[15] <= {11{~vpfs[15]}} | adr_in15;             cnt[15] <= cnt_in15;
+     adr[0]  <=  adr_in0;              cnt[0]  <= cnt_in0;
+     adr[1]  <=  adr_in1;              cnt[1]  <= cnt_in1;
+     adr[2]  <=  adr_in2;              cnt[2]  <= cnt_in2;
+     adr[3]  <=  adr_in3;              cnt[3]  <= cnt_in3;
+     adr[4]  <=  adr_in4;              cnt[4]  <= cnt_in4;
+     adr[5]  <=  adr_in5;              cnt[5]  <= cnt_in5;
+     adr[6]  <=  adr_in6;              cnt[6]  <= cnt_in6;
+     adr[7]  <=  adr_in7;              cnt[7]  <= cnt_in7;
+     adr[8]  <=  adr_in8;              cnt[8]  <= cnt_in8;
+     adr[9]  <=  adr_in9;              cnt[9]  <= cnt_in9;
+     adr[10] <=  adr_in10;             cnt[10] <= cnt_in10;
+     adr[11] <=  adr_in11;             cnt[11] <= cnt_in11;
+     adr[12] <=  adr_in12;             cnt[12] <= cnt_in12;
+     adr[13] <=  adr_in13;             cnt[13] <= cnt_in13;
+     adr[14] <=  adr_in14;             cnt[14] <= cnt_in14;
+     adr[15] <=  adr_in15;             cnt[15] <= cnt_in15;
    end
 
   `else
 
     wire [MXADRBITS-1:0] adr [15:0];   wire [MXCNTBITS-1:0] cnt [15:0];
 
-    assign adr[0]  = {11{~vpfs[0 ]}} | adr_in0;             assign cnt[0]  = cnt_in0;
-    assign adr[1]  = {11{~vpfs[1 ]}} | adr_in1;             assign cnt[1]  = cnt_in1;
-    assign adr[2]  = {11{~vpfs[2 ]}} | adr_in2;             assign cnt[2]  = cnt_in2;
-    assign adr[3]  = {11{~vpfs[3 ]}} | adr_in3;             assign cnt[3]  = cnt_in3;
-    assign adr[4]  = {11{~vpfs[4 ]}} | adr_in4;             assign cnt[4]  = cnt_in4;
-    assign adr[5]  = {11{~vpfs[5 ]}} | adr_in5;             assign cnt[5]  = cnt_in5;
-    assign adr[6]  = {11{~vpfs[6 ]}} | adr_in6;             assign cnt[6]  = cnt_in6;
-    assign adr[7]  = {11{~vpfs[7 ]}} | adr_in7;             assign cnt[7]  = cnt_in7;
-    assign adr[8]  = {11{~vpfs[8 ]}} | adr_in8;             assign cnt[8]  = cnt_in8;
-    assign adr[9]  = {11{~vpfs[9 ]}} | adr_in9;             assign cnt[9]  = cnt_in9;
-    assign adr[10] = {11{~vpfs[10]}} | adr_in10;            assign cnt[10] = cnt_in10;
-    assign adr[11] = {11{~vpfs[11]}} | adr_in11;            assign cnt[11] = cnt_in11;
-    assign adr[12] = {11{~vpfs[12]}} | adr_in12;            assign cnt[12] = cnt_in12;
-    assign adr[13] = {11{~vpfs[13]}} | adr_in13;            assign cnt[13] = cnt_in13;
-    assign adr[14] = {11{~vpfs[14]}} | adr_in14;            assign cnt[14] = cnt_in14;
-    assign adr[15] = {11{~vpfs[15]}} | adr_in15;            assign cnt[15] = cnt_in15;
+    assign adr[0]  = adr_in0;             assign cnt[0]  = cnt_in0;
+    assign adr[1]  = adr_in1;             assign cnt[1]  = cnt_in1;
+    assign adr[2]  = adr_in2;             assign cnt[2]  = cnt_in2;
+    assign adr[3]  = adr_in3;             assign cnt[3]  = cnt_in3;
+    assign adr[4]  = adr_in4;             assign cnt[4]  = cnt_in4;
+    assign adr[5]  = adr_in5;             assign cnt[5]  = cnt_in5;
+    assign adr[6]  = adr_in6;             assign cnt[6]  = cnt_in6;
+    assign adr[7]  = adr_in7;             assign cnt[7]  = cnt_in7;
+    assign adr[8]  = adr_in8;             assign cnt[8]  = cnt_in8;
+    assign adr[9]  = adr_in9;             assign cnt[9]  = cnt_in9;
+    assign adr[10] = adr_in10;            assign cnt[10] = cnt_in10;
+    assign adr[11] = adr_in11;            assign cnt[11] = cnt_in11;
+    assign adr[12] = adr_in12;            assign cnt[12] = cnt_in12;
+    assign adr[13] = adr_in13;            assign cnt[13] = cnt_in13;
+    assign adr[14] = adr_in14;            assign cnt[14] = cnt_in14;
+    assign adr[15] = adr_in15;            assign cnt[15] = cnt_in15;
 
   `endif
 
@@ -190,7 +190,7 @@ parameter MXCNTBITS=3;
 
     end
 
-    // stage 3: swap odd pairs
+    // stage 3: swap odd pairs (1,2), (3,4), (5,6), (7,8), (9,10), (11,12), (13,14)
     //------------------------------------------------------------------------------------------------------------------
 
     wire [2:0]           cnt_s3 [15:0];

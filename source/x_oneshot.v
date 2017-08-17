@@ -38,7 +38,7 @@
   reg [NBITS-1:0] halt = 3'd0;
   always @(posedge slowclk) begin
     if (d && (!ENABLE || sm==idle))
-      halt <= deadtime-1;
+      halt <= deadtime-1'b1;
     else if (halt!=0)
       halt <= halt - 1'b1;
     else

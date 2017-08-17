@@ -96,7 +96,7 @@ module truncate_clusters (
       else                  segment_ff[iseg] <= segment_copy [iseg];
     end
 
-    assign segment_out[iseg] = latch_en[iseg] ? segment[iseg] : segment_ff[iseg];
+    assign segment_out[iseg] = segment_ff[iseg];
 
   end
   endgenerate
