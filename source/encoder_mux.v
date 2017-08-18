@@ -42,23 +42,23 @@ module encoder_mux (
 // latch_enable
 //----------------------------------------------------------------------------------------------------------------------
 
-  wire [10:0] vec_adr0 [1:0];
-  wire [10:0] vec_adr1 [1:0];
-  wire [10:0] vec_adr2 [1:0];
-  wire [10:0] vec_adr3 [1:0];
-  wire [10:0] vec_adr4 [1:0];
-  wire [10:0] vec_adr5 [1:0];
-  wire [10:0] vec_adr6 [1:0];
-  wire [10:0] vec_adr7 [1:0];
+  wire [10:0] encoder_adr0 [1:0];
+  wire [10:0] encoder_adr1 [1:0];
+  wire [10:0] encoder_adr2 [1:0];
+  wire [10:0] encoder_adr3 [1:0];
+  wire [10:0] encoder_adr4 [1:0];
+  wire [10:0] encoder_adr5 [1:0];
+  wire [10:0] encoder_adr6 [1:0];
+  wire [10:0] encoder_adr7 [1:0];
 
-  wire  [2:0] vec_cnt0 [1:0];
-  wire  [2:0] vec_cnt1 [1:0];
-  wire  [2:0] vec_cnt2 [1:0];
-  wire  [2:0] vec_cnt3 [1:0];
-  wire  [2:0] vec_cnt4 [1:0];
-  wire  [2:0] vec_cnt5 [1:0];
-  wire  [2:0] vec_cnt6 [1:0];
-  wire  [2:0] vec_cnt7 [1:0];
+  wire  [2:0] encoder_cnt0 [1:0];
+  wire  [2:0] encoder_cnt1 [1:0];
+  wire  [2:0] encoder_cnt2 [1:0];
+  wire  [2:0] encoder_cnt3 [1:0];
+  wire  [2:0] encoder_cnt4 [1:0];
+  wire  [2:0] encoder_cnt5 [1:0];
+  wire  [2:0] encoder_cnt6 [1:0];
+  wire  [2:0] encoder_cnt7 [1:0];
 
   reg mux_sel = 0;
   always @(posedge frame_clock)
@@ -87,14 +87,14 @@ module encoder_mux (
   always @(posedge clock4x)
     clock_lac <= clock_sampled_dly;
 
-  assign {cnt0,adr0} = clock_lac ? {vec_cnt0[0], vec_adr0[0]} : {vec_cnt0[1], vec_adr0[1]}; // {vec_cnt0[0], vec_adr0[0]}]};
-  assign {cnt1,adr1} = clock_lac ? {vec_cnt1[0], vec_adr1[0]} : {vec_cnt1[1], vec_adr1[1]}; // {vec_cnt1[0], vec_adr1[0]}]};
-  assign {cnt2,adr2} = clock_lac ? {vec_cnt2[0], vec_adr2[0]} : {vec_cnt2[1], vec_adr2[1]}; // {vec_cnt2[0], vec_adr2[0]}]};
-  assign {cnt3,adr3} = clock_lac ? {vec_cnt3[0], vec_adr3[0]} : {vec_cnt3[1], vec_adr3[1]}; // {vec_cnt3[0], vec_adr3[0]}]};
-  assign {cnt4,adr4} = clock_lac ? {vec_cnt4[0], vec_adr4[0]} : {vec_cnt4[1], vec_adr4[1]}; // {vec_cnt4[0], vec_adr4[0]}]};
-  assign {cnt5,adr5} = clock_lac ? {vec_cnt5[0], vec_adr5[0]} : {vec_cnt5[1], vec_adr5[1]}; // {vec_cnt5[0], vec_adr5[0]}]};
-  assign {cnt6,adr6} = clock_lac ? {vec_cnt6[0], vec_adr6[0]} : {vec_cnt6[1], vec_adr6[1]}; // {vec_cnt6[0], vec_adr6[0]}]};
-  assign {cnt7,adr7} = clock_lac ? {vec_cnt7[0], vec_adr7[0]} : {vec_cnt7[1], vec_adr7[1]}; // {vec_cnt7[0], vec_adr7[0]}]};
+  assign {cnt0,adr0} = clock_lac ? {encoder_cnt0[1], encoder_adr0[1]} : {encoder_cnt0[0], encoder_adr0[0]}; // {encoder_cnt0[0], encoder_adr0[0]}]};
+  assign {cnt1,adr1} = clock_lac ? {encoder_cnt1[1], encoder_adr1[1]} : {encoder_cnt1[0], encoder_adr1[0]}; // {encoder_cnt1[0], encoder_adr1[0]}]};
+  assign {cnt2,adr2} = clock_lac ? {encoder_cnt2[1], encoder_adr2[1]} : {encoder_cnt2[0], encoder_adr2[0]}; // {encoder_cnt2[0], encoder_adr2[0]}]};
+  assign {cnt3,adr3} = clock_lac ? {encoder_cnt3[1], encoder_adr3[1]} : {encoder_cnt3[0], encoder_adr3[0]}; // {encoder_cnt3[0], encoder_adr3[0]}]};
+  assign {cnt4,adr4} = clock_lac ? {encoder_cnt4[1], encoder_adr4[1]} : {encoder_cnt4[0], encoder_adr4[0]}; // {encoder_cnt4[0], encoder_adr4[0]}]};
+  assign {cnt5,adr5} = clock_lac ? {encoder_cnt5[1], encoder_adr5[1]} : {encoder_cnt5[0], encoder_adr5[0]}; // {encoder_cnt5[0], encoder_adr5[0]}]};
+  assign {cnt6,adr6} = clock_lac ? {encoder_cnt6[1], encoder_adr6[1]} : {encoder_cnt6[0], encoder_adr6[0]}; // {encoder_cnt6[0], encoder_adr6[0]}]};
+  assign {cnt7,adr7} = clock_lac ? {encoder_cnt7[1], encoder_adr7[1]} : {encoder_cnt7[0], encoder_adr7[0]}; // {encoder_cnt7[0], encoder_adr7[0]}]};
 
 
   wire [1:0] fclk;
@@ -121,23 +121,23 @@ module encoder_mux (
 
         .frame_clock (fclk[iencoder]),
 
-        .adr0(vec_adr0[iencoder]),
-        .adr1(vec_adr1[iencoder]),
-        .adr2(vec_adr2[iencoder]),
-        .adr3(vec_adr3[iencoder]),
-        .adr4(vec_adr4[iencoder]),
-        .adr5(vec_adr5[iencoder]),
-        .adr6(vec_adr6[iencoder]),
-        .adr7(vec_adr7[iencoder]),
+        .adr0(encoder_adr0[iencoder]),
+        .adr1(encoder_adr1[iencoder]),
+        .adr2(encoder_adr2[iencoder]),
+        .adr3(encoder_adr3[iencoder]),
+        .adr4(encoder_adr4[iencoder]),
+        .adr5(encoder_adr5[iencoder]),
+        .adr6(encoder_adr6[iencoder]),
+        .adr7(encoder_adr7[iencoder]),
 
-        .cnt0(vec_cnt0[iencoder]),
-        .cnt1(vec_cnt1[iencoder]),
-        .cnt2(vec_cnt2[iencoder]),
-        .cnt3(vec_cnt3[iencoder]),
-        .cnt4(vec_cnt4[iencoder]),
-        .cnt5(vec_cnt5[iencoder]),
-        .cnt6(vec_cnt6[iencoder]),
-        .cnt7(vec_cnt7[iencoder])
+        .cnt0(encoder_cnt0[iencoder]),
+        .cnt1(encoder_cnt1[iencoder]),
+        .cnt2(encoder_cnt2[iencoder]),
+        .cnt3(encoder_cnt3[iencoder]),
+        .cnt4(encoder_cnt4[iencoder]),
+        .cnt5(encoder_cnt5[iencoder]),
+        .cnt6(encoder_cnt6[iencoder]),
+        .cnt7(encoder_cnt7[iencoder])
     );
     end
   endgenerate

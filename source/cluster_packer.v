@@ -143,8 +143,8 @@ module cluster_packer (
 // clock 0: fire oneshots to prevent stuck bits and shorten the monostables
 //----------------------------------------------------------------------------------------------------------------------
 
-  wire [MXSBITS-1:0] vfat_s0 [24:0];
-  wire [MXSBITS-1:0] vfat_s1 [24:0];
+  wire [MXSBITS-1:0] vfat_s0 [23:0];
+  wire [MXSBITS-1:0] vfat_s1 [23:0];
 
   assign vfat_s0[0]  = vfat0;
   assign vfat_s0[1]  = vfat1;
@@ -204,7 +204,7 @@ module cluster_packer (
 
   reg [MXKEYS-1:0] partition [7:0];
 
-  always @(posedge clock4x) begin
+  always @(*) begin
     `ifdef invert_partitions  // need to make a choice about whether strip-0 is in partition 0 or 7
       partition[7] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
       partition[6] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
@@ -374,7 +374,7 @@ module cluster_packer (
   always @(posedge clock1x)
     trig_stop <= trig_stop_i;
 
-  always @(posedge clock4x) begin
+  always @(posedge clock1x) begin
          cluster0 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[0];
          cluster1 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[1];
          cluster2 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[2];

@@ -46,8 +46,11 @@ module truncate_clusters (
 
   input frame_clock,
 
+  output reg [2:0] pass,
+
   input  [767:0] vpfs_in,
   output [767:0] vpfs_out
+
 );
 
   parameter MXSEGS  = 12;
@@ -58,14 +61,26 @@ module truncate_clusters (
   always @(posedge clock)
     clock_sampled [7:0] <= {clock_sampled[6:0],frame_clock};
 
-  reg latch_on_next = 0;
-  always @(posedge clock)
-      latch_on_next <= (clock_sampled == 8'b00111100);
+  // sorry for the magic number;
+  // we are sampling the value of the slow frame clock on our fast 160 MHz clock, looking to latch the inputs at the
+  // appropriate time based on looking for a rising edge of the latch clock
+  // there are 8 160MHz clocks per 20MHz clock (hence the 8-bit number for the clock-sampled shift register)
+  // it should be clear if you draw a timing diagram.. but imagine in two clock cycles clock sampled will be
+  // 11110000 which means the next clock will be at the rising edge..
+
+  wire latch_on_next = (clock_sampled == 8'b00111100);
 
   (* KEEP = "TRUE" *)
   reg [MXSEGS-1:0] latch_en=0;
   always @(posedge clock)
     latch_en <= {MXSEGS{latch_on_next}};
+
+  always @(posedge clock) begin
+    if (latch_en)
+      pass <= 0;
+    else
+      pass <= pass + 1'b1;
+  end;
 
 
 
