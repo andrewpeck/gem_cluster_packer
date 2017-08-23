@@ -33,10 +33,14 @@ module first8of1536 (
 // Interconnects
 //----------------------------------------------------------------------------------------------------------------------
 
+  // for some reason this loop does not work in planahead as a single loop and has to be split in two.. no idea why
   wire [2:0] cnts_unrolled [1535:0]; 
   genvar ipad; 
   generate
-    for (ipad=0; ipad<1536; ipad=ipad+1) begin:padloop
+    for (ipad=0; ipad<768; ipad=ipad+1) begin:padloop0to767
+      assign cnts_unrolled [ipad] = cnts_in [ipad*3+2:ipad*3];
+    end
+    for (ipad=768; ipad<1536; ipad=ipad+1) begin:padloop768to1535
       assign cnts_unrolled [ipad] = cnts_in [ipad*3+2:ipad*3];
     end
   endgenerate
