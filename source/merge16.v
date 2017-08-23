@@ -61,10 +61,10 @@ parameter MXADRBITS=11;
 parameter MXCNTBITS=3;
 
 //`define input_latch 1
-// `define s0_latch 1
-   `define s1_latch 1
-// `define s2_latch 1
-  `define s3_latch 1
+ `define s0_latch 1
+//   `define s1_latch 1
+ `define s2_latch 1
+ `define s3_latch 1
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -236,16 +236,7 @@ parameter MXCNTBITS=3;
       assign {adr6_o,cnt6_o} = {adr_s3[6],cnt_s3[6]};
       assign {adr7_o,cnt7_o} = {adr_s3[7],cnt_s3[7]};
 
-//    assign {adr0_o,cnt0_o} = {adr_in0,cnt_in0};
-//    assign {adr1_o,cnt1_o} = {adr_in1,cnt_in1};
-//    assign {adr2_o,cnt2_o} = {adr_in2,cnt_in2};
-//    assign {adr3_o,cnt3_o} = {adr_in3,cnt_in3};
-//    assign {adr4_o,cnt4_o} = {adr_in4,cnt_in4};
-//    assign {adr5_o,cnt5_o} = {adr_in5,cnt_in5};
-//    assign {adr6_o,cnt6_o} = {adr_in6,cnt_in6};
-//    assign {adr7_o,cnt7_o} = {adr_in7,cnt_in7};
-
-    assign pass_out = pass_s3;
+      assign pass_out = pass_s3;
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule

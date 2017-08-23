@@ -193,7 +193,7 @@ parameter MXPADS = 768;
   assign pass_s7 = pass_s6;
 
   // Stage 6: 1 of 3 Parallel Encoder
-  always @(*) begin
+  always @(posedge clock) begin
     if      (vpf_s7[0]) {vpf_s8[0], cnt_s8[0], key_s8[0]} = {vpf_s7[0], cnt_s7[0], {2'b00, key_s7[0]}};
     else if (vpf_s7[1]) {vpf_s8[0], cnt_s8[0], key_s8[0]} = {vpf_s7[1], cnt_s7[1], {2'b01, key_s7[1]}};
     else                {vpf_s8[0], cnt_s8[0], key_s8[0]} = {vpf_s7[2], cnt_s7[2], {2'b10, key_s7[2]}};

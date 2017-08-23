@@ -374,7 +374,7 @@ module cluster_packer (
   always @(posedge clock1x)
     trig_stop <= trig_stop_i;
 
-  always @(posedge clock1x) begin
+  always @(negedge clock1x) begin
          cluster0 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[0];
          cluster1 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[1];
          cluster2 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[2];
