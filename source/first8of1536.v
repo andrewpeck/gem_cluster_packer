@@ -9,6 +9,8 @@ module first8of1536 (
     input  [1536  -1:0] vpfs_in,
     input  [1536*3-1:0] cnts_in,
 
+    output     [2:0]      pass,
+
     output reg [2:0]      cnt0,
     output reg [2:0]      cnt1,
     output reg [2:0]      cnt2,
@@ -17,6 +19,14 @@ module first8of1536 (
     output reg [2:0]      cnt5,
     output reg [2:0]      cnt6,
     output reg [2:0]      cnt7,
+    output reg [2:0]      cnt8,
+    output reg [2:0]      cnt9,
+    output reg [2:0]      cnt10,
+    output reg [2:0]      cnt11,
+    output reg [2:0]      cnt12,
+    output reg [2:0]      cnt13,
+    output reg [2:0]      cnt14,
+    output reg [2:0]      cnt15,
 
     output reg [10:0]      adr0,
     output reg [10:0]      adr1,
@@ -25,7 +35,15 @@ module first8of1536 (
     output reg [10:0]      adr4,
     output reg [10:0]      adr5,
     output reg [10:0]      adr6,
-    output reg [10:0]      adr7
+    output reg [10:0]      adr7,
+    output reg [10:0]      adr8,
+    output reg [10:0]      adr9,
+    output reg [10:0]      adr10,
+    output reg [10:0]      adr11,
+    output reg [10:0]      adr12,
+    output reg [10:0]      adr13,
+    output reg [10:0]      adr14,
+    output reg [10:0]      adr15
 );
 
 
@@ -69,8 +87,6 @@ module first8of1536 (
   wire [2:0] pass_truncate      [1:0];
   wire [2:0] pass_encoder       [1:0];
   reg  [2:0] pass_encoder_latch ;
-  reg  [2:0] pass_encoder_s1    ;
-  wire [2:0] pass_merger        ;
 
 
   genvar ienc;
@@ -126,10 +142,12 @@ wire [MXCNTBITS-1:0] cnt_merged [7:0];
 
   // latch outputs of priority encoder when it produces its 8 results, stable for merger
 
+assign pass = pass_encoder_latch;
+
 always @(posedge clock4x) begin
 
   pass_encoder_latch  <= pass_encoder[0];
-  pass_encoder_s1     <= pass_encoder[0];
+
 
   if (pass_encoder[0]==3'd7) begin
 
@@ -160,101 +178,56 @@ always @(posedge clock4x) begin
       cnt_s1  [6]  <= cnt_latch[0][6];
       cnt_s1  [7]  <= cnt_enc  [0]   ; // lookahead on #7
 
-      cnt_s1  [7]   <= cnt_latch[1][0];
-      cnt_s1  [8]   <= cnt_latch[1][1];
-      cnt_s1  [9]   <= cnt_latch[1][2];
-      cnt_s1  [10]  <= cnt_latch[1][3];
-      cnt_s1  [11]  <= cnt_latch[1][4];
-      cnt_s1  [12]  <= cnt_latch[1][5];
-      cnt_s1  [13]  <= cnt_latch[1][6];
-      cnt_s1  [14]  <= cnt_enc  [1]   ; // lookahead on #7
+      cnt_s1  [8]  <= cnt_latch[1][0];
+      cnt_s1  [9]  <= cnt_latch[1][1];
+      cnt_s1  [10] <= cnt_latch[1][2];
+      cnt_s1  [11] <= cnt_latch[1][3];
+      cnt_s1  [12] <= cnt_latch[1][4];
+      cnt_s1  [13] <= cnt_latch[1][5];
+      cnt_s1  [14] <= cnt_latch[1][6];
+      cnt_s1  [15] <= cnt_enc  [1]   ; // lookahead on #7
 
   end
 end
-
-
-merge16 u_merge16 (
-    .clock4x(clock4x),
-
-    .pass_in (pass_encoder_s1),
-    .pass_out (pass_merger),
-
-    .adr_in0  ( adr_s1[0]),
-    .adr_in1  ( adr_s1[1]),
-    .adr_in2  ( adr_s1[2]),
-    .adr_in3  ( adr_s1[3]),
-    .adr_in4  ( adr_s1[4]),
-    .adr_in5  ( adr_s1[5]),
-    .adr_in6  ( adr_s1[6]),
-    .adr_in7  ( adr_s1[7]),
-    .adr_in8  ( adr_s1[8]),
-    .adr_in9  ( adr_s1[9]),
-    .adr_in10 ( adr_s1[10]),
-    .adr_in11 ( adr_s1[11]),
-    .adr_in12 ( adr_s1[12]),
-    .adr_in13 ( adr_s1[13]),
-    .adr_in14 ( adr_s1[14]),
-    .adr_in15 ( adr_s1[15]),
-
-    .cnt_in0  ( cnt_s1[0]),
-    .cnt_in1  ( cnt_s1[1]),
-    .cnt_in2  ( cnt_s1[2]),
-    .cnt_in3  ( cnt_s1[3]),
-    .cnt_in4  ( cnt_s1[4]),
-    .cnt_in5  ( cnt_s1[5]),
-    .cnt_in6  ( cnt_s1[6]),
-    .cnt_in7  ( cnt_s1[7]),
-    .cnt_in8  ( cnt_s1[8]),
-    .cnt_in9  ( cnt_s1[9]),
-    .cnt_in10 ( cnt_s1[10]),
-    .cnt_in11 ( cnt_s1[11]),
-    .cnt_in12 ( cnt_s1[12]),
-    .cnt_in13 ( cnt_s1[13]),
-    .cnt_in14 ( cnt_s1[14]),
-    .cnt_in15 ( cnt_s1[15]),
-
-
-    .adr0_o(adr_merged[0]),
-    .adr1_o(adr_merged[1]),
-    .adr2_o(adr_merged[2]),
-    .adr3_o(adr_merged[3]),
-    .adr4_o(adr_merged[4]),
-    .adr5_o(adr_merged[5]),
-    .adr6_o(adr_merged[6]),
-    .adr7_o(adr_merged[7]),
-
-    .cnt0_o(cnt_merged[0]),
-    .cnt1_o(cnt_merged[1]),
-    .cnt2_o(cnt_merged[2]),
-    .cnt3_o(cnt_merged[3]),
-    .cnt4_o(cnt_merged[4]),
-    .cnt5_o(cnt_merged[5]),
-    .cnt6_o(cnt_merged[6]),
-    .cnt7_o(cnt_merged[7])
-);
 
 //-------------------------------------------------------------------------------------------------------------------
 // Outputs
 // ------------------------------------------------------------------------------------------------------------------
 
   always @(*) begin
-    adr0 <= adr_merged[0];
-    adr1 <= adr_merged[1];
-    adr2 <= adr_merged[2];
-    adr3 <= adr_merged[3];
-    adr4 <= adr_merged[4];
-    adr5 <= adr_merged[5];
-    adr6 <= adr_merged[6];
-    adr7 <= adr_merged[7];
+    adr0  <= adr_s1[0];
+    adr1  <= adr_s1[1];
+    adr2  <= adr_s1[2];
+    adr3  <= adr_s1[3];
+    adr4  <= adr_s1[4];
+    adr5  <= adr_s1[5];
+    adr6  <= adr_s1[6];
+    adr7  <= adr_s1[7];
+    adr8  <= adr_s1[8];
+    adr9  <= adr_s1[9];
+    adr10 <= adr_s1[10];
+    adr11 <= adr_s1[11];
+    adr12 <= adr_s1[12];
+    adr13 <= adr_s1[13];
+    adr14 <= adr_s1[14];
+    adr15 <= adr_s1[15];
 
-    cnt0 <= cnt_merged[0];
-    cnt1 <= cnt_merged[1];
-    cnt2 <= cnt_merged[2];
-    cnt3 <= cnt_merged[3];
-    cnt4 <= cnt_merged[4];
-    cnt5 <= cnt_merged[5];
-    cnt6 <= cnt_merged[6];
-    cnt7 <= cnt_merged[7];
+    cnt0  <= cnt_s1[0];
+    cnt1  <= cnt_s1[1];
+    cnt2  <= cnt_s1[2];
+    cnt3  <= cnt_s1[3];
+    cnt4  <= cnt_s1[4];
+    cnt5  <= cnt_s1[5];
+    cnt6  <= cnt_s1[6];
+    cnt7  <= cnt_s1[7];
+    cnt8  <= cnt_s1[8];
+    cnt9  <= cnt_s1[9];
+    cnt10 <= cnt_s1[10];
+    cnt11 <= cnt_s1[11];
+    cnt12 <= cnt_s1[12];
+    cnt13 <= cnt_s1[13];
+    cnt14 <= cnt_s1[14];
+    cnt15 <= cnt_s1[15];
   end
 
 //----------------------------------------------------------------------------------------------------------------------
