@@ -3,20 +3,20 @@ module count_clusters (
 
     input  [1535:0] vpfs_i,
 
-    output reg [7:0] cnt_o,
+    output reg [10:0] cnt_o,
 
     output reg overflow_o
 );
 
-  reg [2:0] cnt_s1 [255:0];
-  reg [3:0] cnt_s2 [127:0];
-  reg [4:0] cnt_s3  [63:0];
-  reg [5:0] cnt_s4  [31:0];
-  reg [6:0] cnt_s5  [15:0];
-  reg [7:0] cnt_s6  [ 7:0];
-  reg [7:0] cnt_s7  [ 1:0];
+  reg [2:0] cnt_s1 [255:0]; // count to 6
+  reg [3:0] cnt_s2 [127:0]; // count to 12
+  reg [4:0] cnt_s3  [63:0]; // count to 24
+  reg [5:0] cnt_s4  [31:0]; // count to 48
+  reg [6:0] cnt_s5  [15:0]; // count to 96
+  reg [8:0] cnt_s6  [ 7:0]; // count to 192
+  reg [9:0] cnt_s7  [ 1:0]; // count to 768
 
-  reg [7:0] cnt;
+  reg [10:0] cnt;
 
   // register inputs
   reg  [1535:0] vpfs;

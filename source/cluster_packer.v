@@ -26,14 +26,14 @@
 
 module cluster_packer (
 
-    input            clock4x,
-    input            clock1x,
-    input            frame_clock,
-    input            reset_i,
-    output reg [7:0] cluster_count,
-    input      [3:0] deadtime_i,
+    input             clock4x,
+    input             clock1x,
+    input             frame_clock,
+    input             reset_i,
+    output reg [7:0]  cluster_count,
+    input      [3:0]  deadtime_i,
 
-    input            trig_stop_i,
+    input             trig_stop_i,
 
     input  [MXSBITS-1:0] vfat0,
     input  [MXSBITS-1:0] vfat1,
@@ -287,17 +287,25 @@ module cluster_packer (
   // generate an overflow flag. This can be used to change the fiber's frame
   // separator to flag this to the receiving devices
 
-  wire [7:0] cluster_count_comb;
+  wire [10:0] cluster_count_s0;
 
   count_clusters u_count_clusters (
     .clock4x    (clock4x),
     .vpfs_i     (vpfs),
-    .cnt_o      (cluster_count_comb),
+    .cnt_o      (cluster_count_s0),
     .overflow_o (overflow_out)
   );
 
-  always @(posedge clock1x)
-    cluster_count <= reset ? 8'd0 : cluster_count_comb;
+  always @(posedge clock1x) begin
+    if (reset)
+      cluster_count <= 0;
+    else if (cluster_count_s0==12'd255)
+        cluster_count <= 8'd254;
+    else if (|(cluster_count_s0[10:8])) // if >255, cap at 255
+        cluster_count <= 8'd255;
+    else
+        cluster_count <= cluster_count_s0;
+  end
 
   // FIXME: need to align overflow and cluster count to data
 
