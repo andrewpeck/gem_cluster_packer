@@ -5,7 +5,7 @@ module count_clusters (
 
     output reg [10:0] cnt_o,
 
-    output reg overflow_o
+    output overflow_o
 );
 
   reg [2:0] cnt_s1 [255:0]; // count to 6
@@ -16,7 +16,7 @@ module count_clusters (
   reg [8:0] cnt_s6  [ 7:0]; // count to 192
   reg [9:0] cnt_s7  [ 1:0]; // count to 768
 
-  reg [10:0] cnt;
+  reg [10:0] cnt; // count to 1536
 
   // register inputs
   reg  [1535:0] vpfs;
@@ -68,16 +68,16 @@ module count_clusters (
   endgenerate
 
   always @(posedge clock4x) begin
-    cnt_s7[0] <=   cnt_s6[0]  + cnt_s6[1]  + cnt_s6[2]  + cnt_s6[3];
-    cnt_s7[1] <=   cnt_s6[4]  + cnt_s6[5]  + cnt_s6[6]  + cnt_s6[7];
+    cnt_s7[0] <= cnt_s6[0]  + cnt_s6[1]  + cnt_s6[2]  + cnt_s6[3];
+    cnt_s7[1] <= cnt_s6[4]  + cnt_s6[5]  + cnt_s6[6]  + cnt_s6[7];
   end
 
   // delay count by bx to align with overflow
   always @(posedge clock4x) begin
-    cnt        <= cnt_s7[0] + cnt_s7[1];
-    cnt_o      <= cnt;
-    overflow_o <= (cnt > 8);
+    cnt_o <= cnt_s7[0] + cnt_s7[1];
   end
+
+	assign overflow_o = (cnt > 8);
 
   function [2:0] fast6count;  // do a fast count of 6 bits with just 3 LUTs (the best you can do in a single logic step)
   input [5:0] s;

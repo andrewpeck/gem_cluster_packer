@@ -298,13 +298,13 @@ module cluster_packer (
 
   always @(posedge clock1x) begin
     if (reset)
-      cluster_count <= 0;
+      cluster_count <= 8'd0;
     else if (cluster_count_s0==12'd255)
         cluster_count <= 8'd254;
     else if (|(cluster_count_s0[10:8])) // if >255, cap at 255
         cluster_count <= 8'd255;
     else
-        cluster_count <= cluster_count_s0;
+        cluster_count <= cluster_count_s0[7:0];
   end
 
   // FIXME: need to align overflow and cluster count to data
