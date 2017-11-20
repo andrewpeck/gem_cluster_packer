@@ -28,7 +28,6 @@ module cluster_packer (
 
     input             clock4x,
     input             clock1x,
-    input             frame_clock,
     input             reset_i,
     output reg [7:0]  cluster_count,
     input      [3:0]  deadtime_i,
@@ -195,6 +194,14 @@ module cluster_packer (
   end
   endgenerate
 
+  reg [3:0] clock_sampled;
+  reg latch_pulse;
+  always @(posedge clock4x) begin
+    clock_sampled <= {clock_sampled[2:0], clock1x};
+
+    latch_pulse   <= (clock_sampled==4'b0110);
+  end
+
 //----------------------------------------------------------------------------------------------------------------------
 // clock 1: Count cluster multiplicity for each pad
 //----------------------------------------------------------------------------------------------------------------------
@@ -283,6 +290,10 @@ module cluster_packer (
     end // key_loop
   endgenerate
 
+  reg latch_pulse_dly1;
+  always @(posedge clock4x)
+    latch_pulse_dly1 <= latch_pulse;
+
   // We count the number of cluster primaries. If it is greater than 8,
   // generate an overflow flag. This can be used to change the fiber's frame
   // separator to flag this to the receiving devices
@@ -334,32 +345,32 @@ module cluster_packer (
   wire [MXADRBITS-1:0] adr_encoder [MXCLUSTERS-1:0];
   wire [MXCNTBITS-1:0] cnt_encoder [MXCLUSTERS-1:0];
 
-  encoder_mux u_encoder_mux (
+  first8of1536 u_first8 (
+      .clock4x(clock4x),
 
-    .clock4x (clock4x),
+      .vpfs_in (vpfs),
+      .cnts_in (cnts),
 
-    .frame_clock (frame_clock),
+      .latch_pulse(latch_pulse_dly1),
 
-    .vpfs_in (vpfs),
-    .cnts_in (cnts),
+      .adr0  (adr_encoder [0]),
+      .adr1  (adr_encoder [1]),
+      .adr2  (adr_encoder [2]),
+      .adr3  (adr_encoder [3]),
+      .adr4  (adr_encoder [4]),
+      .adr5  (adr_encoder [5]),
+      .adr6  (adr_encoder [6]),
+      .adr7  (adr_encoder [7]),
 
-    .adr0 (adr_encoder[0]),
-    .adr1 (adr_encoder[1]),
-    .adr2 (adr_encoder[2]),
-    .adr3 (adr_encoder[3]),
-    .adr4 (adr_encoder[4]),
-    .adr5 (adr_encoder[5]),
-    .adr6 (adr_encoder[6]),
-    .adr7 (adr_encoder[7]),
+      .cnt0  (cnt_encoder [0]),
+      .cnt1  (cnt_encoder [1]),
+      .cnt2  (cnt_encoder [2]),
+      .cnt3  (cnt_encoder [3]),
+      .cnt4  (cnt_encoder [4]),
+      .cnt5  (cnt_encoder [5]),
+      .cnt6  (cnt_encoder [6]),
+      .cnt7  (cnt_encoder [7])
 
-    .cnt0 (cnt_encoder[0]),
-    .cnt1 (cnt_encoder[1]),
-    .cnt2 (cnt_encoder[2]),
-    .cnt3 (cnt_encoder[3]),
-    .cnt4 (cnt_encoder[4]),
-    .cnt5 (cnt_encoder[5]),
-    .cnt6 (cnt_encoder[6]),
-    .cnt7 (cnt_encoder[7])
   );
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -382,7 +393,7 @@ module cluster_packer (
   always @(posedge clock1x)
     trig_stop <= trig_stop_i;
 
-  always @(negedge clock1x) begin
+  always @(posedge clock4x) begin
          cluster0 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[0];
          cluster1 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[1];
          cluster2 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[2];

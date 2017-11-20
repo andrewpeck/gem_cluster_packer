@@ -5,7 +5,7 @@ module priority768 (
 
   input clock,
 
-  input frame_clock,
+  input latch_pulse,
 
   input  [2:0] pass_in,
   output reg [2:0] pass_out,
@@ -18,24 +18,9 @@ module priority768 (
   output reg  [10:0] adr,
   output reg   [2:0] cnt
 );
-
-  (* KEEP = "TRUE" *)
-  reg [7:0] clock_sampled = 0;
-  always @(posedge clock)
-    clock_sampled [7:0] <= {clock_sampled[6:0],frame_clock};
-
-  // sorry for the magic number;
-  // we are sampling the value of the slow frame clock on our fast 160 MHz clock, looking to latch the inputs at the
-  // appropriate time based on looking for a rising edge of the latch clock
-  // there are 8 160MHz clocks per 20MHz clock (hence the 8-bit number for the clock-sampled shift register)
-  // it should be clear if you draw a timing diagram.. but imagine in two clock cycles clock sampled will be
-  // 11110000 which means the next clock will be at the rising edge..
-
-  wire latch_on_next = (clock_sampled == 8'b00111100);
-
   reg latch_en=0;
   always @(posedge clock)
-    latch_en <= latch_on_next;
+    latch_en <= latch_pulse;
 
   parameter MXPADS = 768;
 
