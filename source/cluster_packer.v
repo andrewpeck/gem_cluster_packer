@@ -71,7 +71,6 @@ module cluster_packer (
     output overflow
 );
 
-  parameter ONESHOT_EN        = 1;
   parameter TRUNCATE_CLUSTERS = 1;
 
   parameter MXSBITS    = 64;         // S-bits per vfat
@@ -175,21 +174,43 @@ module cluster_packer (
     deadtime <= deadtime_i;
   end
 
+  reg latch_pulse_s1;
+
+  `ifdef ONESHOT
+  always @(posedge clock4x) begin
+  `else
+  always @(*) begin
+  `endif
+    latch_pulse_s1 <= latch_pulse;
+  end
+
   genvar os_vfat;
   genvar os_sbit;
   generate
   for (os_vfat=0; os_vfat<24;      os_vfat=os_vfat+1'b1) begin  : os_vfatloop
     for (os_sbit=0; os_sbit<MXSBITS; os_sbit=os_sbit+1'b1) begin  : os_sbitloop
-      x_oneshot #(
-        .ENABLE  (ONESHOT_EN)
-      )
-      sbit_oneshot (
-        .d          (vfat_s0[os_vfat][os_sbit]),
-        .q          (vfat_s1[os_vfat][os_sbit]),
-        .deadtime_i (deadtime),
-        .clock      (clock4x),
-        .slowclk    (clock1x)
-      );
+
+      `ifdef ONESHOT
+
+        x_oneshot sbit_oneshot (
+          .d          (vfat_s0[os_vfat][os_sbit]),
+          .q          (vfat_s1[os_vfat][os_sbit]),
+          .deadtime_i (deadtime),
+          .clock      (clock4x),
+          .slowclk    (clock1x)
+        );
+
+
+      `else
+
+        //--------------------------------------------------------------------------------------------------------------
+        // without the oneshot we can save 6.25 ns latency and make this transparent
+        //--------------------------------------------------------------------------------------------------------------
+
+        assign vfat_s1[os_vfat][os_sbit] = vfat_s0[os_vfat][os_sbit];
+
+      `endif
+
     end
   end
   endgenerate
@@ -290,10 +311,6 @@ module cluster_packer (
     end // key_loop
   endgenerate
 
-  reg latch_pulse_dly1;
-  always @(posedge clock4x)
-    latch_pulse_dly1 <= latch_pulse;
-
   // We count the number of cluster primaries. If it is greater than 8,
   // generate an overflow flag. This can be used to change the fiber's frame
   // separator to flag this to the receiving devices
@@ -351,7 +368,7 @@ module cluster_packer (
       .vpfs_in (vpfs),
       .cnts_in (cnts),
 
-      .latch_pulse(latch_pulse_dly1),
+      .latch_pulse(latch_pulse_s1),
 
       .adr0  (adr_encoder [0]),
       .adr1  (adr_encoder [1]),
