@@ -1,4 +1,8 @@
 `define invert_partitions
+// START: CLUSTER_PACKER_SETTINGS DO NOT EDIT --
+//`define oh_lite
+// END: CLUSTER_PACKER_SETTINGS DO NOT EDIT --
+
 //----------------------------------------------------------------------------------------------------------------------
 // cluster.packer.v
 //----------------------------------------------------------------------------------------------------------------------
@@ -71,19 +75,43 @@ module cluster_packer (
     output overflow
 );
 
+  parameter MXSBITS    = 64;              // S-bits per vfat
+
+  `ifdef oh_lite
+  parameter OH_LITE    = 1;
+  parameter MXKEYS     = 6*MXSBITS;       // Vfats  per partition
+  parameter MXROWS     = 2;               // Eta partitions per chamber
+  parameter MXCLUSTERS = 4;               // Number of clusters per bx
+  `else
+  parameter OH_LITE    = 0;
+  parameter MXKEYS     = 3*MXSBITS;       // Vfats  per partition
+  parameter MXROWS     = 8;               // Eta partitions per chamber
+  parameter MXCLUSTERS = 8;               // Number of clusters per bx
+  `endif
+
   parameter TRUNCATE_CLUSTERS = 1;
 
-  parameter MXSBITS    = 64;         // S-bits per vfat
-  parameter MXKEYS     = 3*MXSBITS;  // S-bits per partition
-  parameter MXPADS     = 24*MXSBITS; // S-bits per chamber
-  parameter MXROWS     = 8;          // Eta partitions per chamber
-  parameter MXCNTBITS  = 3;          // Number of count   bits per cluster
-  parameter MXADRBITS  = 11;         // Number of address bits per cluster
-  parameter MXCLSTBITS = 14;         // Number of total   bits per cluster
-  parameter MXOUTBITS  = 56;         // Number of total   bits per packet
-  parameter MXCLUSTERS = 8;          // Number of clusters per bx
-
+  parameter MXVFATS    = 24-12*OH_LITE;
+  parameter MXPADS     = (MXKEYS*MXROWS); // S-bits per chamber
+  parameter MXCNTBITS  = 3;               // Number of count   bits per cluster
+  parameter MXADRBITS  = 11;              // Number of address bits per cluster
+  parameter MXCLSTBITS = 14;              // Number of total   bits per cluster
+  parameter MXOUTBITS  = 56;              // Number of total   bits per packet
   parameter VFAT_V2    = 0;
+
+  initial $display ("Compiling cluster packer:");
+  initial $display ("    MXSBITS    = %d", MXSBITS);
+  initial $display ("    MXKEYS     = %d", MXKEYS);
+  initial $display ("    MXVFATS    = %d", MXVFATS);
+  initial $display ("    MXROWS     = %d", MXROWS);
+  initial $display ("    MXPADS     = %d", MXPADS);
+  initial $display ("    MXCNTBITS  = %d", MXCNTBITS);
+  initial $display ("    MXADRBITS  = %d", MXADRBITS);
+  initial $display ("    MXCLSTBITS = %d", MXCLSTBITS);
+  initial $display ("    MXOUTBITS  = %d", MXOUTBITS);
+  initial $display ("    MXCLUSTERS = %d", MXCLUSTERS);
+  initial $display ("    VFATV2     = %d", VFAT_V2);
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // State machine power-up reset + global reset
@@ -156,6 +184,7 @@ module cluster_packer (
   assign vfat_s0[9]  = vfat9;
   assign vfat_s0[10] = vfat10;
   assign vfat_s0[11] = vfat11;
+  `ifndef oh_lite
   assign vfat_s0[12] = vfat12;
   assign vfat_s0[13] = vfat13;
   assign vfat_s0[14] = vfat14;
@@ -168,13 +197,17 @@ module cluster_packer (
   assign vfat_s0[21] = vfat21;
   assign vfat_s0[22] = vfat22;
   assign vfat_s0[23] = vfat23;
+  `endif
 
   reg [3:0] deadtime;
   always @(posedge clock1x) begin
     deadtime <= deadtime_i;
   end
 
+
+  wire clock_lac, latch_pulse;
   reg latch_pulse_s1;
+  lac lac (clock1x, clock4x, clock_lac, latch_pulse);
 
   `ifdef ONESHOT
   always @(posedge clock4x) begin
@@ -187,7 +220,7 @@ module cluster_packer (
   genvar os_vfat;
   genvar os_sbit;
   generate
-  for (os_vfat=0; os_vfat<24;      os_vfat=os_vfat+1'b1) begin  : os_vfatloop
+  for (os_vfat=0; os_vfat<(MXPADS/MXSBITS); os_vfat=os_vfat+1'b1) begin  : os_vfatloop
     for (os_sbit=0; os_sbit<MXSBITS; os_sbit=os_sbit+1'b1) begin  : os_sbitloop
 
       `ifdef ONESHOT
@@ -215,14 +248,6 @@ module cluster_packer (
   end
   endgenerate
 
-  reg [3:0] clock_sampled;
-  reg latch_pulse;
-  always @(posedge clock4x) begin
-    clock_sampled <= {clock_sampled[2:0], clock1x};
-
-    latch_pulse   <= (clock_sampled==4'b0110);
-  end
-
 //----------------------------------------------------------------------------------------------------------------------
 // clock 1: Count cluster multiplicity for each pad
 //----------------------------------------------------------------------------------------------------------------------
@@ -234,14 +259,14 @@ module cluster_packer (
 
   always @(*) begin
     `ifdef invert_partitions  // need to make a choice about whether strip-0 is in partition 0 or 7
-      partition[7] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
-      partition[6] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
-      partition[5] <= {vfat_s1[18], vfat_s1[10],  vfat_s1[2]};
-      partition[4] <= {vfat_s1[19], vfat_s1[11],  vfat_s1[3]};
-      partition[3] <= {vfat_s1[20], vfat_s1[12],  vfat_s1[4]};
-      partition[2] <= {vfat_s1[21], vfat_s1[13],  vfat_s1[5]};
-      partition[1] <= {vfat_s1[22], vfat_s1[14],  vfat_s1[6]};
       partition[0] <= {vfat_s1[23], vfat_s1[15],  vfat_s1[7]};
+      partition[1] <= {vfat_s1[22], vfat_s1[14],  vfat_s1[6]};
+      partition[2] <= {vfat_s1[21], vfat_s1[13],  vfat_s1[5]};
+      partition[3] <= {vfat_s1[20], vfat_s1[12],  vfat_s1[4]};
+      partition[4] <= {vfat_s1[19], vfat_s1[11],  vfat_s1[3]};
+      partition[5] <= {vfat_s1[18], vfat_s1[10],  vfat_s1[2]};
+      partition[6] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
+      partition[7] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
     `else
       partition[0] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
       partition[1] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
@@ -255,32 +280,22 @@ module cluster_packer (
   end
 
   // zero pad the partition to handle the edge cases for counting
-  //--------------------------------------------------------------------------------
-
-
-  wire [(MXKEYS-1)+8:0] partition_padded [MXROWS-1:0];
-
-  reg pad = 0;
-
-  assign partition_padded[0] = {{8{pad}}, partition[0]};
-  assign partition_padded[1] = {{8{pad}}, partition[1]};
-  assign partition_padded[2] = {{8{pad}}, partition[2]};
-  assign partition_padded[3] = {{8{pad}}, partition[3]};
-  assign partition_padded[4] = {{8{pad}}, partition[4]};
-  assign partition_padded[5] = {{8{pad}}, partition[5]};
-  assign partition_padded[6] = {{8{pad}}, partition[6]};
-  assign partition_padded[7] = {{8{pad}}, partition[7]};
-
   // count cluster size and assign valid pattern flags
   //--------------------------------------------------------------------------------
+
+  reg pad = 0;
+  wire [(MXKEYS-1)+8:0] partition_padded [MXROWS-1:0];
   reg  [MXPADS  -1:0] vpfs=0;
-  wire [MXPADS*3-1:0] cnts;
+  wire [MXPADS*MXCNTBITS-1:0] cnts;
 
   genvar ikey;
   genvar irow;
   genvar ibit;
   generate
     for (irow=0; irow<MXROWS; irow=irow+1) begin: cluster_count_rowloop
+
+    assign partition_padded[irow] = {{8{pad}}, partition[irow]};
+
     for (ikey=0; ikey<MXKEYS; ikey=ikey+1) begin: cluster_count_keyloop
 
         if (VFAT_V2)  begin
@@ -317,12 +332,21 @@ module cluster_packer (
 
   wire [10:0] cluster_count_s0;
 
+  `ifdef oh_lite
+  count_clusters_lite u_count_clusters (
+    .clock4x    (clock4x),
+    .vpfs_i     (vpfs),
+    .cnt_o      (cluster_count_s0),
+    .overflow_o (overflow_out)
+  );
+  `else
   count_clusters u_count_clusters (
     .clock4x    (clock4x),
     .vpfs_i     (vpfs),
     .cnt_o      (cluster_count_s0),
     .overflow_o (overflow_out)
   );
+  `endif
 
   always @(posedge clock1x) begin
     if (reset)
@@ -362,6 +386,27 @@ module cluster_packer (
   wire [MXADRBITS-1:0] adr_encoder [MXCLUSTERS-1:0];
   wire [MXCNTBITS-1:0] cnt_encoder [MXCLUSTERS-1:0];
 
+  `ifdef oh_lite
+    first4of1536 u_first4 (
+      .clock4x(clock4x),
+
+      .vpfs_in (vpfs),
+      .cnts_in (cnts),
+
+      .latch_pulse(latch_pulse_s1),
+
+      .adr0  (adr_encoder [0]),
+      .adr1  (adr_encoder [1]),
+      .adr2  (adr_encoder [2]),
+      .adr3  (adr_encoder [3]),
+      .adr4  (adr_encoder [4]),
+
+      .cnt0  (cnt_encoder [0]),
+      .cnt1  (cnt_encoder [1]),
+      .cnt2  (cnt_encoder [2]),
+      .cnt3  (cnt_encoder [3])
+  );
+  `else
   first8of1536 u_first8 (
       .clock4x(clock4x),
 
@@ -389,6 +434,7 @@ module cluster_packer (
       .cnt7  (cnt_encoder [7])
 
   );
+  `endif
 
 //----------------------------------------------------------------------------------------------------------------------
 // clock 13: build data packet
@@ -415,10 +461,12 @@ module cluster_packer (
          cluster1 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[1];
          cluster2 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[2];
          cluster3 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[3];
+         `ifndef oh_lite
          cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[4];
          cluster5 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[5];
          cluster6 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[6];
          cluster7 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[7];
+        `endif
   end
 
 //----------------------------------------------------------------------------------------------------------------------
