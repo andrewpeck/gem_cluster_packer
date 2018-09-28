@@ -3,78 +3,617 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="/home/andrew/Dropbox/CMS/GEM/cluster_packer/work/best1of192_tb_isim_beh1.wdb" id="1" type="auto">
+      <db_ref path="D:/Dropbox/CMS/Firmware/oh_lite/src/sbit_cluster_packer/work/best1of192_tb_isim_beh1.wdb" id="1" type="auto">
          <top_modules>
             <top_module name="glbl" />
             <top_module name="tb_cluster_packer" />
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="5" />
-   <wvobject fp_name="group22" type="group">
-      <obj_property name="label">truncate</obj_property>
+   <WVObjectSize size="14" />
+   <wvobject fp_name="group50" type="group">
+      <obj_property name="label">Ports</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <wvobject fp_name="/tb_cluster_packer/cluster" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cluster[7:0,13:0]</obj_property>
+         <obj_property name="ObjectShortName">cluster[7:0,13:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/cluster_count" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cluster_count[7:0]</obj_property>
+         <obj_property name="ObjectShortName">cluster_count[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/overflow" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">overflow</obj_property>
+         <obj_property name="ObjectShortName">overflow</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/cnt" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt[7:0,2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt[7:0,2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/adr" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr[7:0,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr[7:0,10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/clock1x" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clock1x</obj_property>
+         <obj_property name="ObjectShortName">clock1x</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/clock2x" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clock2x</obj_property>
+         <obj_property name="ObjectShortName">clock2x</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/clock4x" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clock4x</obj_property>
+         <obj_property name="ObjectShortName">clock4x</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/clock5x" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clock5x</obj_property>
+         <obj_property name="ObjectShortName">clock5x</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/reset" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">reset</obj_property>
+         <obj_property name="ObjectShortName">reset</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/sbits" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">sbits[1535:0]</obj_property>
+         <obj_property name="ObjectShortName">sbits[1535:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/vfat_sbits" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vfat_sbits[23:0,63:0]</obj_property>
+         <obj_property name="ObjectShortName">vfat_sbits[23:0,63:0]</obj_property>
+      </wvobject>
    </wvobject>
-   <wvobject fp_name="group25" type="group">
-      <obj_property name="label">priority</obj_property>
+   <wvobject fp_name="divider53" type="divider">
+      <obj_property name="label">vpfs</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/overflow" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">overflow</obj_property>
-      <obj_property name="ObjectShortName">overflow</obj_property>
+   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/vpfs" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">vpfs[1535:0]</obj_property>
+      <obj_property name="ObjectShortName">vpfs[1535:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/cnt" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">cnt[7:0,2:0]</obj_property>
-      <obj_property name="ObjectShortName">cnt[7:0,2:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   <wvobject fp_name="divider54" type="divider">
+      <obj_property name="label">cnts</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cluster_packer/adr" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">adr[7:0,10:0]</obj_property>
-      <obj_property name="ObjectShortName">adr[7:0,10:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      <wvobject fp_name="/tb_cluster_packer/adr[7]" type="array" db_ref_id="1">
+   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/cnts" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">cnts[4607:0]</obj_property>
+      <obj_property name="ObjectShortName">cnts[4607:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider56" type="divider">
+      <obj_property name="label">first16of1536</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="group57" type="group">
+      <obj_property name="label">first16</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /clock4x" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clock4x</obj_property>
+         <obj_property name="ObjectShortName">clock4x</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /latch_pulse" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">latch_pulse</obj_property>
+         <obj_property name="ObjectShortName">latch_pulse</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /vpfs_in" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vpfs_in[1535:0]</obj_property>
+         <obj_property name="ObjectShortName">vpfs_in[1535:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnts_in" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnts_in[4607:0]</obj_property>
+         <obj_property name="ObjectShortName">cnts_in[4607:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /clock" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">clock</obj_property>
+         <obj_property name="ObjectShortName">clock</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /vpfs_truncated" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vpfs_truncated[1535:0]</obj_property>
+         <obj_property name="ObjectShortName">vpfs_truncated[1535:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr_enc" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr_enc[1:0,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_enc[1:0,10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /vpf_enc" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vpf_enc[1:0,0:0]</obj_property>
+         <obj_property name="ObjectShortName">vpf_enc[1:0,0:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt_enc" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt_enc[1:0,2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt_enc[1:0,2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /pass_truncate" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">pass_truncate[1:0,2:0]</obj_property>
+         <obj_property name="ObjectShortName">pass_truncate[1:0,2:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /pass_truncate[1]" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">[1,2:0]</obj_property>
+            <obj_property name="ObjectShortName">pass_truncate[1,2:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /pass_truncate[0]" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">[0,2:0]</obj_property>
+            <obj_property name="ObjectShortName">pass_truncate[0,2:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /pass_encoder" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">pass_encoder[1:0,2:0]</obj_property>
+         <obj_property name="ObjectShortName">pass_encoder[1:0,2:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt0" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt0[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt0[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt1[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt1[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt2" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt2[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt2[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt3" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt3[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt3[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt4" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt4[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt4[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt5" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt5[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt5[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt6" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt6[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt6[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt7" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt7[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt7[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt8" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt8[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt8[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt9" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt9[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt9[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt10" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt10[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt10[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt11" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt11[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt11[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt12" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt12[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt12[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt13" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt13[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt13[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt14" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt14[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt14[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt15" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt15[2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt15[2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr0" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr0[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr0[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr1[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr1[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr2" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr2[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr2[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr3" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr3[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr3[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr4" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr4[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr4[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr5" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr5[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr5[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr6" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr6[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr6[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr7" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr7[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr7[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr8" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr8[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr8[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr9" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr9[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr9[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr10" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr10[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr10[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr11" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr11[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr11[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr12" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr12[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr12[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr13" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr13[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr13[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr14" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr14[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr14[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr15" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr15[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr15[10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /latch_out" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">latch_out</obj_property>
+         <obj_property name="ObjectShortName">latch_out</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr_latch" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr_latch[1:0,7:0,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_latch[1:0,7:0,10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt_latch" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt_latch[1:0,7:0,2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt_latch[1:0,7:0,2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /vpf_latch" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vpf_latch[1:0,7:0,0:0]</obj_property>
+         <obj_property name="ObjectShortName">vpf_latch[1:0,7:0,0:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr_s1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr_s1[15:0,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_s1[15:0,10:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /cnt_s1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">cnt_s1[15:0,2:0]</obj_property>
+         <obj_property name="ObjectShortName">cnt_s1[15:0,2:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /MXCLUSTERS" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">MXCLUSTERS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">MXCLUSTERS[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /NUM_ENCODERS" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">NUM_ENCODERS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_ENCODERS[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /CLUSTERS_PER_ENCODER" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">CLUSTERS_PER_ENCODER[31:0]</obj_property>
+         <obj_property name="ObjectShortName">CLUSTERS_PER_ENCODER[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /MXADRBITS" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">MXADRBITS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">MXADRBITS[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /MXCNTBITS" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">MXCNTBITS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">MXCNTBITS[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="divider76" type="divider">
+      <obj_property name="label">mux</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="group93" type="group">
+      <obj_property name="label">encoder0</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /latch_out" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">latch_out</obj_property>
+         <obj_property name="ObjectShortName">latch_out</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr0" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr0[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr0[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr1[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr1[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr2" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr2[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr2[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr3" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr3[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr3[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr4" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr4[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr4[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr5" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr5[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr5[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr6" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr6[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr6[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr7" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr7[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr7[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr8" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr8[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr8[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr9" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr9[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr9[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr10" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr10[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr10[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr11" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr11[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr11[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr12" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr12[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr12[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr13" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr13[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr13[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr14" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr14[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr14[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[0].u_first16 /adr15" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr15[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr15[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group94" type="group">
+      <obj_property name="label">encoder1</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /latch_out" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">latch_out</obj_property>
+         <obj_property name="ObjectShortName">latch_out</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr0" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr0[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr0[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr1[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr1[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr2" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr2[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr2[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr3" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr3[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr3[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr4" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr4[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr4[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr5" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr5[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr5[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr6" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr6[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr6[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr7" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr7[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr7[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr8" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr8[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr8[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr9" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr9[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr9[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr10" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr10[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr10[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr11" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr11[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr11[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr12" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr12[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr12[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr13" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr13[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr13[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr14" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr14[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr14[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/\encloop[1].u_first16 /adr15" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">adr15[10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr15[10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/mux_sel_toggle" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mux_sel_toggle</obj_property>
+      <obj_property name="ObjectShortName">mux_sel_toggle</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/mux_sel_srl" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mux_sel_srl</obj_property>
+      <obj_property name="ObjectShortName">mux_sel_srl</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/mux_sel" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mux_sel</obj_property>
+      <obj_property name="ObjectShortName">mux_sel</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">adr_muxed[15:0,10:0]</obj_property>
+      <obj_property name="ObjectShortName">adr_muxed[15:0,10:0]</obj_property>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[15]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[15,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[15,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[14]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[14,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[14,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[13]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[13,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[13,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[12]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[12,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[12,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[11]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[11,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[11,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[10]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[10,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[10,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[9]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[9,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[9,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[8]" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">[8,10:0]</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[8,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[7]" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">[7,10:0]</obj_property>
-         <obj_property name="ObjectShortName">adr[7,10:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[7,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_cluster_packer/adr[6]" type="array" db_ref_id="1">
-         <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[6]" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">[6,10:0]</obj_property>
-         <obj_property name="ObjectShortName">adr[6,10:0]</obj_property>
-         <obj_property name="label">[6,10:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[6,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_cluster_packer/adr[5]" type="array" db_ref_id="1">
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[5]" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">[5,10:0]</obj_property>
-         <obj_property name="ObjectShortName">adr[5,10:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[5,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_cluster_packer/adr[4]" type="array" db_ref_id="1">
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[4]" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">[4,10:0]</obj_property>
-         <obj_property name="ObjectShortName">adr[4,10:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[4,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_cluster_packer/adr[3]" type="array" db_ref_id="1">
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[3]" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">[3,10:0]</obj_property>
-         <obj_property name="ObjectShortName">adr[3,10:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[3,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_cluster_packer/adr[2]" type="array" db_ref_id="1">
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[2]" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">[2,10:0]</obj_property>
-         <obj_property name="ObjectShortName">adr[2,10:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[2,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_cluster_packer/adr[1]" type="array" db_ref_id="1">
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[1]" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">[1,10:0]</obj_property>
-         <obj_property name="ObjectShortName">adr[1,10:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[1,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_cluster_packer/adr[0]" type="array" db_ref_id="1">
+      <wvobject fp_name="/tb_cluster_packer/u_cluster_packer/u_encoder_mux/adr_muxed[0]" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">[0,10:0]</obj_property>
-         <obj_property name="ObjectShortName">adr[0,10:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="ObjectShortName">adr_muxed[0,10:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <obj_property name="Reversed">false</obj_property>
       </wvobject>
    </wvobject>
 </wave_config>

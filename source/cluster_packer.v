@@ -1,8 +1,4 @@
-`define invert_partitions
-// START: CLUSTER_PACKER_SETTINGS DO NOT EDIT --
-//`define oh_lite
-// END: CLUSTER_PACKER_SETTINGS DO NOT EDIT --
-
+`include "constants.v"
 //----------------------------------------------------------------------------------------------------------------------
 // cluster.packer.v
 //----------------------------------------------------------------------------------------------------------------------
@@ -30,6 +26,7 @@
 
 module cluster_packer (
 
+    input             clock5x,
     input             clock4x,
     input             clock1x,
     input             reset_i,
@@ -170,7 +167,8 @@ module cluster_packer (
 //----------------------------------------------------------------------------------------------------------------------
 
   wire [MXSBITS-1:0] vfat_s0 [23:0];
-  wire [MXSBITS-1:0] vfat_s1 [23:0];
+  wire [MXSBITS-1:0] vfat_os [23:0];
+  reg [MXSBITS-1:0] vfat_s1 [23:0];
 
   assign vfat_s0[0]  = vfat0;
   assign vfat_s0[1]  = vfat1;
@@ -227,11 +225,13 @@ module cluster_packer (
 
         x_oneshot sbit_oneshot (
           .d          (vfat_s0[os_vfat][os_sbit]),
-          .q          (vfat_s1[os_vfat][os_sbit]),
+          .q          (vfat_os[os_vfat][os_sbit]),
           .deadtime_i (deadtime),
           .clock      (clock4x),
           .slowclk    (clock1x)
         );
+
+        vfat_s1[os_vfat][os_sbit] = vfat_os[os_vfat][os_sbit];
 
 
       `else
@@ -240,7 +240,14 @@ module cluster_packer (
         // without the oneshot we can save 6.25 ns latency and make this transparent
         //--------------------------------------------------------------------------------------------------------------
 
-        assign vfat_s1[os_vfat][os_sbit] = vfat_s0[os_vfat][os_sbit];
+        `ifdef full_chamber_finder
+          always @(posedge clock4x)
+            vfat_s1[os_vfat][os_sbit] = vfat_s0[os_vfat][os_sbit];
+        `else
+          always @(*)
+            vfat_s1[os_vfat][os_sbit] <= vfat_s0[os_vfat][os_sbit];
+        `else
+        `endif
 
       `endif
 
@@ -283,7 +290,7 @@ module cluster_packer (
   // count cluster size and assign valid pattern flags
   //--------------------------------------------------------------------------------
 
-  reg pad = 0;
+  parameter [0:0] pad = 0;
   wire [(MXKEYS-1)+8:0] partition_padded [MXROWS-1:0];
   reg  [MXPADS  -1:0] vpfs=0;
   wire [MXPADS*MXCNTBITS-1:0] cnts;
@@ -386,54 +393,114 @@ module cluster_packer (
   wire [MXADRBITS-1:0] adr_encoder [MXCLUSTERS-1:0];
   wire [MXCNTBITS-1:0] cnt_encoder [MXCLUSTERS-1:0];
 
+  //--------------------------------------------------------------------------------------------------------------------
+  // GE2/1 Light Optohybrid
+
+  //--------------------------------------------------------------------------------------------------------------------
   `ifdef oh_lite
-    first4of1536 u_first4 (
-      .clock4x(clock4x),
+      `ifdef first5
+      first5of1536 u_first5 (
+      `else
+      first4of1536 u_first4 (
+      `endif
+      
 
-      .vpfs_in (vpfs),
-      .cnts_in (cnts),
+        .vpfs_in (vpfs),
+        .cnts_in (cnts),
 
-      .latch_pulse(latch_pulse_s1),
+        .latch_pulse(latch_pulse_s1),
 
-      .adr0  (adr_encoder [0]),
-      .adr1  (adr_encoder [1]),
-      .adr2  (adr_encoder [2]),
-      .adr3  (adr_encoder [3]),
-      .adr4  (adr_encoder [4]),
+        .adr0  (adr_encoder [0]),
+        .adr1  (adr_encoder [1]),
+        .adr2  (adr_encoder [2]),
+        .adr3  (adr_encoder [3]),
+        `ifdef first5
+        .adr4  (adr_encoder [4]),
+        `endif
 
-      .cnt0  (cnt_encoder [0]),
-      .cnt1  (cnt_encoder [1]),
-      .cnt2  (cnt_encoder [2]),
-      .cnt3  (cnt_encoder [3])
-  );
+        .cnt0  (cnt_encoder [0]),
+        .cnt1  (cnt_encoder [1]),
+        .cnt2  (cnt_encoder [2]),
+        .cnt3  (cnt_encoder [3]),
+        `ifdef first5
+        .cnt4  (cnt_encoder [4]),
+        `endif
+        
+          .clock4x(clock4x)
+    );
   `else
-  first8of1536 u_first8 (
-      .clock4x(clock4x),
+
+  //--------------------------------------------------------------------------------------------------------------------
+  // GE1/1 with Global Cluster Finding
+  //--------------------------------------------------------------------------------------------------------------------
+
+  `ifdef full_chamber_finder
+    encoder_mux u_encoder_mux (
+
+      .clock4x (clock4x),
+      .clock5x(clock5x),
+
+      .latch_pulse (latch_pulse),
+      .clock_lac   (clock_lac),
+      .latch_out(),
 
       .vpfs_in (vpfs),
       .cnts_in (cnts),
 
-      .latch_pulse(latch_pulse_s1),
+      .adr0 (adr_encoder[0]),
+      .adr1 (adr_encoder[1]),
+      .adr2 (adr_encoder[2]),
+      .adr3 (adr_encoder[3]),
+      .adr4 (adr_encoder[4]),
+      .adr5 (adr_encoder[5]),
+      .adr6 (adr_encoder[6]),
+      .adr7 (adr_encoder[7]),
 
-      .adr0  (adr_encoder [0]),
-      .adr1  (adr_encoder [1]),
-      .adr2  (adr_encoder [2]),
-      .adr3  (adr_encoder [3]),
-      .adr4  (adr_encoder [4]),
-      .adr5  (adr_encoder [5]),
-      .adr6  (adr_encoder [6]),
-      .adr7  (adr_encoder [7]),
+      .cnt0 (cnt_encoder[0]),
+      .cnt1 (cnt_encoder[1]),
+      .cnt2 (cnt_encoder[2]),
+      .cnt3 (cnt_encoder[3]),
+      .cnt4 (cnt_encoder[4]),
+      .cnt5 (cnt_encoder[5]),
+      .cnt6 (cnt_encoder[6]),
+      .cnt7 (cnt_encoder[7])
+    );
 
-      .cnt0  (cnt_encoder [0]),
-      .cnt1  (cnt_encoder [1]),
-      .cnt2  (cnt_encoder [2]),
-      .cnt3  (cnt_encoder [3]),
-      .cnt4  (cnt_encoder [4]),
-      .cnt5  (cnt_encoder [5]),
-      .cnt6  (cnt_encoder [6]),
-      .cnt7  (cnt_encoder [7])
+  //--------------------------------------------------------------------------------------------------------------------
+  // GE1/1 with Split Chamber Cluster Finding
+  //--------------------------------------------------------------------------------------------------------------------
 
-  );
+  `else
+    first8of1536 u_first8 (
+        .clock4x(clock4x),
+        .clock5x(clock5x),
+
+        .vpfs_in (vpfs),
+        .cnts_in (cnts),
+
+        .latch_pulse(latch_pulse_s1),
+        .latch_out(),
+
+        .adr0  (adr_encoder [0]),
+        .adr1  (adr_encoder [1]),
+        .adr2  (adr_encoder [2]),
+        .adr3  (adr_encoder [3]),
+        .adr4  (adr_encoder [4]),
+        .adr5  (adr_encoder [5]),
+        .adr6  (adr_encoder [6]),
+        .adr7  (adr_encoder [7]),
+
+        .cnt0  (cnt_encoder [0]),
+        .cnt1  (cnt_encoder [1]),
+        .cnt2  (cnt_encoder [2]),
+        .cnt3  (cnt_encoder [3]),
+        .cnt4  (cnt_encoder [4]),
+        .cnt5  (cnt_encoder [5]),
+        .cnt6  (cnt_encoder [6]),
+        .cnt7  (cnt_encoder [7])
+
+    );
+  `endif
   `endif
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -461,6 +528,11 @@ module cluster_packer (
          cluster1 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[1];
          cluster2 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[2];
          cluster3 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[3];
+
+         `ifdef first5
+         cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[4];
+         `endif
+
          `ifndef oh_lite
          cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[4];
          cluster5 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[5];

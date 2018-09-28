@@ -5,12 +5,13 @@ module tb_cluster_packer;
 
 clockgen uclockgen (
   .clock40  (clock1x),
-  .clock160 (clock4x)
+  .clock80 (clock2x),
+  .clock160 (clock4x),
+  .clock200 (clock5x)
 );
 
 STARTUPE2 startup_inst(.GSR(1'b0), .GTS(1'b0));
 
-reg truncate_clusters=0;
 reg reset;
 
 initial begin
@@ -43,6 +44,27 @@ end
       #25   sbits = {732'd0, 36'h555555555, 732'd0, 36'hAAAAAAAAA};
       #25   sbits = {732'd0, 36'hAAAAAAAAA, 732'd0, 36'h555555555};
       #25   sbits = {732'd0, 36'h555555555, 732'd0, 36'hAAAAAAAAA};
+      #25   sbits = {1536'd0};
+      #25   sbits = {1536'd0};
+      #25   sbits = {732'd0, 36'h000000000, 732'd0, 36'hAAAAAAAAA};
+      #25   sbits = {1536'd0};
+      #25   sbits = {1536'd0};
+      #25   sbits = {732'd0, 36'h555555555, 732'd0, 36'h000000000};
+      #25   sbits = {1536'd0};
+      #25   sbits = {1536'd0};
+      #25   sbits = {732'd0, 36'h555555555, 732'd0, 36'h000000000};
+      #25   sbits = {1536'd0};
+      #25   sbits = {1536'd0};
+      #25   sbits = {732'd0, 36'h555555555, 732'd0, 36'h000000000};
+      #25   sbits = {1536'd0};
+      #25   sbits = {1536'd0};
+      #25   sbits = {732'd0, 36'h555555555, 732'd0, 36'h000000000};
+      #25   sbits = {1536'd0};
+      #25   sbits = {1536'd0};
+      #25   sbits = {732'd0, 36'h555555555, 732'd0, 36'h000000000};
+      #25   sbits = {1536'd0};
+      #25   sbits = {1536'd0};
+      #25   sbits = {732'd0, 36'h555555555, 732'd0, 36'h000000000};
       #25   sbits = {1536'd0};
       #25   sbits = {1536'd2};
       #25   sbits = {1536'd4};
@@ -158,12 +180,23 @@ end
 
 wire [13:0] cluster [7:0];
 
+wire [7:0] cluster_count;
+
+wire overflow;
+
 `ifdef vfat3 cluster_packer       u_cluster_packer 
 `else        cluster_packer_vfat2 u_cluster_packer 
 `endif (
   .clock4x(clock4x),
+  .clock5x(clock5x),
+  .clock1x(clock1x),
 
-  .global_reset (reset),
+  .cluster_count(cluster_count),
+  .deadtime_i(4'd0),
+
+  .trig_stop_i (1'b0),
+
+  .reset_i (reset),
 
   .vfat0  (vfat_sbits[0]),
   .vfat1  (vfat_sbits[1]),
@@ -190,8 +223,6 @@ wire [13:0] cluster [7:0];
   .vfat22 (vfat_sbits[22]),
   .vfat23 (vfat_sbits[23]),
 
-  .truncate_clusters (truncate_clusters),
-
   .cluster0 (cluster[0]),
   .cluster1 (cluster[1]),
   .cluster2 (cluster[2]),
@@ -199,7 +230,9 @@ wire [13:0] cluster [7:0];
   .cluster4 (cluster[4]),
   .cluster5 (cluster[5]),
   .cluster6 (cluster[6]),
-  .cluster7 (cluster[7])
+  .cluster7 (cluster[7]),
+
+  .overflow (overflow)
 );
 
 

@@ -6,14 +6,16 @@
 // crossings, while the other handles S-bits received at the "odd" bunch
 // crossing.
 //
-// This module and submodule is only based on a 160 MHz clock, so it is essentially blind to the 40MHz system clock!
 //----------------------------------------------------------------------------------------------------------------------
 
 module encoder_mux (
 
-  input frame_clock,
+  input clock_lac,
+  input latch_pulse,
+  output latch_out,
 
   input clock4x,
+  input clock5x,
 
   input  [1536-1:0]    vpfs_in,
 
@@ -76,36 +78,71 @@ module encoder_mux (
   wire  [2:0] encoder_cnt14 [1:0];
   wire  [2:0] encoder_cnt15 [1:0];
 
-  wire  [2:0] encoder_pass [1:0];
+  wire  [0:0] encoder_vpf0  [1:0];
+  wire  [0:0] encoder_vpf1  [1:0];
+  wire  [0:0] encoder_vpf2  [1:0];
+  wire  [0:0] encoder_vpf3  [1:0];
+  wire  [0:0] encoder_vpf4  [1:0];
+  wire  [0:0] encoder_vpf5  [1:0];
+  wire  [0:0] encoder_vpf6  [1:0];
+  wire  [0:0] encoder_vpf7  [1:0];
+  wire  [0:0] encoder_vpf8  [1:0];
+  wire  [0:0] encoder_vpf9  [1:0];
+  wire  [0:0] encoder_vpf10 [1:0];
+  wire  [0:0] encoder_vpf11 [1:0];
+  wire  [0:0] encoder_vpf12 [1:0];
+  wire  [0:0] encoder_vpf13 [1:0];
+  wire  [0:0] encoder_vpf14 [1:0];
+  wire  [0:0] encoder_vpf15 [1:0];
 
-  wire [10:0] adr_muxed  [15:0];
-  wire  [2:0] cnt_muxed  [15:0];
-  wire  [2:0] pass_muxed;
+  wire  [1:0] encoder_latch_out;
+
+  reg [10:0] adr_muxed  [15:0];
+  reg  [2:0] cnt_muxed  [15:0];
+  reg  [0:0] vpf_muxed  [15:0];
+  reg        encoder_latch_muxed;
 
   // multiplex cluster outputs from the two priority encoder modules
 
-  wire [1:0] fclk;
-  assign fclk[0] =  frame_clock;
-  assign fclk[1] = ~frame_clock;
 
-  // create stable latches on the slow clock to pass to alternating encoders
-  reg  [1536-1:0]    vpfs [1:0];
-  reg  [1536*3-1:0]  cnts [1:0];
+  // latch is coming every 25 ns, but want to slow it down to every 50 so just pass every other
+  reg latch_allow = 1'b1;
+  always @(posedge clock4x) begin
+    if (latch_pulse) begin
+      latch_allow <= ~latch_allow;
+    end
+  end
+
+
+  // delay the second latch pulse by 25ns (SRL=2 delays by 3 plus a ff for fanout)
+
+  wire latch_pulse_dly_srl;
+  parameter [3:0] latch_dly = 4'd2;
+  SRL16E u_latch_dly (.CLK(clock4x),.CE(1'b1),.D(latch_allow & latch_pulse),.A0(latch_dly[0]),.A1(latch_dly[1]),.A2(latch_dly[2]),.A3(latch_dly[3]),.Q(latch_pulse_dly_srl));
+
+  reg latch_pulse_delayed = 0;
+  always @(posedge clock4x) begin
+    latch_pulse_delayed <= latch_pulse_dly_srl;
+  end
+
+  wire [1:0] latch_pulse_arr;
+
+  assign latch_pulse_arr[0] =  (latch_allow & latch_pulse);
+  assign latch_pulse_arr[1] =  latch_pulse_delayed;
+
   genvar iencoder;
   generate
   for (iencoder=0; iencoder<2; iencoder=iencoder+1) begin: encloop
 
-    always @(posedge fclk[iencoder]) begin
-      vpfs[iencoder] <= vpfs_in;
-      cnts[iencoder] <= cnts_in;
-    end
+    first16of1536 u_first16 (
 
-    first8of1536 u_first8 (
         .clock4x(clock4x),
+        .clock5x(clock5x),
         .vpfs_in (vpfs_in),
         .cnts_in (cnts_in),
 
-        .frame_clock (fclk[iencoder]),
+        .latch_pulse (latch_pulse_arr [iencoder]),
+        .latch_out (encoder_latch_out [iencoder]),
 
         .adr0  (encoder_adr0 [iencoder]),
         .adr1  (encoder_adr1 [iencoder]),
@@ -141,103 +178,108 @@ module encoder_mux (
         .cnt14 (encoder_cnt14[iencoder]),
         .cnt15 (encoder_cnt15[iencoder]),
 
-        .pass  (encoder_pass[iencoder])
-
+        .vpf0  (encoder_vpf0 [iencoder]),
+        .vpf1  (encoder_vpf1 [iencoder]),
+        .vpf2  (encoder_vpf2 [iencoder]),
+        .vpf3  (encoder_vpf3 [iencoder]),
+        .vpf4  (encoder_vpf4 [iencoder]),
+        .vpf5  (encoder_vpf5 [iencoder]),
+        .vpf6  (encoder_vpf6 [iencoder]),
+        .vpf7  (encoder_vpf7 [iencoder]),
+        .vpf8  (encoder_vpf8 [iencoder]),
+        .vpf9  (encoder_vpf9 [iencoder]),
+        .vpf10 (encoder_vpf10[iencoder]),
+        .vpf11 (encoder_vpf11[iencoder]),
+        .vpf12 (encoder_vpf12[iencoder]),
+        .vpf13 (encoder_vpf13[iencoder]),
+        .vpf14 (encoder_vpf14[iencoder]),
+        .vpf15 (encoder_vpf15[iencoder])
     );
     end
   endgenerate
 
-  reg mux_sel=0;
+  wire encoder_latch_or = |encoder_latch_out;
+
+  reg mux_sel_toggle = 0;
   always @(posedge clock4x) begin
-
-    // use 6 because there is a 1 clock delay in flopping this, so we lookahead by 1 clock
-    if (encoder_pass[0]==6)
-      mux_sel<=0;
-    else if (encoder_pass[1]==6)
-      mux_sel<=1;
-    else
-      mux_sel<=mux_sel;
-
+    if      (encoder_latch_out[0]) mux_sel_toggle <= 1'b1;
+    else if (encoder_latch_out[1]) mux_sel_toggle <= 1'b0;
   end
 
-  assign pass_muxed    = mux_sel ? (encoder_pass[0])  : (encoder_pass[1]);
+  wire mux_sel_srl;
 
-  assign cnt_muxed[0]  = mux_sel ? (encoder_cnt0[0])  : (encoder_cnt0[1]);
-  assign cnt_muxed[1]  = mux_sel ? (encoder_cnt1[0])  : (encoder_cnt1[1]);
-  assign cnt_muxed[2]  = mux_sel ? (encoder_cnt2[0])  : (encoder_cnt2[1]);
-  assign cnt_muxed[3]  = mux_sel ? (encoder_cnt3[0])  : (encoder_cnt3[1]);
-  assign cnt_muxed[4]  = mux_sel ? (encoder_cnt4[0])  : (encoder_cnt4[1]);
-  assign cnt_muxed[5]  = mux_sel ? (encoder_cnt5[0])  : (encoder_cnt5[1]);
-  assign cnt_muxed[6]  = mux_sel ? (encoder_cnt6[0])  : (encoder_cnt6[1]);
-  assign cnt_muxed[7]  = mux_sel ? (encoder_cnt7[0])  : (encoder_cnt7[1]);
-  assign cnt_muxed[8]  = mux_sel ? (encoder_cnt8[0])  : (encoder_cnt8[1]);
-  assign cnt_muxed[9]  = mux_sel ? (encoder_cnt9[0])  : (encoder_cnt9[1]);
-  assign cnt_muxed[10] = mux_sel ? (encoder_cnt10[0]) : (encoder_cnt10[1]);
-  assign cnt_muxed[11] = mux_sel ? (encoder_cnt11[0]) : (encoder_cnt11[1]);
-  assign cnt_muxed[12] = mux_sel ? (encoder_cnt12[0]) : (encoder_cnt12[1]);
-  assign cnt_muxed[13] = mux_sel ? (encoder_cnt13[0]) : (encoder_cnt13[1]);
-  assign cnt_muxed[14] = mux_sel ? (encoder_cnt14[0]) : (encoder_cnt14[1]);
-  assign cnt_muxed[15] = mux_sel ? (encoder_cnt15[0]) : (encoder_cnt15[1]);
+  parameter [3:0] mux_sel_dly = 4'd5; // set SRL to 6 for delay of 6; 6+1 (flip-flop) = 7
+  SRL16E u_lac_dly (.CLK(clock4x),.CE(1'b1),.D(mux_sel_toggle),.A0(mux_sel_dly[0]),.A1(mux_sel_dly[1]),.A2(mux_sel_dly[2]),.A3(mux_sel_dly[3]),.Q(mux_sel_srl));
 
-  assign adr_muxed[0]  = mux_sel ? (encoder_adr0[0])  : (encoder_adr0[1]);
-  assign adr_muxed[1]  = mux_sel ? (encoder_adr1[0])  : (encoder_adr1[1]);
-  assign adr_muxed[2]  = mux_sel ? (encoder_adr2[0])  : (encoder_adr2[1]);
-  assign adr_muxed[3]  = mux_sel ? (encoder_adr3[0])  : (encoder_adr3[1]);
-  assign adr_muxed[4]  = mux_sel ? (encoder_adr4[0])  : (encoder_adr4[1]);
-  assign adr_muxed[5]  = mux_sel ? (encoder_adr5[0])  : (encoder_adr5[1]);
-  assign adr_muxed[6]  = mux_sel ? (encoder_adr6[0])  : (encoder_adr6[1]);
-  assign adr_muxed[7]  = mux_sel ? (encoder_adr7[0])  : (encoder_adr7[1]);
-  assign adr_muxed[8]  = mux_sel ? (encoder_adr8[0])  : (encoder_adr8[1]);
-  assign adr_muxed[9]  = mux_sel ? (encoder_adr9[0])  : (encoder_adr9[1]);
-  assign adr_muxed[10] = mux_sel ? (encoder_adr10[0]) : (encoder_adr10[1]);
-  assign adr_muxed[11] = mux_sel ? (encoder_adr11[0]) : (encoder_adr11[1]);
-  assign adr_muxed[12] = mux_sel ? (encoder_adr12[0]) : (encoder_adr12[1]);
-  assign adr_muxed[13] = mux_sel ? (encoder_adr13[0]) : (encoder_adr13[1]);
-  assign adr_muxed[14] = mux_sel ? (encoder_adr14[0]) : (encoder_adr14[1]);
-  assign adr_muxed[15] = mux_sel ? (encoder_adr15[0]) : (encoder_adr15[1]);
+  reg mux_sel=0;
+  always @(posedge clock4x) begin
+    mux_sel <= mux_sel_srl;
+  end
 
-  assign cnt_muxed[0]  = mux_sel ? (encoder_cnt0[0])  : (encoder_cnt0[1]);
-  assign cnt_muxed[1]  = mux_sel ? (encoder_cnt1[0])  : (encoder_cnt1[1]);
-  assign cnt_muxed[2]  = mux_sel ? (encoder_cnt2[0])  : (encoder_cnt2[1]);
-  assign cnt_muxed[3]  = mux_sel ? (encoder_cnt3[0])  : (encoder_cnt3[1]);
-  assign cnt_muxed[4]  = mux_sel ? (encoder_cnt4[0])  : (encoder_cnt4[1]);
-  assign cnt_muxed[5]  = mux_sel ? (encoder_cnt5[0])  : (encoder_cnt5[1]);
-  assign cnt_muxed[6]  = mux_sel ? (encoder_cnt6[0])  : (encoder_cnt6[1]);
-  assign cnt_muxed[7]  = mux_sel ? (encoder_cnt7[0])  : (encoder_cnt7[1]);
-  assign cnt_muxed[8]  = mux_sel ? (encoder_cnt8[0])  : (encoder_cnt8[1]);
-  assign cnt_muxed[9]  = mux_sel ? (encoder_cnt9[0])  : (encoder_cnt9[1]);
-  assign cnt_muxed[10] = mux_sel ? (encoder_cnt10[0]) : (encoder_cnt10[1]);
-  assign cnt_muxed[11] = mux_sel ? (encoder_cnt11[0]) : (encoder_cnt11[1]);
-  assign cnt_muxed[12] = mux_sel ? (encoder_cnt12[0]) : (encoder_cnt12[1]);
-  assign cnt_muxed[13] = mux_sel ? (encoder_cnt13[0]) : (encoder_cnt13[1]);
-  assign cnt_muxed[14] = mux_sel ? (encoder_cnt14[0]) : (encoder_cnt14[1]);
-  assign cnt_muxed[15] = mux_sel ? (encoder_cnt15[0]) : (encoder_cnt15[1]);
 
-  assign adr_muxed[0]  = mux_sel ? (encoder_adr0[0])  : (encoder_adr0[1]);
-  assign adr_muxed[1]  = mux_sel ? (encoder_adr1[0])  : (encoder_adr1[1]);
-  assign adr_muxed[2]  = mux_sel ? (encoder_adr2[0])  : (encoder_adr2[1]);
-  assign adr_muxed[3]  = mux_sel ? (encoder_adr3[0])  : (encoder_adr3[1]);
-  assign adr_muxed[4]  = mux_sel ? (encoder_adr4[0])  : (encoder_adr4[1]);
-  assign adr_muxed[5]  = mux_sel ? (encoder_adr5[0])  : (encoder_adr5[1]);
-  assign adr_muxed[6]  = mux_sel ? (encoder_adr6[0])  : (encoder_adr6[1]);
-  assign adr_muxed[7]  = mux_sel ? (encoder_adr7[0])  : (encoder_adr7[1]);
-  assign adr_muxed[8]  = mux_sel ? (encoder_adr8[0])  : (encoder_adr8[1]);
-  assign adr_muxed[9]  = mux_sel ? (encoder_adr9[0])  : (encoder_adr9[1]);
-  assign adr_muxed[10] = mux_sel ? (encoder_adr10[0]) : (encoder_adr10[1]);
-  assign adr_muxed[11] = mux_sel ? (encoder_adr11[0]) : (encoder_adr11[1]);
-  assign adr_muxed[12] = mux_sel ? (encoder_adr12[0]) : (encoder_adr12[1]);
-  assign adr_muxed[13] = mux_sel ? (encoder_adr13[0]) : (encoder_adr13[1]);
-  assign adr_muxed[14] = mux_sel ? (encoder_adr14[0]) : (encoder_adr14[1]);
-  assign adr_muxed[15] = mux_sel ? (encoder_adr15[0]) : (encoder_adr15[1]);
+  always @(posedge clock4x) begin
+      encoder_latch_muxed = mux_sel ? (encoder_latch_out[0])  : (encoder_latch_out[1]);
+      
+      cnt_muxed[ 0] = mux_sel ? (encoder_cnt0[0])  : (encoder_cnt0 [1]);
+      cnt_muxed[ 1] = mux_sel ? (encoder_cnt1[0])  : (encoder_cnt1 [1]);
+      cnt_muxed[ 2] = mux_sel ? (encoder_cnt2[0])  : (encoder_cnt2 [1]);
+      cnt_muxed[ 3] = mux_sel ? (encoder_cnt3[0])  : (encoder_cnt3 [1]);
+      cnt_muxed[ 4] = mux_sel ? (encoder_cnt4[0])  : (encoder_cnt4 [1]);
+      cnt_muxed[ 5] = mux_sel ? (encoder_cnt5[0])  : (encoder_cnt5 [1]);
+      cnt_muxed[ 6] = mux_sel ? (encoder_cnt6[0])  : (encoder_cnt6 [1]);
+      cnt_muxed[ 7] = mux_sel ? (encoder_cnt7[0])  : (encoder_cnt7 [1]);
+      cnt_muxed[ 8] = mux_sel ? (encoder_cnt8[0])  : (encoder_cnt8 [1]);
+      cnt_muxed[ 9] = mux_sel ? (encoder_cnt9[0])  : (encoder_cnt9 [1]);
+      cnt_muxed[10] = mux_sel ? (encoder_cnt10[0]) : (encoder_cnt10[1]);
+      cnt_muxed[11] = mux_sel ? (encoder_cnt11[0]) : (encoder_cnt11[1]);
+      cnt_muxed[12] = mux_sel ? (encoder_cnt12[0]) : (encoder_cnt12[1]);
+      cnt_muxed[13] = mux_sel ? (encoder_cnt13[0]) : (encoder_cnt13[1]);
+      cnt_muxed[14] = mux_sel ? (encoder_cnt14[0]) : (encoder_cnt14[1]);
+      cnt_muxed[15] = mux_sel ? (encoder_cnt15[0]) : (encoder_cnt15[1]);
+      
+      adr_muxed[ 0] = mux_sel ? (encoder_adr0[0])  : (encoder_adr0 [1]);
+      adr_muxed[ 1] = mux_sel ? (encoder_adr1[0])  : (encoder_adr1 [1]);
+      adr_muxed[ 2] = mux_sel ? (encoder_adr2[0])  : (encoder_adr2 [1]);
+      adr_muxed[ 3] = mux_sel ? (encoder_adr3[0])  : (encoder_adr3 [1]);
+      adr_muxed[ 4] = mux_sel ? (encoder_adr4[0])  : (encoder_adr4 [1]);
+      adr_muxed[ 5] = mux_sel ? (encoder_adr5[0])  : (encoder_adr5 [1]);
+      adr_muxed[ 6] = mux_sel ? (encoder_adr6[0])  : (encoder_adr6 [1]);
+      adr_muxed[ 7] = mux_sel ? (encoder_adr7[0])  : (encoder_adr7 [1]);
+      adr_muxed[ 8] = mux_sel ? (encoder_adr8[0])  : (encoder_adr8 [1]);
+      adr_muxed[ 9] = mux_sel ? (encoder_adr9[0])  : (encoder_adr9 [1]);
+      adr_muxed[10] = mux_sel ? (encoder_adr10[0]) : (encoder_adr10[1]);
+      adr_muxed[11] = mux_sel ? (encoder_adr11[0]) : (encoder_adr11[1]);
+      adr_muxed[12] = mux_sel ? (encoder_adr12[0]) : (encoder_adr12[1]);
+      adr_muxed[13] = mux_sel ? (encoder_adr13[0]) : (encoder_adr13[1]);
+      adr_muxed[14] = mux_sel ? (encoder_adr14[0]) : (encoder_adr14[1]);
+      adr_muxed[15] = mux_sel ? (encoder_adr15[0]) : (encoder_adr15[1]);
+      
+      vpf_muxed[ 0] = mux_sel ? (encoder_vpf0[0])  : (encoder_vpf0 [1]);
+      vpf_muxed[ 1] = mux_sel ? (encoder_vpf1[0])  : (encoder_vpf1 [1]);
+      vpf_muxed[ 2] = mux_sel ? (encoder_vpf2[0])  : (encoder_vpf2 [1]);
+      vpf_muxed[ 3] = mux_sel ? (encoder_vpf3[0])  : (encoder_vpf3 [1]);
+      vpf_muxed[ 4] = mux_sel ? (encoder_vpf4[0])  : (encoder_vpf4 [1]);
+      vpf_muxed[ 5] = mux_sel ? (encoder_vpf5[0])  : (encoder_vpf5 [1]);
+      vpf_muxed[ 6] = mux_sel ? (encoder_vpf6[0])  : (encoder_vpf6 [1]);
+      vpf_muxed[ 7] = mux_sel ? (encoder_vpf7[0])  : (encoder_vpf7 [1]);
+      vpf_muxed[ 8] = mux_sel ? (encoder_vpf8[0])  : (encoder_vpf8 [1]);
+      vpf_muxed[ 9] = mux_sel ? (encoder_vpf9[0])  : (encoder_vpf9 [1]);
+      vpf_muxed[10] = mux_sel ? (encoder_vpf10[0]) : (encoder_vpf10[1]);
+      vpf_muxed[11] = mux_sel ? (encoder_vpf11[0]) : (encoder_vpf11[1]);
+      vpf_muxed[12] = mux_sel ? (encoder_vpf12[0]) : (encoder_vpf12[1]);
+      vpf_muxed[13] = mux_sel ? (encoder_vpf13[0]) : (encoder_vpf13[1]);
+      vpf_muxed[14] = mux_sel ? (encoder_vpf14[0]) : (encoder_vpf14[1]);
+      vpf_muxed[15] = mux_sel ? (encoder_vpf15[0]) : (encoder_vpf15[1]);
+  end
 
-  wire [2:0] pass_merger;
+  wire merge_latch;
 
-  merge16 u_merge16 (
+  merge16_light u_merge16 (
 
       .clock4x(clock4x),
 
-      .pass_in  (pass_muxed),
-      .pass_out (pass_merger),
+      .mux_pulse_in  (encoder_latch_muxed),
+      .mux_pulse_out (latch_out),
 
       .adr_in0  ( adr_muxed[0]),
       .adr_in1  ( adr_muxed[1]),
@@ -273,6 +315,22 @@ module encoder_mux (
       .cnt_in14 ( cnt_muxed[14]),
       .cnt_in15 ( cnt_muxed[15]),
 
+      .vpf_in0  ( vpf_muxed[0]),
+      .vpf_in1  ( vpf_muxed[1]),
+      .vpf_in2  ( vpf_muxed[2]),
+      .vpf_in3  ( vpf_muxed[3]),
+      .vpf_in4  ( vpf_muxed[4]),
+      .vpf_in5  ( vpf_muxed[5]),
+      .vpf_in6  ( vpf_muxed[6]),
+      .vpf_in7  ( vpf_muxed[7]),
+      .vpf_in8  ( vpf_muxed[8]),
+      .vpf_in9  ( vpf_muxed[9]),
+      .vpf_in10 ( vpf_muxed[10]),
+      .vpf_in11 ( vpf_muxed[11]),
+      .vpf_in12 ( vpf_muxed[12]),
+      .vpf_in13 ( vpf_muxed[13]),
+      .vpf_in14 ( vpf_muxed[14]),
+      .vpf_in15 ( vpf_muxed[15]),
 
       .adr0_o(adr0),
       .adr1_o(adr1),
