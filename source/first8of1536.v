@@ -1,5 +1,3 @@
-`include "constants.v"
-
 `timescale 1ns / 100 ps
 
 `ifdef first4
@@ -17,8 +15,8 @@ module first16of1536 (
 
     input latch_pulse, // this should go high when new vpfs are ready
 
-    input  [1536  -1:0] vpfs_in,
-    input  [1536*3-1:0] cnts_in,
+    input  [MXSBITS*MXVFATS  -1:0] vpfs_in,
+    input  [MXSBITS*MXVFATS*3-1:0] cnts_in,
 
     output reg [2:0]      cnt0,
     output reg [2:0]      cnt1,
@@ -93,6 +91,8 @@ module first16of1536 (
     output reg latch_out
 );
 
+`include "constants.v"
+
 wire clock;
 `ifdef first5
   assign clock=clock5x;
@@ -105,21 +105,14 @@ wire clock;
 //----------------------------------------------------------------------------------------------------------------------
 
 `ifdef first4
-  parameter MXCLUSTERS = 4;
-`elsif first5
-  parameter MXCLUSTERS = 5;
-`elsif first8
-  parameter MXCLUSTERS = 8;
-`else
-  parameter MXCLUSTERS = 16;
-`endif
-
-`ifdef first4
   parameter NUM_ENCODERS = 1;
+  parameter NUM_PASSES   = 4;
 `elsif first5
   parameter NUM_ENCODERS = 1;
+  parameter NUM_PASSES   = 5;
 `else
   parameter NUM_ENCODERS = 2;
+  parameter NUM_PASSES   = 8;
 `endif
 
 `ifdef first16
@@ -137,9 +130,6 @@ wire clock;
 // Encoders
 //----------------------------------------------------------------------------------------------------------------------
 
-  parameter MXADRBITS = 11;
-  parameter MXCNTBITS = 3;
-
   reg [MXADRBITS-1:0] adr_latch [NUM_ENCODERS-1:0][CLUSTERS_PER_ENCODER-1:0];
   reg [MXCNTBITS-1:0] cnt_latch [NUM_ENCODERS-1:0][CLUSTERS_PER_ENCODER-1:0];
   reg [          0:0] vpf_latch [NUM_ENCODERS-1:0][CLUSTERS_PER_ENCODER-1:0];
@@ -149,7 +139,7 @@ wire clock;
   wire [2:0] pass_encoder       [NUM_ENCODERS-1:0];
 
   genvar ienc;
-  generate;
+  generate
   for (ienc=0; ienc<NUM_ENCODERS; ienc=ienc+1) begin: encloop
 
       // cluster truncator
@@ -202,7 +192,7 @@ reg  [MXCNTBITS-1:0] cnt_s1 [15:0];
 always @(posedge clock) begin
 
   `ifdef first5
-      if (pass_encoder[0]==3'd4) begin
+      if (pass_encoder[0]==NUM_PASSES-1) begin
 
           latch_out  <= 1'b1;
 
@@ -223,7 +213,7 @@ always @(posedge clock) begin
           latch_out  <= 1'b0;
         end
   `elsif first16
-        if (pass_encoder[0]==3'd7) begin
+        if (pass_encoder[0]==NUM_PASSES-1) begin
 
             latch_out  <= 1'b1;
 
@@ -299,7 +289,7 @@ always @(posedge clock) begin
        // First 8 or First4
        //---------------------------------------------------------------------------------------------------------------
      `else
-      if (pass_encoder[0]==3'd3) begin
+      if (pass_encoder[0]==NUM_PASSES-1) begin
 
           latch_out  <= 1'b1;
 

@@ -1,7 +1,7 @@
 module count_clusters_lite (
     input clock4x,
 
-    input  [768:0] vpfs_i,
+    input  [767:0] vpfs_i,
 
     output reg [10:0] cnt_o,
 
@@ -19,7 +19,7 @@ module count_clusters_lite (
   reg [10:0] cnt; // count to 1536
 
   // register inputs
-  reg  [1535:0] vpfs;
+  reg  [767:0] vpfs;
   always @(posedge clock4x)
     vpfs <= vpfs_i;
 

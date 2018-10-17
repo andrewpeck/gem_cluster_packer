@@ -1,4 +1,3 @@
-`include "constants.v"
 //----------------------------------------------------------------------------------------------------------------------
 // cluster.packer.v
 //----------------------------------------------------------------------------------------------------------------------
@@ -24,7 +23,10 @@
 
 //synthesis attribute ALLCLOCKNETS of cluster_packer is "240MHz"
 
-module cluster_packer (
+module cluster_packer #(
+  parameter VFAT_V2           = 0,
+  parameter TRUNCATE_CLUSTERS = 1
+) (
 
     input             clock5x,
     input             clock4x,
@@ -72,29 +74,11 @@ module cluster_packer (
     output overflow
 );
 
-  parameter MXSBITS    = 64;              // S-bits per vfat
+//----------------------------------------------------------------------------------------------------------------------
+// Constants
+//----------------------------------------------------------------------------------------------------------------------
 
-  `ifdef oh_lite
-  parameter OH_LITE    = 1;
-  parameter MXKEYS     = 6*MXSBITS;       // Vfats  per partition
-  parameter MXROWS     = 2;               // Eta partitions per chamber
-  parameter MXCLUSTERS = 4;               // Number of clusters per bx
-  `else
-  parameter OH_LITE    = 0;
-  parameter MXKEYS     = 3*MXSBITS;       // Vfats  per partition
-  parameter MXROWS     = 8;               // Eta partitions per chamber
-  parameter MXCLUSTERS = 8;               // Number of clusters per bx
-  `endif
-
-  parameter TRUNCATE_CLUSTERS = 1;
-
-  parameter MXVFATS    = 24-12*OH_LITE;
-  parameter MXPADS     = (MXKEYS*MXROWS); // S-bits per chamber
-  parameter MXCNTBITS  = 3;               // Number of count   bits per cluster
-  parameter MXADRBITS  = 11;              // Number of address bits per cluster
-  parameter MXCLSTBITS = 14;              // Number of total   bits per cluster
-  parameter MXOUTBITS  = 56;              // Number of total   bits per packet
-  parameter VFAT_V2    = 0;
+  `include "constants.v"
 
   initial $display ("Compiling cluster packer:");
   initial $display ("    MXSBITS    = %d", MXSBITS);
@@ -123,42 +107,12 @@ module cluster_packer (
   initial cluster6 = 0;
   initial cluster7 = 0;
 
-  // Startup -- keeps outputs off during powerup
-  //---------------------------------------------
-
-  wire [3:0] powerup_dly = 4'd12;
-
-  reg powerup_ff  = 0;
-  //srl16e_bbl #(1) u_startup (.clock(clock4x), .ce(!powerup), .adr(powerup_dly),  .d(1'b1), .q(powerup));
-  SRL16E u_startup (.CLK(clock1x),.CE(!powerup),.D(1'b1),.A0(powerup_dly[0]),.A1(powerup_dly[1]),.A2(powerup_dly[2]),.A3(powerup_dly[3]),.Q(powerup));
-  always @(posedge clock1x) begin
-    powerup_ff <= powerup;
-  end
-
   // Reset -- keeps outputs off during reset time
-  //--------------------------------------------------------------
-  reg reset_done_ff = 1;
-  wire [3:0] reset_dly=4'd0;
-
-  //srl16e_bbl #(1) u_reset_dly (.clock(clock1x), .ce(1'b1), .adr(reset_dly),  .d(global_reset), .q(reset_delayed));
-  SRL16E u_reset (
-    .CLK (clock1x),
-    .CE  (1'b1),
-    .D   (reset_i),
-    .Q   (reset_delayed),
-    .A0  (reset_dly[0]),.A1 ( reset_dly[1]),.A2 ( reset_dly[2]),.A3 ( reset_dly[3])
-  );
-
-  always @(posedge clock1x) begin
-    if       (reset_i && reset_done_ff)                   reset_done_ff <= 1'b0;
-    else if (!reset_i && reset_delayed && !reset_done_ff) reset_done_ff <= 1'b1;
-    else                                                  reset_done_ff <= reset_done_ff;
-  end
 
   reg ready, reset;
   always @(posedge clock1x) begin
-    ready <= powerup_ff && reset_done_ff;
-    reset <= !ready;
+    ready <= ~reset;
+    reset <= reset_i;
   end
 
 
@@ -339,6 +293,8 @@ module cluster_packer (
 
   wire [10:0] cluster_count_s0;
 
+  wire overflow_out;
+
   `ifdef oh_lite
   count_clusters_lite u_count_clusters (
     .clock4x    (clock4x),
@@ -369,6 +325,9 @@ module cluster_packer (
   // FIXME: need to align overflow and cluster count to data
 
   // the output of the overflow flag should be delayed to lineup with the outputs from the priority encoding modules
+
+  wire overflow_dly;
+
   parameter [3:0] OVERFLOW_DELAY = 7;
   SRL16E u_overflow_delay (
     .CLK (clock4x),
@@ -403,7 +362,7 @@ module cluster_packer (
       `else
       first4of1536 u_first4 (
       `endif
-      
+
 
         .vpfs_in (vpfs),
         .cnts_in (cnts),
@@ -425,7 +384,7 @@ module cluster_packer (
         `ifdef first5
         .cnt4  (cnt_encoder [4]),
         `endif
-        
+
           .clock4x(clock4x)
     );
   `else
@@ -472,32 +431,41 @@ module cluster_packer (
 
   `else
     first8of1536 u_first8 (
-        .clock4x(clock4x),
-        .clock5x(clock5x),
+      .clock4x(clock4x),
+      .clock5x(clock5x),
 
-        .vpfs_in (vpfs),
-        .cnts_in (cnts),
+      .vpfs_in (vpfs),
+      .cnts_in (cnts),
 
-        .latch_pulse(latch_pulse_s1),
-        .latch_out(),
+      .latch_pulse(latch_pulse_s1),
+      .latch_out(),
 
-        .adr0  (adr_encoder [0]),
-        .adr1  (adr_encoder [1]),
-        .adr2  (adr_encoder [2]),
-        .adr3  (adr_encoder [3]),
-        .adr4  (adr_encoder [4]),
-        .adr5  (adr_encoder [5]),
-        .adr6  (adr_encoder [6]),
-        .adr7  (adr_encoder [7]),
+      .adr0  (adr_encoder [0]),
+      .adr1  (adr_encoder [1]),
+      .adr2  (adr_encoder [2]),
+      .adr3  (adr_encoder [3]),
+      .adr4  (adr_encoder [4]),
+      .adr5  (adr_encoder [5]),
+      .adr6  (adr_encoder [6]),
+      .adr7  (adr_encoder [7]),
 
-        .cnt0  (cnt_encoder [0]),
-        .cnt1  (cnt_encoder [1]),
-        .cnt2  (cnt_encoder [2]),
-        .cnt3  (cnt_encoder [3]),
-        .cnt4  (cnt_encoder [4]),
-        .cnt5  (cnt_encoder [5]),
-        .cnt6  (cnt_encoder [6]),
-        .cnt7  (cnt_encoder [7])
+      .cnt0  (cnt_encoder [0]),
+      .cnt1  (cnt_encoder [1]),
+      .cnt2  (cnt_encoder [2]),
+      .cnt3  (cnt_encoder [3]),
+      .cnt4  (cnt_encoder [4]),
+      .cnt5  (cnt_encoder [5]),
+      .cnt6  (cnt_encoder [6]),
+      .cnt7  (cnt_encoder [7]),
+
+      .vpf0 (),
+      .vpf1 (),
+      .vpf2 (),
+      .vpf3 (),
+      .vpf4 (),
+      .vpf5 (),
+      .vpf6 (),
+      .vpf7 ()
 
     );
   `endif
@@ -523,22 +491,42 @@ module cluster_packer (
   always @(posedge clock1x)
     trig_stop <= trig_stop_i;
 
+  initial cluster0 = {3'd0,11'h7FF};
+  initial cluster1 = {3'd0,11'h7FF};
+  initial cluster2 = {3'd0,11'h7FF};
+  initial cluster3 = {3'd0,11'h7FF};
+  initial cluster4 = {3'd0,11'h7FF};
+  initial cluster5 = {3'd0,11'h7FF};
+  initial cluster6 = {3'd0,11'h7FF};
+  initial cluster7 = {3'd0,11'h7FF};
+
   always @(posedge clock4x) begin
-         cluster0 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[0];
-         cluster1 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[1];
-         cluster2 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[2];
-         cluster3 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[3];
 
-         `ifdef first5
-         cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[4];
-         `endif
+     cluster0 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[0];
+     cluster1 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[1];
+     cluster2 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[2];
+     cluster3 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[3];
 
-         `ifndef oh_lite
-         cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[4];
-         cluster5 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[5];
-         cluster6 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[6];
-         cluster7 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[7];
+    `ifdef oh_lite
+
+        `ifdef first5
+        cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[4];
+        `else
+        cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : {3'd0,11'h7FF};
         `endif
+
+        cluster5 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : {3'd0,11'h7FF};
+        cluster6 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : {3'd0,11'h7FF};
+        cluster7 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : {3'd0,11'h7FF};
+
+    `else
+
+        cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[4];
+        cluster5 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[5];
+        cluster6 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[6];
+        cluster7 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[7];
+
+    `endif
   end
 
 //----------------------------------------------------------------------------------------------------------------------

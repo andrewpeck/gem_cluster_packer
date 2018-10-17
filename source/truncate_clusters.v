@@ -84,7 +84,7 @@ module truncate_clusters (
   wire [SEGSIZE-1:0] segment_out       [MXSEGS-1:0];
 
   genvar iseg;
-  generate;
+  generate
   for (iseg=0; iseg<MXSEGS; iseg=iseg+1) begin: segloop
     initial segment_ff      [iseg] = {SEGSIZE{1'b0}};
 

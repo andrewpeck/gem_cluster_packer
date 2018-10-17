@@ -29,8 +29,10 @@ module consecutive_count  ( // one logic step, could run at 320 MHz easy!
    input  clock;
    input  [6:0] sbit; // Note! This is s-bits i+1 to i+7 for candidate cluster i
    output [2:0]  count ;
-   assign count=sum;
+
    reg [2:0] 	 sum = 0; // sum <= cons_count(sbit[6:1]);
+
+   assign count=sum;
 
 
    always @(posedge clock) begin  // uses sbit0 here (the 2nd bit of the cluster) as a sync register reset
