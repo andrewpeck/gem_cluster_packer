@@ -121,7 +121,8 @@ wire clock;
   parameter CLUSTERS_PER_ENCODER = 4;
 `endif
 
-  wire [1535:0] vpfs_truncated;
+  wire [MXSBITS*MXVFATS-1:0] vpfs_truncated;
+
   wire   [10:0] adr_enc [NUM_ENCODERS-1:0];
   wire   [0:0]  vpf_enc [NUM_ENCODERS-1:0];
   wire   [2:0]  cnt_enc [NUM_ENCODERS-1:0];
@@ -183,9 +184,9 @@ endgenerate
 always @(posedge clock) begin
 end
 
-reg  [0:0]           vpf_s1 [15:0];
-reg  [MXADRBITS-1:0] adr_s1 [15:0];
-reg  [MXCNTBITS-1:0] cnt_s1 [15:0];
+reg  [0:0]           vpf_s1 [MXCLUSTERS-1:0];
+reg  [MXADRBITS-1:0] adr_s1 [MXCLUSTERS-1:0];
+reg  [MXCNTBITS-1:0] cnt_s1 [MXCLUSTERS-1:0];
 
 // latch outputs of priority encoder when it produces its 8 results, stable for merger
 
@@ -207,6 +208,12 @@ always @(posedge clock) begin
           cnt_s1  [2]  <= cnt_latch[0][2];
           cnt_s1  [3]  <= cnt_latch[0][3];
           cnt_s1  [4]  <= cnt_enc  [0]   ; // lookahead
+
+          vpf_s1  [0]  <= vpf_latch[0][0];
+          vpf_s1  [1]  <= vpf_latch[0][1];
+          vpf_s1  [2]  <= vpf_latch[0][2];
+          vpf_s1  [3]  <= vpf_latch[0][3];
+          vpf_s1  [4]  <= vpf_enc  [0]   ; // lookahead
 
         end
         else begin

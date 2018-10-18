@@ -5,7 +5,7 @@ module count_clusters_lite (
 
     output reg [10:0] cnt_o,
 
-    output overflow_o
+    output reg overflow_o
 );
 
   reg [2 : 0] cnt_s1  [127 : 0]; // count to 6
@@ -19,6 +19,8 @@ module count_clusters_lite (
   reg [10:0] cnt; // count to 1536
 
   // register inputs
+  // make sure Xilinx doesn't merge these with copies in the cluster finding
+  (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
   reg  [767:0] vpfs;
   always @(posedge clock4x)
     vpfs <= vpfs_i;
@@ -76,9 +78,9 @@ module count_clusters_lite (
   // delay count by bx to align with overflow
   always @(posedge clock4x) begin
     cnt_o <= cnt_s7[0] + cnt_s7[1];
+    overflow_o <= (cnt_o > 8);
   end
 
-	assign overflow_o = (cnt > 8);
 
   function [2:0] fast6count;  // do a fast count of 6 bits with just 3 LUTs (the best you can do in a single logic step)
   input [5:0] s;

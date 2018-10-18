@@ -62,14 +62,14 @@ module cluster_packer #(
     input  [MXSBITS-1:0] vfat22,
     input  [MXSBITS-1:0] vfat23,
 
-    output reg [MXCLSTBITS-1:0] cluster0,
-    output reg [MXCLSTBITS-1:0] cluster1,
-    output reg [MXCLSTBITS-1:0] cluster2,
-    output reg [MXCLSTBITS-1:0] cluster3,
-    output reg [MXCLSTBITS-1:0] cluster4,
-    output reg [MXCLSTBITS-1:0] cluster5,
-    output reg [MXCLSTBITS-1:0] cluster6,
-    output reg [MXCLSTBITS-1:0] cluster7,
+    output [MXCLSTBITS-1:0] cluster0,
+    output [MXCLSTBITS-1:0] cluster1,
+    output [MXCLSTBITS-1:0] cluster2,
+    output [MXCLSTBITS-1:0] cluster3,
+    output [MXCLSTBITS-1:0] cluster4,
+    output [MXCLSTBITS-1:0] cluster5,
+    output [MXCLSTBITS-1:0] cluster6,
+    output [MXCLSTBITS-1:0] cluster7,
 
     output overflow
 );
@@ -89,7 +89,6 @@ module cluster_packer #(
   initial $display ("    MXCNTBITS  = %d", MXCNTBITS);
   initial $display ("    MXADRBITS  = %d", MXADRBITS);
   initial $display ("    MXCLSTBITS = %d", MXCLSTBITS);
-  initial $display ("    MXOUTBITS  = %d", MXOUTBITS);
   initial $display ("    MXCLUSTERS = %d", MXCLUSTERS);
   initial $display ("    VFATV2     = %d", VFAT_V2);
 
@@ -97,15 +96,6 @@ module cluster_packer #(
 //----------------------------------------------------------------------------------------------------------------------
 // State machine power-up reset + global reset
 //----------------------------------------------------------------------------------------------------------------------
-
-  initial cluster0 = 0;
-  initial cluster1 = 0;
-  initial cluster2 = 0;
-  initial cluster3 = 0;
-  initial cluster4 = 0;
-  initial cluster5 = 0;
-  initial cluster6 = 0;
-  initial cluster7 = 0;
 
   // Reset -- keeps outputs off during reset time
 
@@ -120,9 +110,9 @@ module cluster_packer #(
 // clock 0: fire oneshots to prevent stuck bits and shorten the monostables
 //----------------------------------------------------------------------------------------------------------------------
 
-  wire [MXSBITS-1:0] vfat_s0 [23:0];
-  wire [MXSBITS-1:0] vfat_os [23:0];
-  reg [MXSBITS-1:0] vfat_s1 [23:0];
+  wire [MXSBITS-1:0] vfat_s0 [MXVFATS-1:0];
+  wire [MXSBITS-1:0] vfat_os [MXVFATS-1:0];
+  reg  [MXSBITS-1:0] vfat_s1 [MXVFATS-1:0];
 
   assign vfat_s0[0]  = vfat0;
   assign vfat_s0[1]  = vfat1;
@@ -156,7 +146,6 @@ module cluster_packer #(
     deadtime <= deadtime_i;
   end
 
-
   wire clock_lac, latch_pulse;
   reg latch_pulse_s1;
   lac lac (clock1x, clock4x, clock_lac, latch_pulse);
@@ -172,7 +161,7 @@ module cluster_packer #(
   genvar os_vfat;
   genvar os_sbit;
   generate
-  for (os_vfat=0; os_vfat<(MXPADS/MXSBITS); os_vfat=os_vfat+1'b1) begin  : os_vfatloop
+  for (os_vfat=0; os_vfat<MXVFATS; os_vfat=os_vfat+1'b1) begin  : os_vfatloop
     for (os_sbit=0; os_sbit<MXSBITS; os_sbit=os_sbit+1'b1) begin  : os_sbitloop
 
       `ifdef ONESHOT
@@ -185,25 +174,18 @@ module cluster_packer #(
           .slowclk    (clock1x)
         );
 
-        vfat_s1[os_vfat][os_sbit] = vfat_os[os_vfat][os_sbit];
-
-
       `else
 
         //--------------------------------------------------------------------------------------------------------------
         // without the oneshot we can save 6.25 ns latency and make this transparent
         //--------------------------------------------------------------------------------------------------------------
 
-        `ifdef full_chamber_finder
-          always @(posedge clock4x)
-            vfat_s1[os_vfat][os_sbit] = vfat_s0[os_vfat][os_sbit];
-        `else
-          always @(*)
-            vfat_s1[os_vfat][os_sbit] <= vfat_s0[os_vfat][os_sbit];
-        `else
-        `endif
+        assign vfat_os[os_vfat][os_sbit] = vfat_s0[os_vfat][os_sbit];
 
       `endif
+
+      always @(*)
+        vfat_s1[os_vfat][os_sbit] <= vfat_os[os_vfat][os_sbit];
 
     end
   end
@@ -216,27 +198,37 @@ module cluster_packer #(
   // remap vfats into partitions
   //--------------------------------------------------------------------------------
 
-  reg [MXKEYS-1:0] partition [7:0];
+  reg [MXKEYS-1:0] partition [MXROWS-1:0];
 
   always @(*) begin
-    `ifdef invert_partitions  // need to make a choice about whether strip-0 is in partition 0 or 7
-      partition[0] <= {vfat_s1[23], vfat_s1[15],  vfat_s1[7]};
-      partition[1] <= {vfat_s1[22], vfat_s1[14],  vfat_s1[6]};
-      partition[2] <= {vfat_s1[21], vfat_s1[13],  vfat_s1[5]};
-      partition[3] <= {vfat_s1[20], vfat_s1[12],  vfat_s1[4]};
-      partition[4] <= {vfat_s1[19], vfat_s1[11],  vfat_s1[3]};
-      partition[5] <= {vfat_s1[18], vfat_s1[10],  vfat_s1[2]};
-      partition[6] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
-      partition[7] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
+    `ifdef oh_lite
+      `ifdef invert_partitions  // need to make a choice about whether strip-0 is in partition 0 or 7
+        partition[0] <= {vfat_s1[0], vfat_s1[1],  vfat_s1[2], vfat_s1[3], vfat_s1[4],  vfat_s1[5]};
+        partition[1] <= {vfat_s1[6], vfat_s1[7],  vfat_s1[8], vfat_s1[9], vfat_s1[10], vfat_s1[11]};
+      `else
+        partition[1] <= {vfat_s1[0], vfat_s1[1],  vfat_s1[2], vfat_s1[3], vfat_s1[4],  vfat_s1[5]};
+        partition[0] <= {vfat_s1[6], vfat_s1[7],  vfat_s1[8], vfat_s1[9], vfat_s1[10], vfat_s1[11]};
+      `endif
     `else
-      partition[0] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
-      partition[1] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
-      partition[2] <= {vfat_s1[18], vfat_s1[10],  vfat_s1[2]};
-      partition[3] <= {vfat_s1[19], vfat_s1[11],  vfat_s1[3]};
-      partition[4] <= {vfat_s1[20], vfat_s1[12],  vfat_s1[4]};
-      partition[5] <= {vfat_s1[21], vfat_s1[13],  vfat_s1[5]};
-      partition[6] <= {vfat_s1[22], vfat_s1[14],  vfat_s1[6]};
-      partition[7] <= {vfat_s1[23], vfat_s1[15],  vfat_s1[7]};
+      `ifdef invert_partitions  // need to make a choice about whether strip-0 is in partition 0 or 7
+        partition[0] <= {vfat_s1[23], vfat_s1[15],  vfat_s1[7]};
+        partition[1] <= {vfat_s1[22], vfat_s1[14],  vfat_s1[6]};
+        partition[2] <= {vfat_s1[21], vfat_s1[13],  vfat_s1[5]};
+        partition[3] <= {vfat_s1[20], vfat_s1[12],  vfat_s1[4]};
+        partition[4] <= {vfat_s1[19], vfat_s1[11],  vfat_s1[3]};
+        partition[5] <= {vfat_s1[18], vfat_s1[10],  vfat_s1[2]};
+        partition[6] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
+        partition[7] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
+      `else
+        partition[0] <= {vfat_s1[16], vfat_s1[8 ],  vfat_s1[0]};
+        partition[1] <= {vfat_s1[17], vfat_s1[9 ],  vfat_s1[1]};
+        partition[2] <= {vfat_s1[18], vfat_s1[10],  vfat_s1[2]};
+        partition[3] <= {vfat_s1[19], vfat_s1[11],  vfat_s1[3]};
+        partition[4] <= {vfat_s1[20], vfat_s1[12],  vfat_s1[4]};
+        partition[5] <= {vfat_s1[21], vfat_s1[13],  vfat_s1[5]};
+        partition[6] <= {vfat_s1[22], vfat_s1[14],  vfat_s1[6]};
+        partition[7] <= {vfat_s1[23], vfat_s1[15],  vfat_s1[7]};
+      `endif
     `endif
   end
 
@@ -354,15 +346,14 @@ module cluster_packer #(
 
   //--------------------------------------------------------------------------------------------------------------------
   // GE2/1 Light Optohybrid
-
   //--------------------------------------------------------------------------------------------------------------------
+
   `ifdef oh_lite
       `ifdef first5
       first5of1536 u_first5 (
       `else
       first4of1536 u_first4 (
       `endif
-
 
         .vpfs_in (vpfs),
         .cnts_in (cnts),
@@ -385,7 +376,8 @@ module cluster_packer #(
         .cnt4  (cnt_encoder [4]),
         `endif
 
-          .clock4x(clock4x)
+        .clock5x(clock5x),
+        .clock4x(clock4x)
     );
   `else
 
@@ -397,7 +389,7 @@ module cluster_packer #(
     encoder_mux u_encoder_mux (
 
       .clock4x (clock4x),
-      .clock5x(clock5x),
+      .clock5x (clock5x),
 
       .latch_pulse (latch_pulse),
       .clock_lac   (clock_lac),
@@ -475,59 +467,73 @@ module cluster_packer #(
 // clock 13: build data packet
 //----------------------------------------------------------------------------------------------------------------------
 
-  wire [MXCLSTBITS-1:0] cluster [MXCLUSTERS-1:0];
-  genvar icluster;
-  generate
-    for (icluster=0; icluster<MXROWS; icluster=icluster+1) begin: adrloop
-
-      //  14 bit hit format encoding
-      //   hit[10:0]  = pad
-      //   hit[13:11] = n adjacent pads hit  up to 7
-      assign cluster[icluster] = {cnt_encoder[icluster], adr_encoder[icluster] };
-    end
-  endgenerate
-
   reg trig_stop;
   always @(posedge clock1x)
     trig_stop <= trig_stop_i;
 
-  initial cluster0 = {3'd0,11'h7FF};
-  initial cluster1 = {3'd0,11'h7FF};
-  initial cluster2 = {3'd0,11'h7FF};
-  initial cluster3 = {3'd0,11'h7FF};
-  initial cluster4 = {3'd0,11'h7FF};
-  initial cluster5 = {3'd0,11'h7FF};
-  initial cluster6 = {3'd0,11'h7FF};
-  initial cluster7 = {3'd0,11'h7FF};
+  reg [MXCLSTBITS-1:0] cluster [7:0];
 
-  always @(posedge clock4x) begin
+  genvar icluster;
 
-     cluster0 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[0];
-     cluster1 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[1];
-     cluster2 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[2];
-     cluster3 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[3];
+  //--------------------------------------------------------------------------------------------------------------------
+  // Initial values
+  //--------------------------------------------------------------------------------------------------------------------
 
-    `ifdef oh_lite
+  generate
+    for (icluster=0; icluster<8; icluster=icluster+1'b1) begin: clusterloop_init
 
-        `ifdef first5
-        cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[4];
-        `else
-        cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : {3'd0,11'h7FF};
-        `endif
+      initial $display ("Initializing cluster_loop %d of %d", icluster, 7);
 
-        cluster5 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : {3'd0,11'h7FF};
-        cluster6 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : {3'd0,11'h7FF};
-        cluster7 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : {3'd0,11'h7FF};
+      initial cluster[icluster] = {3'd0,11'h7FE};
+    end
+  endgenerate
 
-    `else
+  //--------------------------------------------------------------------------------------------------------------------
+  // Concatenate clusters
+  //--------------------------------------------------------------------------------------------------------------------
 
-        cluster4 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[4];
-        cluster5 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[5];
-        cluster6 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[6];
-        cluster7 <= (reset) ? {3'd0,11'h7FE} : trig_stop ? {3'd0,11'h7FD} : cluster[7];
+  // FIXME:
+  // i have NO IDEA why this is needed
+  // but in simulation it seems to be necessary...
+  // there must be something wrong with the parsing of the parameters or something?
+  // when using the already existing MXCLUSTERS the loop only increments to 1 less than it should
+  // what the heck... Vivado is horrible
 
-    `endif
-  end
+  `ifdef oh_lite
+      `ifdef first5                        //
+      localparam mxclst = 5;           // Number of clusters per bx
+      `else                                //
+      localparam mxclst = 4;           // Number of clusters per bx
+      `endif                               //
+  `else
+      localparam mxclst = 8;           // Number of clusters per bx
+  `endif
+
+  generate
+    for (icluster=0; icluster<mxclst; icluster=icluster+1'b1) begin: clusterloop
+
+      initial $display ("Assigning cluster_loop %d of %d", icluster, MXCLUSTERS-1);
+      //  14 bit hit format encoding
+      //   hit[10:0]  = pad
+      //   hit[13:11] = n adjacent pads hit  up to 7
+
+      always @(posedge clock4x) begin
+        cluster[icluster] <= reset     ? {3'd0, 11'h7FE} :
+                             trig_stop ? {3'd0, 11'h7FD} :
+                                         {cnt_encoder[icluster], adr_encoder[icluster]};
+      end
+
+    end
+  endgenerate
+
+  assign cluster0 = cluster[0];
+  assign cluster1 = cluster[1];
+  assign cluster2 = cluster[2];
+  assign cluster3 = cluster[3];
+  assign cluster4 = cluster[4];
+  assign cluster5 = cluster[5];
+  assign cluster6 = cluster[6];
+  assign cluster7 = cluster[7];
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule
