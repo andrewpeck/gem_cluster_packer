@@ -11,8 +11,6 @@
  Note... not sure how fast this can run, but probably 160 MHz or more...
 */
 
-
-
 module consecutive_count  ( // one logic step, could run at 320 MHz easy!
     clock, // This could be inverted lhc_clk or 80 MHz or a 1/4 phase shifted clk for optimal speed.
     sbit,  // Here we hand the *next 7* s-bits to this module and save the result for any s-bit i...
@@ -52,16 +50,3 @@ module consecutive_count  ( // one logic step, could run at 320 MHz easy!
 //------------------------------------------------------------------------------------------------------------------
 endmodule
 //------------------------------------------------------------------------------------------------------------------
-
-/* ...jotting some incomplete thoughts here about the upper level.... bad code here!
-  genvar ipad;
-  generate
-  for (ipad=0; ipad<=MXPAD-1; ipad=ipad+1) begin: gempad
-    consecutive_count cons_cnt_i(clk,sbit[ipad+1:ipad+7],cnt[ipad]);
-    always @(posedge clk) begin
-       if (sbit[ipad:ipad-1]=2'b10 || sbit[ipad:ipad-9]=10'b1111111110) clust_r0[ipad] <= {cnt[ipad][2:0],ipad[10:0]}; // 14-bits
-       else clust_r0[ipad] <= 0; // 14-bits
-    end
-  endgenerate
-
-*/

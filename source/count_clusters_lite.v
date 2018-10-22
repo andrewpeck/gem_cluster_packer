@@ -21,9 +21,14 @@ module count_clusters_lite (
   // register inputs
   // make sure Xilinx doesn't merge these with copies in the cluster finding
   (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
+  reg  [767:0] vpfs_s0;
+  (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
   reg  [767:0] vpfs;
-  always @(posedge clock4x)
-    vpfs <= vpfs_i;
+  always @(posedge clock4x) begin
+    vpfs_s0 <= vpfs_i;
+    vpfs    <= vpfs_s0;
+  end
+
 
   genvar icnt;
 
@@ -75,10 +80,12 @@ module count_clusters_lite (
  // cnt_s7[1] <= cnt_s6[4]  + cnt_s6[5]  + cnt_s6[6]  + cnt_s6[7];
   end
 
+  reg [10:0] cnt;
   // delay count by bx to align with overflow
   always @(posedge clock4x) begin
-    cnt_o <= cnt_s7[0] + cnt_s7[1];
-    overflow_o <= (cnt_o > 8);
+    cnt <= cnt_s7[0] + cnt_s7[1];
+    cnt_o <= cnt;
+    overflow_o <= (cnt > 8);
   end
 
 
