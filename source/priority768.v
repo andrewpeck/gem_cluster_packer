@@ -18,6 +18,10 @@ module priority768 (
   output reg  [10:0] adr,
   output reg   [2:0] cnt
 );
+
+  (* KEEP = "TRUE" *)
+  (* MAX_FANOUT = 128 *)
+  (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
   reg latch_en=0;
   always @(posedge clock)
     latch_en <= latch_pulse;

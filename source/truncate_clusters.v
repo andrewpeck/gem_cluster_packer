@@ -64,6 +64,8 @@ module truncate_clusters (
   // 11110000 which means the next clock will be at the rising edge..
 
   (* KEEP = "TRUE" *)
+  (* MAX_FANOUT = 128 *)
+  (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
   reg [MXSEGS-1:0] latch_en=0;
   always @(posedge clock)
     latch_en <= {MXSEGS{latch_pulse}};
