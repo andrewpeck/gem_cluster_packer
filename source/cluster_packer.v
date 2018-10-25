@@ -272,7 +272,7 @@ assign cluster_clock = clock4x;
 		.MXROWS         (MXROWS),
 		.MXKEYS         (MXKEYS),
 		.SPLIT_CLUSTERS (SPLIT_CLUSTERS) // 0=long clusters will be split in two
-	)(
+	) find_cluster_primaries (
 		.clock (cluster_clock),
 		.sbits (sbits_s0),
 		.vpfs  (vpfs),

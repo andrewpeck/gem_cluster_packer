@@ -19,12 +19,14 @@ module priority768 (
   output reg   [2:0] cnt
 );
 
-  (* KEEP = "TRUE" *)
+  parameter MXLATCHES = 16;
+
   (* MAX_FANOUT = 128 *)
+  (* DONT_TOUCH = "TRUE" *)
   (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
-  reg latch_en=0;
+  reg [MXLATCHES-1:0] latch_en=0;
   always @(posedge clock)
-    latch_en <= latch_pulse;
+    latch_en <= {MXLATCHES{latch_pulse}};
 
   parameter MXPADS = 768;
 
@@ -40,7 +42,7 @@ module priority768 (
   generate
   for (ipad=0; ipad<768; ipad=ipad+1) begin: padloop
     always @(posedge clock) begin
-      if (latch_en)
+      if (latch_en[ipad/MXLATCHES])
         cnts_latch [ipad] <= cnts_in [ipad*3+2:ipad*3];
     end
 

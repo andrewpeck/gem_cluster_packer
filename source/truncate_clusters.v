@@ -65,7 +65,7 @@ module truncate_clusters #(
   // it should be clear if you draw a timing diagram.. but imagine in two clock cycles clock sampled will be
   // 11110000 which means the next clock will be at the rising edge..
 
-  (* KEEP = "TRUE" *)
+  (* DONT_TOUCH = "TRUE" *)
   (* MAX_FANOUT = 128 *)
   (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
   reg [MXSEGS-1:0] latch_en=0;
