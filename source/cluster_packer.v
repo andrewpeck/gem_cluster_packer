@@ -263,16 +263,9 @@ assign cluster_clock = clock4x;
   // count cluster size and assign valid pattern flags
   //--------------------------------------------------------------------------------
 
-	wire [MXPADS  -1:0] vpfs=0;
+	wire [MXPADS  -1        :0] vpfs;
   wire [MXPADS*MXCNTBITS-1:0] cnts;
 
-  // optional duplicate of vpfs for timing
-  (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
-  reg  [MXPADS  -1:0] vpfs_reg=0;
-
-  always @(posedge cluster_clock) begin
-    vpfs_reg <= vpfs;
-  end
 
 	find_cluster_primaries #(
 		.MXPADS         (MXPADS),
@@ -286,6 +279,17 @@ assign cluster_clock = clock4x;
 		.cnts  (cnts)
 	);
 
+  // optional duplicate of vpfs for timing
+  (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
+  reg  [MXPADS  -1:0] vpfs_reg=0;
+  (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
+  reg  [MXPADS*MXCNTBITS-1:0] cnts_reg;
+
+  always @(posedge cluster_clock) begin
+    vpfs_reg <= vpfs;
+    cnts_reg <= cnts;
+  end
+
   // We count the number of cluster primaries. If it is greater than 8,
   // generate an overflow flag. This can be used to change the fiber's frame
   // separator to flag this to the receiving devices
@@ -297,14 +301,14 @@ assign cluster_clock = clock4x;
   `ifdef oh_lite
   count_clusters_lite u_count_clusters (
     .clock4x    (cluster_clock),
-    .vpfs_i     (vpfs),
+    .vpfs_i     (vpfs_reg),
     .cnt_o      (cluster_count_s0),
     .overflow_o (overflow_out)
   );
   `else
   count_clusters u_count_clusters (
     .clock4x    (cluster_clock),
-    .vpfs_i     (vpfs),
+    .vpfs_i     (vpfs_reg),
     .cnt_o      (cluster_count_s0),
     .overflow_o (overflow_out)
   );
@@ -368,7 +372,11 @@ assign cluster_clock = clock4x;
         .vpfs_in (vpfs),
         `endif
 
+        `ifdef first5
         .cnts_in (cnts),
+        `else
+        .cnts_in (cnts_reg),
+        `endif
 
         .latch_pulse(latch_pulse_s1),
 
