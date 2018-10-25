@@ -25,7 +25,7 @@
 
 module cluster_packer #(
   parameter VFAT_V2           = 0,
-  parameter TRUNCATE_CLUSTERS = 1
+  parameter SPLIT_CLUSTERS = 1
 ) (
 
     input             clock5x,
@@ -105,6 +105,12 @@ module cluster_packer #(
     reset <= reset_i;
   end
 
+wire cluster_clock;
+`ifdef first5
+assign cluster_clock = clock5x;
+`else
+assign cluster_clock = clock4x;
+`endif
 
 //----------------------------------------------------------------------------------------------------------------------
 // clock 0: fire oneshots to prevent stuck bits and shorten the monostables
@@ -146,16 +152,27 @@ module cluster_packer #(
     deadtime <= deadtime_i;
   end
 
-  wire clock_lac, latch_pulse;
+  wire clock_lac, latch_pulse_4x, latch_pulse_5x;
   reg latch_pulse_s1;
-  lac lac (clock1x, clock4x, clock_lac, latch_pulse);
+  lac lac      (
+    .clock     ( clock1x),
+    .clock4x   ( clock4x),
+    .clock5x   ( clock5x),
+    .clock_lac ( clock_lac),
+    .strobe4x  ( latch_pulse_4x),
+    .strobe5x  ( latch_pulse_5x)
+  );
 
   `ifdef ONESHOT
-  always @(posedge clock4x) begin
+  always @(posedge cluster_clock) begin
   `else
   always @(*) begin
   `endif
-    latch_pulse_s1 <= latch_pulse;
+      `ifdef first5
+        latch_pulse_s1 <= latch_pulse_5x;
+      `else
+        latch_pulse_s1 <= latch_pulse_4x;
+      `endif
   end
 
   genvar os_vfat;
@@ -170,7 +187,7 @@ module cluster_packer #(
           .d          (vfat_s0[os_vfat][os_sbit]),
           .q          (vfat_os[os_vfat][os_sbit]),
           .deadtime_i (deadtime),
-          .clock      (clock4x),
+          .clock      (cluster_clock),
           .slowclk    (clock1x)
         );
 
@@ -232,52 +249,42 @@ module cluster_packer #(
     `endif
   end
 
-  // zero pad the partition to handle the edge cases for counting
-  // count cluster size and assign valid pattern flags
-  //--------------------------------------------------------------------------------
+  wire  [MXPADS-1:0] sbits_s0;
 
-  parameter [0:0] pad = 0;
-  wire [(MXKEYS-1)+8:0] partition_padded [MXROWS-1:0];
-  reg  [MXPADS  -1:0] vpfs=0;
-  wire [MXPADS*MXCNTBITS-1:0] cnts;
-
-  genvar ikey;
-  genvar irow;
-  genvar ibit;
+  genvar ikey, irow, ibit;
   generate
-    for (irow=0; irow<MXROWS; irow=irow+1) begin: cluster_count_rowloop
-
-    assign partition_padded[irow] = {{8{pad}}, partition[irow]};
-
-    for (ikey=0; ikey<MXKEYS; ikey=ikey+1) begin: cluster_count_keyloop
-
-        if (VFAT_V2)  begin
-            assign cnts[(MXKEYS*irow*3)+(ikey+1)*3-1:(MXKEYS*irow*3)+ikey*3] = 3'd7;
-            always @(posedge clock4x)
-              vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
-        end
-        else begin
-          // first pad is always a cluster if it has an S-bit
-          // other pads are cluster if they:
-          //    (1) are preceded by a Zero (i.e. they start a cluster)
-          // or (2) are preceded by a Size=8 cluster (and cluster truncation is turned off)
-          //        if we have size > 16 cluster, the end will get cut off
-          always @(posedge clock4x) begin
-            if      (ikey == 0) vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey];
-            else if (ikey  < 9) vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10;
-            else if (ikey >= 9) vpfs [(MXKEYS*irow)+ikey] <= partition[irow][ikey:ikey-1]==2'b10 || (!TRUNCATE_CLUSTERS && partition[irow][ikey:ikey-9]==10'b1111111110) ;
-          end
-
-          consecutive_count ucntseq (
-            .clock (clock4x),
-            .sbit  (partition_padded[irow][ikey+7:ikey+1]),
-            .count (cnts[(MXKEYS*irow*3)+(ikey+1)*3-1:(MXKEYS*irow*3)+ikey*3])
-          );
-        end
-
+    for (irow=0; irow<MXROWS; irow=irow+1) begin: cluster_vpf_rowloop
+    for (ikey=0; ikey<MXKEYS; ikey=ikey+1) begin: cluster_vpf_keyloop
+			assign sbits_s0 [(MXKEYS*irow)+ikey] = partition[irow][ikey];
     end // row loop
     end // key_loop
   endgenerate
+
+  // count cluster size and assign valid pattern flags
+  //--------------------------------------------------------------------------------
+
+	wire [MXPADS  -1:0] vpfs=0;
+  wire [MXPADS*MXCNTBITS-1:0] cnts;
+
+  // optional duplicate of vpfs for timing
+  (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
+  reg  [MXPADS  -1:0] vpfs_reg=0;
+
+  always @(posedge cluster_clock) begin
+    vpfs_reg <= vpfs;
+  end
+
+	find_cluster_primaries #(
+		.MXPADS         (MXPADS),
+		.MXROWS         (MXROWS),
+		.MXKEYS         (MXKEYS),
+		.SPLIT_CLUSTERS (SPLIT_CLUSTERS) // 0=long clusters will be split in two
+	)(
+		.clock (cluster_clock),
+		.sbits (sbits_s0),
+		.vpfs  (vpfs),
+		.cnts  (cnts)
+	);
 
   // We count the number of cluster primaries. If it is greater than 8,
   // generate an overflow flag. This can be used to change the fiber's frame
@@ -289,14 +296,14 @@ module cluster_packer #(
 
   `ifdef oh_lite
   count_clusters_lite u_count_clusters (
-    .clock4x    (clock4x),
+    .clock4x    (cluster_clock),
     .vpfs_i     (vpfs),
     .cnt_o      (cluster_count_s0),
     .overflow_o (overflow_out)
   );
   `else
   count_clusters u_count_clusters (
-    .clock4x    (clock4x),
+    .clock4x    (cluster_clock),
     .vpfs_i     (vpfs),
     .cnt_o      (cluster_count_s0),
     .overflow_o (overflow_out)
@@ -322,7 +329,7 @@ module cluster_packer #(
 
   parameter [3:0] OVERFLOW_DELAY = 7;
   SRL16E u_overflow_delay (
-    .CLK (clock4x),
+    .CLK (cluster_clock),
     .CE  (1'b1),
     .D   (overflow_out),
     .Q   (overflow_dly),
@@ -333,7 +340,7 @@ module cluster_packer #(
   );
 
   reg overflow_ff = 0;
-  always @(posedge clock4x)
+  always @(posedge cluster_clock)
     overflow_ff <= (reset) ? 1'b0 : overflow_dly;
   assign overflow = overflow_ff;
 
@@ -355,7 +362,12 @@ module cluster_packer #(
       first4of1536 u_first4 (
       `endif
 
+        `ifdef first5
+        .vpfs_in (vpfs_reg),
+        `else
         .vpfs_in (vpfs),
+        `endif
+
         .cnts_in (cnts),
 
         .latch_pulse(latch_pulse_s1),
@@ -376,8 +388,7 @@ module cluster_packer #(
         .cnt4  (cnt_encoder [4]),
         `endif
 
-        .clock5x(clock5x),
-        .clock4x(clock4x)
+        .clock (cluster_clock)
     );
   `else
 
@@ -388,8 +399,7 @@ module cluster_packer #(
   `ifdef full_chamber_finder
     encoder_mux u_encoder_mux (
 
-      .clock4x (clock4x),
-      .clock5x (clock5x),
+      .clock (cluster_clock),
 
       .latch_pulse (latch_pulse),
       .clock_lac   (clock_lac),
@@ -423,8 +433,7 @@ module cluster_packer #(
 
   `else
     first8of1536 u_first8 (
-      .clock4x(clock4x),
-      .clock5x(clock5x),
+      .clock (cluster_clock),
 
       .vpfs_in (vpfs),
       .cnts_in (cnts),
@@ -517,7 +526,7 @@ module cluster_packer #(
       //   hit[10:0]  = pad
       //   hit[13:11] = n adjacent pads hit  up to 7
 
-      always @(posedge clock4x) begin
+      always @(posedge cluster_clock) begin
         cluster[icluster] <= reset     ? {3'd0, 11'h7FE} :
                              trig_stop ? {3'd0, 11'h7FD} :
                                          {cnt_encoder[icluster], adr_encoder[icluster]};

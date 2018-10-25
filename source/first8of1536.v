@@ -10,8 +10,7 @@ module first8of1536 (
 module first16of1536 (
 `endif
 
-    input clock5x,
-    input clock4x,
+    input clock,
 
     input latch_pulse, // this should go high when new vpfs are ready
 
@@ -92,13 +91,6 @@ module first16of1536 (
 );
 
 `include "constants.v"
-
-wire clock;
-`ifdef first5
-  assign clock=clock5x;
-`else
-  assign clock=clock4x;
-`endif
 
 //----------------------------------------------------------------------------------------------------------------------
 // Signals
@@ -356,7 +348,11 @@ end
 // Outputs
 // ------------------------------------------------------------------------------------------------------------------
 
+`ifdef output_latch
+  always @(clock) begin
+`else
   always @(*) begin
+`endif
 
     adr0  <= adr_s1[0];
     adr1  <= adr_s1[1];
