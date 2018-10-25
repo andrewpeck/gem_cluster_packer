@@ -28,7 +28,7 @@ module count_clusters (
 
   always @(posedge clock4x) begin
     vpfs_s0 <= vpfs_i;
-    vpfs    <= vpfs;
+    vpfs    <= vpfs_s0;
   end
 
   genvar icnt;
@@ -80,7 +80,6 @@ module count_clusters (
     cnt_s7[1] <= cnt_s6[4]  + cnt_s6[5]  + cnt_s6[6]  + cnt_s6[7];
   end
 
-  reg [10:0] cnt;
   always @(posedge clock4x) begin
     cnt <=  cnt_s7[0] + cnt_s7[1];
     cnt_o <= cnt;
