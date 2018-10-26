@@ -10,8 +10,8 @@ module priority768 (
   input  [2:0] pass_in,
   output reg [2:0] pass_out,
 
-  input   [768  -1:0] vpfs_in,
-  input   [768*3-1:0] cnts_in,
+  input   [MXKEYS  -1:0] vpfs_in,
+  input   [MXKEYS*3-1:0] cnts_in,
 
   output reg cluster_found,
 
@@ -20,6 +20,8 @@ module priority768 (
 );
 
   parameter MXLATCHES = 16;
+  parameter MXKEYS    = 768;
+  parameter MXKEYBITS = 10;
 
   (* MAX_FANOUT = 128 *)
   (* DONT_TOUCH = "TRUE" *)
@@ -28,21 +30,19 @@ module priority768 (
   always @(posedge clock)
     latch_en <= {MXLATCHES{latch_pulse}};
 
-  parameter MXPADS = 768;
-
 //----------------------------------------------------------------------------------------------------------------------
 // Input registers and delays
 //----------------------------------------------------------------------------------------------------------------------
 
-  reg   [768-1:0] vpfs;
-  reg   [2:0] cnts_latch [768-1:0];
-  reg   [2:0] cnts       [768-1:0];
+  reg   [MXKEYS-1:0] vpfs;
+  reg   [2:0] cnts_latch [MXKEYS-1:0];
+  reg   [2:0] cnts       [MXKEYS-1:0];
 
   genvar ipad;
   generate
-  for (ipad=0; ipad<768; ipad=ipad+1) begin: padloop
+  for (ipad=0; ipad<MXKEYS; ipad=ipad+1) begin: padloop
     always @(posedge clock) begin
-      if (latch_en[ipad/MXLATCHES])
+      if (latch_en[ipad/(MXKEYS/MXLATCHES)])
         cnts_latch [ipad] <= cnts_in [ipad*3+2:ipad*3];
     end
 
@@ -76,8 +76,6 @@ module priority768 (
   //`define s8_latch
   `define output_latch
 
-  parameter MXKEYS    = 768;
-  parameter MXKEYBITS = 10;
 
   reg [2:0] pass_s0;
   reg [2:0] pass_s1;
@@ -122,7 +120,7 @@ module priority768 (
   // Stage 0 : 384 of 768
   genvar ihit;
   generate
-  for (ihit=0; ihit<384; ihit=ihit+1) begin: s0
+  for (ihit=0; ihit<MXKEYS/2; ihit=ihit+1) begin: s0
     `ifdef s0_latch
     always @(posedge clock)
     `else
@@ -141,7 +139,7 @@ module priority768 (
 
   // Stage 1: 192 of 384
   generate
-  for (ihit=0; ihit<192; ihit=ihit+1) begin: s1
+  for (ihit=0; ihit<MXKEYS/4; ihit=ihit+1) begin: s1
   `ifdef s1_latch
   always @(posedge clock)
   `else
@@ -160,7 +158,7 @@ module priority768 (
 
   // Stage 2: 96 of 192
   generate
-  for (ihit=0; ihit<96; ihit=ihit+1) begin: s2
+  for (ihit=0; ihit<MXKEYS/8; ihit=ihit+1) begin: s2
   `ifdef s2_latch
   always @(posedge clock)
   `else
@@ -179,7 +177,7 @@ module priority768 (
 
   // Stage 3: 48 of 96
   generate
-  for (ihit=0; ihit<48; ihit=ihit+1) begin: s3
+  for (ihit=0; ihit<MXKEYS/16; ihit=ihit+1) begin: s3
   `ifdef s3_latch
   always @(posedge clock)
   `else
@@ -198,7 +196,7 @@ module priority768 (
 
   // Stage 4: 24 of 48
   generate
-  for (ihit=0; ihit<24; ihit=ihit+1) begin: s4
+  for (ihit=0; ihit<MXKEYS/32; ihit=ihit+1) begin: s4
   `ifdef s4_latch
   always @(posedge clock)
   `else
@@ -217,7 +215,7 @@ module priority768 (
 
   // stage 5: 12 of 24
   generate
-  for (ihit=0; ihit<12; ihit=ihit+1) begin: s5
+  for (ihit=0; ihit<MXKEYS/64; ihit=ihit+1) begin: s5
   `ifdef s5_latch
   always @(posedge clock)
   `else
@@ -236,7 +234,7 @@ module priority768 (
 
   // stage 6: 6 of 12
   generate
-  for (ihit=0; ihit<6; ihit=ihit+1) begin: s6
+  for (ihit=0; ihit<MXKEYS/128; ihit=ihit+1) begin: s6
   `ifdef s6_latch
   always @(posedge clock)
   `else
@@ -255,7 +253,7 @@ module priority768 (
 
   // stage 7: 3 of 6
   generate
-  for (ihit=0; ihit<3; ihit=ihit+1) begin: s7
+  for (ihit=0; ihit<MXKEYS/256; ihit=ihit+1) begin: s7
   `ifdef s7_latch
   always @(posedge clock)
   `else

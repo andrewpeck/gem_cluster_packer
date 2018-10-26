@@ -24,7 +24,6 @@
 //synthesis attribute ALLCLOCKNETS of cluster_packer is "240MHz"
 
 module cluster_packer #(
-  parameter VFAT_V2           = 0,
   parameter SPLIT_CLUSTERS = 1
 ) (
 
@@ -90,7 +89,6 @@ module cluster_packer #(
   initial $display ("    MXADRBITS  = %d", MXADRBITS);
   initial $display ("    MXCLSTBITS = %d", MXCLSTBITS);
   initial $display ("    MXCLUSTERS = %d", MXCLUSTERS);
-  initial $display ("    VFATV2     = %d", VFAT_V2);
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -271,7 +269,7 @@ assign cluster_clock = clock4x;
 		.MXPADS         (MXPADS),
 		.MXROWS         (MXROWS),
 		.MXKEYS         (MXKEYS),
-		.SPLIT_CLUSTERS (SPLIT_CLUSTERS) // 0=long clusters will be split in two
+		.SPLIT_CLUSTERS (SPLIT_CLUSTERS) // 1=long clusters will be split in two (0=the tails are dropped)
 	) find_cluster_primaries (
 		.clock (cluster_clock),
 		.sbits (sbits_s0),
@@ -361,9 +359,9 @@ assign cluster_clock = clock4x;
 
   `ifdef oh_lite
       `ifdef first5
-      first5of1536 u_first5 (
+      cluster_finder u_first5 (
       `else
-      first4of1536 u_first4 (
+      cluster_finder u_first4 (
       `endif
 
         `ifdef first5
@@ -440,7 +438,7 @@ assign cluster_clock = clock4x;
   //--------------------------------------------------------------------------------------------------------------------
 
   `else
-    first8of1536 u_first8 (
+    cluster_finder u_first8 (
       .clock (cluster_clock),
 
       .vpfs_in (vpfs),

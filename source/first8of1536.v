@@ -1,14 +1,6 @@
 `timescale 1ns / 100 ps
 
-`ifdef first4
-module first4of1536 (
-`elsif first5
-module first5of1536 (
-`elsif first8
-module first8of1536 (
-`else
-module first16of1536 (
-`endif
+module cluster_finder (
 
     input clock,
 
