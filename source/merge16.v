@@ -75,7 +75,7 @@ parameter MXCNTBITS=3;
   reg mux_pulse;
 
   `ifdef input_latch
-    always @(posedge clock) begin
+    always @(posedge clock4x) begin
   `else
     always @(*) begin
   `endif

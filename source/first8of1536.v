@@ -129,7 +129,15 @@ module cluster_finder (
 
       // cluster truncator
       //------------------
-      truncate_clusters u_truncate (
+      truncate_clusters
+      `ifdef first5
+      #(.MXSEGS(16))
+      `elsif first4
+      #(.MXSEGS(16))
+      `else
+      #(.MXSEGS(12))
+      `endif
+      u_truncate (
         .clock        (clock),
         .latch_pulse  (latch_pulse),
         .vpfs_in      (vpfs_in       [768*(ienc+1)-1:768*ienc]),
@@ -341,7 +349,7 @@ end
 // ------------------------------------------------------------------------------------------------------------------
 
 `ifdef output_latch
-  always @(clock) begin
+  always @(posedge clock) begin
 `else
   always @(*) begin
 `endif
