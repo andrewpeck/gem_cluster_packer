@@ -40,26 +40,23 @@
 `timescale 1ns / 100 ps
 //----------------------------------------------------------------------------------------------------------------------
 
-module truncate_clusters (
+module truncate_clusters #(
+  parameter MXVPF = 768,
+  parameter MXSEGS = 16
+) (
 
   input clock,
 
-  input frame_clock,
+  input latch_pulse,
 
   output reg [2:0] pass,
 
-  input  [767:0] vpfs_in,
-  output [767:0] vpfs_out
+  input  [MXVPF-1:0] vpfs_in,
+  output [MXVPF-1:0] vpfs_out
 
 );
 
-  parameter MXSEGS  = 12;
-  parameter SEGSIZE = 768/MXSEGS;
-
-  (* KEEP = "TRUE" *)
-  reg [7:0] clock_sampled = 0;
-  always @(posedge clock)
-    clock_sampled [7:0] <= {clock_sampled[6:0],frame_clock};
+  parameter SEGSIZE = MXVPF/MXSEGS;
 
   // sorry for the magic number;
   // we are sampling the value of the slow frame clock on our fast 160 MHz clock, looking to latch the inputs at the
@@ -68,31 +65,31 @@ module truncate_clusters (
   // it should be clear if you draw a timing diagram.. but imagine in two clock cycles clock sampled will be
   // 11110000 which means the next clock will be at the rising edge..
 
-  wire latch_on_next = (clock_sampled == 8'b00111100);
-
-  (* KEEP = "TRUE" *)
+  (* DONT_TOUCH = "TRUE" *)
+  (* MAX_FANOUT = 128 *)
+  (*EQUIVALENT_REGISTER_REMOVAL="NO"*)
   reg [MXSEGS-1:0] latch_en=0;
   always @(posedge clock)
-    latch_en <= {MXSEGS{latch_on_next}};
+    latch_en <= {MXSEGS{latch_pulse}};
 
   always @(posedge clock) begin
     if (latch_en)
       pass <= 0;
     else
       pass <= pass + 1'b1;
-  end;
-
+  end
 
 
   wire [SEGSIZE-1:0] segment           [MXSEGS-1:0];
   wire [SEGSIZE-1:0] segment_copy      [MXSEGS-1:0];
-  wire [0:0]         segment_keep      [MXSEGS-1:0];
-  wire [0:0]         segment_active    [MXSEGS-1:0];
   reg  [SEGSIZE-1:0] segment_ff        [MXSEGS-1:0];
   wire [SEGSIZE-1:0] segment_out       [MXSEGS-1:0];
 
+  wire [MXSEGS-1:0]  segment_keep      ;
+  wire [MXSEGS-1:0]  segment_active    ;
+
   genvar iseg;
-  generate;
+  generate
   for (iseg=0; iseg<MXSEGS; iseg=iseg+1) begin: segloop
     initial segment_ff      [iseg] = {SEGSIZE{1'b0}};
 
@@ -129,22 +126,20 @@ module truncate_clusters (
   //    experiment effectively you have to go through the pain of doing PAR
   //    and looking at the timing report
 
-  assign segment_keep [11]  =  segment_active[10] | segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-  assign segment_keep [10]  =  segment_active[9]  | segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-  assign segment_keep [9]   =  segment_active[8]  | segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-  assign segment_keep [8]   =  segment_active[7]  | segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-  assign segment_keep [7]   =  segment_active[6]  | segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-  assign segment_keep [6]   =  segment_active[5]  | segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-  assign segment_keep [5]   =  segment_active[4]  | segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-  assign segment_keep [4]   =  segment_active[3]  | segment_active[2]  | segment_active[1]  | segment_active[0];
-  assign segment_keep [3]   =  segment_active[2]  | segment_active[1]  | segment_active[0];
-  assign segment_keep [2]   =  segment_active[1]  | segment_active[0];
-  assign segment_keep [1]   =  segment_active[0];
-  assign segment_keep [0]   =  0;
+  generate
+  for (iseg=0; iseg<MXSEGS; iseg=iseg+1) begin: keeploop
+    if (iseg>0)
+      assign segment_keep [iseg]  =  |segment_active[iseg-1:0];
+    else
+      assign segment_keep [iseg]  =  0;
+  end
+  endgenerate
 
-  assign vpfs_out = { segment_out[11], segment_out[10], segment_out[9],  segment_out[8],
-                      segment_out[7],  segment_out[6],  segment_out[5],  segment_out[4],
-                      segment_out[3],  segment_out[2],  segment_out[1],  segment_out[0]};
+  generate
+  for (iseg=0; iseg<MXSEGS; iseg=iseg+1) begin: flatloop
+    assign vpfs_out [(iseg+1)*SEGSIZE-1 : iseg*SEGSIZE]  =  segment_out[iseg];
+  end
+  endgenerate
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule

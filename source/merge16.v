@@ -1,8 +1,8 @@
 module merge16 (
   input clock4x,
 
-  input  [2:0] pass_in,
-  output [2:0] pass_out,
+  input  mux_pulse_in,
+  output mux_pulse_out,
 
   input [MXADRBITS-1:0] adr_in0,
   input [MXADRBITS-1:0] adr_in1,
@@ -72,10 +72,10 @@ parameter MXCNTBITS=3;
 //----------------------------------------------------------------------------------------------------------------------
 
   reg [MXADRBITS-1:0] adr [15:0];   reg [MXCNTBITS-1:0] cnt [15:0];
-  reg [2:0] pass;
+  reg mux_pulse;
 
   `ifdef input_latch
-    always @(posedge clock) begin
+    always @(posedge clock4x) begin
   `else
     always @(*) begin
   `endif
@@ -97,7 +97,7 @@ parameter MXCNTBITS=3;
     adr[14] <=  adr_in14;             cnt[14] <= cnt_in14;
     adr[15] <=  adr_in15;             cnt[15] <= cnt_in15;
 
-    pass <= pass_in;
+    mux_pulse <= mux_pulse_in;
 
   end
 
@@ -106,7 +106,7 @@ parameter MXCNTBITS=3;
 
   reg  [MXCNTBITS-1:0] cnt_s0 [15:0];
   reg  [MXADRBITS-1:0] adr_s0 [15:0];
-  reg  [2:0]           pass_s0;
+  reg                  mux_pulse_s0;
 
   `ifdef s0_latch
     always @(posedge clock4x) begin
@@ -123,7 +123,7 @@ parameter MXCNTBITS=3;
      {{adr_s0[6], cnt_s0[6]},  {adr_s0[14], cnt_s0[14]}}  <=  adr[6] < adr[14] ? {{adr[6], cnt[6]}, {adr[14], cnt[14]}} : {{adr[14], cnt[14]}, {adr[6], cnt[6]}};
      {{adr_s0[7], cnt_s0[7]},  {adr_s0[15], cnt_s0[15]}}  <=  adr[7] < adr[15] ? {{adr[7], cnt[7]}, {adr[15], cnt[15]}} : {{adr[15], cnt[15]}, {adr[7], cnt[7]}};
 
-       pass_s0 <= pass;
+       mux_pulse_s0 <= mux_pulse;
 
     end
 
@@ -133,7 +133,7 @@ parameter MXCNTBITS=3;
   reg [MXCNTBITS-1:0] cnt_s1 [15:0];
   reg [MXADRBITS-1:0] adr_s1 [15:0];
 
-  reg [2:0] pass_s1;
+  reg       mux_pulse_s1;
 
 
   `ifdef s1_latch
@@ -157,7 +157,7 @@ parameter MXCNTBITS=3;
       {adr_s1[14],  cnt_s1[14]} <= {adr_s0[14], cnt_s0[14]};
       {adr_s1[15],  cnt_s1[15]} <= {adr_s0[15], cnt_s0[15]};
 
-      pass_s1 <= pass_s0;
+      mux_pulse_s1 <= mux_pulse_s0;
 
   end
 
@@ -167,7 +167,7 @@ parameter MXCNTBITS=3;
   reg [MXCNTBITS-1:0] cnt_s2 [15:0];
   reg [MXADRBITS-1:0] adr_s2 [15:0];
 
-  reg [2:0] pass_s2;
+  reg       mux_pulse_s2;
 
 
   `ifdef s2_latch
@@ -189,7 +189,7 @@ parameter MXCNTBITS=3;
       {adr_s2[14],  cnt_s2[14]} <= {adr_s1[14], cnt_s1[14]};
       {adr_s2[15],  cnt_s2[15]} <= {adr_s1[15], cnt_s1[15]};
 
-      pass_s2 <= pass_s1;
+      mux_pulse_s2 <= mux_pulse_s1;
   end
 
   // stage 3: swap odd pairs (1,2), (3,4), (5,6), (7,8), (9,10), (11,12), (13,14)
@@ -198,7 +198,7 @@ parameter MXCNTBITS=3;
   reg [MXCNTBITS-1:0] cnt_s3 [15:0];
   reg [MXADRBITS-1:0] adr_s3 [15:0];
 
-  reg [2:0] pass_s3;
+  reg  mux_pulse_s3;
 
 
   `ifdef s3_latch
@@ -219,7 +219,7 @@ parameter MXCNTBITS=3;
 
      {adr_s3[15],  cnt_s3[15]} = {adr_s2[15],  cnt_s2[15]};
 
-      pass_s3 = pass_s2;
+      mux_pulse_s3 = mux_pulse_s2;
 
     end
 
@@ -236,7 +236,7 @@ parameter MXCNTBITS=3;
       assign {adr6_o,cnt6_o} = {adr_s3[6],cnt_s3[6]};
       assign {adr7_o,cnt7_o} = {adr_s3[7],cnt_s3[7]};
 
-      assign pass_out = pass_s3;
+      assign mux_pulse_out = mux_pulse_s3;
 
 //----------------------------------------------------------------------------------------------------------------------
 endmodule

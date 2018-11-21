@@ -15,8 +15,6 @@
 //-----------------------------------------------------------------------------------------------------------------
   module x_oneshot (d,clock,slowclk,deadtime_i,q);
 
-  parameter ENABLE   = 1;
-
   parameter NBITS    = 4;
 
   input  d;
@@ -37,7 +35,7 @@
 
   reg [NBITS-1:0] halt = 3'd0;
   always @(posedge slowclk) begin
-    if (d && (!ENABLE || sm==idle))
+    if (d && (sm==idle))
       halt <= deadtime-1'b1;
     else if (halt!=0)
       halt <= halt - 1'b1;
@@ -64,7 +62,7 @@
 
   generate
   always @(posedge clock) begin
-    q <= d && (!ENABLE || sm==idle);
+      q <= d && (sm==idle);
   end
   endgenerate
 
