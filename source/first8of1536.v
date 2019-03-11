@@ -94,15 +94,12 @@ module cluster_finder (
 `elsif first5
   parameter NUM_ENCODERS = 1;
   parameter NUM_PASSES   = 5;
+`elsif first8
+  parameter NUM_ENCODERS = 2;
+  parameter NUM_PASSES   = 4;
 `else
   parameter NUM_ENCODERS = 2;
   parameter NUM_PASSES   = 8;
-`endif
-
-`ifdef first16
-  parameter CLUSTERS_PER_ENCODER = 8;
-`else
-  parameter CLUSTERS_PER_ENCODER = 4;
 `endif
 
   wire [MXSBITS*MXVFATS-1:0] vpfs_truncated;
@@ -115,9 +112,9 @@ module cluster_finder (
 // Encoders
 //----------------------------------------------------------------------------------------------------------------------
 
-  reg [MXADRBITS-1:0] adr_latch [NUM_ENCODERS-1:0][CLUSTERS_PER_ENCODER-1:0];
-  reg [MXCNTBITS-1:0] cnt_latch [NUM_ENCODERS-1:0][CLUSTERS_PER_ENCODER-1:0];
-  reg [          0:0] vpf_latch [NUM_ENCODERS-1:0][CLUSTERS_PER_ENCODER-1:0];
+  reg [MXADRBITS-1:0] adr_latch [NUM_ENCODERS-1:0][NUM_PASSES-1:0];
+  reg [MXCNTBITS-1:0] cnt_latch [NUM_ENCODERS-1:0][NUM_PASSES-1:0];
+  reg [          0:0] vpf_latch [NUM_ENCODERS-1:0][NUM_PASSES-1:0];
 
   // carry along a marker showing the ith cluster which is being processed-- used for sync
   wire [2:0] pass_truncate      [NUM_ENCODERS-1:0];
@@ -160,7 +157,7 @@ module cluster_finder (
       );
 
     genvar i;
-    for (i=0; i<CLUSTERS_PER_ENCODER; i=i+1) begin: latchloop
+    for (i=0; i<NUM_PASSES; i=i+1) begin: latchloop
     always @(posedge clock) begin
       if (pass_encoder[ienc]==i) begin
         adr_latch[ienc][i] <= adr_enc[ienc];
