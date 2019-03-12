@@ -31,7 +31,7 @@ module cluster_packer #(
     input             clock4x,
     input             clock1x,
     input             reset_i,
-    output reg [7:0]  cluster_count,
+    output reg [10:0] cluster_count,
     input      [3:0]  deadtime_i,
 
     input             trig_stop_i,
@@ -315,12 +315,8 @@ assign cluster_clock = clock4x;
   always @(posedge clock1x) begin
     if (reset)
       cluster_count <= 8'd0;
-    else if (cluster_count_s0==12'd255)
-        cluster_count <= 8'd254;
-    else if (|(cluster_count_s0[10:8])) // if >255, cap at 255
-        cluster_count <= 8'd255;
     else
-        cluster_count <= cluster_count_s0[7:0];
+      cluster_count <= cluster_count_s0;
   end
 
   // FIXME: need to align overflow and cluster count to data
