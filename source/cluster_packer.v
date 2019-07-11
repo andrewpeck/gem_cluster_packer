@@ -78,6 +78,7 @@ module cluster_packer #(
 //----------------------------------------------------------------------------------------------------------------------
 
   `include "constants.v"
+  `define invert_partitions
 
   initial $display ("Compiling cluster packer:");
   initial $display ("    MXSBITS    = %d", MXSBITS);
